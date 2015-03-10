@@ -224,8 +224,8 @@ test('Action', function (t) {
       disposable = action.subscribe(function () {
         t.true(
           subject1.hasObservers() && subject2.hasObservers(),
-          'observables  passed to waitFor should have observer ' +
-            'registred during the action `dispatching`'
+          'observables passed to waitFor should have observers ' +
+            'registered during the action `dispatching`'
         );
 
         t.false(
