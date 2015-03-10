@@ -1,10 +1,10 @@
-var test = require('tape');
+var _test = require('tape');
 var Store = require('../lib/store');
 var Rx = require('rx');
 var sinon = require('sinon');
-var _Promise = require('bluebird');
+var Q = require('q');
 
-test('Store', function (t) {
+_test('Store', function (t) {
   t.test('errors', function () {
     t.throws(
       function () {
@@ -70,7 +70,7 @@ test('Store', function (t) {
 
     store = Store.create({
       getInitialValue: function () {
-        return _Promise.resolve(value);
+        return Q.resolve(value);
       }
     });
 
@@ -239,7 +239,7 @@ test('Store', function (t) {
 
         store.subscribe(spy);
 
-        var defer = deferred();
+        var defer = Q.defer();
 
         operations.onNext({
           value: newValue,
@@ -270,15 +270,6 @@ test('Store', function (t) {
         });
       });
 
-      function deferred() {
-        var result = {};
-        result.promise = new _Promise(function (resolve, reject) {
-          result.resolve = resolve;
-          result.reject = reject;
-        });
-        return result;
-      }
-
       t.test('nesting', function (t) {
         var operations = new Rx.Subject();
         var store = Store.create({
@@ -299,7 +290,7 @@ test('Store', function (t) {
           'observers should have been notified with the initial value'
         );
 
-        var deferred1 = deferred();
+        var deferred1 = Q.defer();
         operations.onNext({
           transform: function (arr) {
             return arr.concat('foo');
@@ -314,7 +305,8 @@ test('Store', function (t) {
             'after that the first operation have been applied'
         );
 
-        var deferred2 = deferred();
+        var deferred2 = Q.defer();
+
         operations.onNext({
           transform: function (arr) {
             return arr.concat('bar');
@@ -351,8 +343,8 @@ test('Store', function (t) {
           t.deepEqual(
             spy.getCall(4).args[0],
             [],
-            'observers should have been notified with the initial value after ' +
-            'that the second operation has failed'
+            'observers should have been notified with the initial value after' +
+            ' that the second operation has failed'
           );
         });
 

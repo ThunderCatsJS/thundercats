@@ -33,7 +33,8 @@
       "Name": "Berkeley Martinez",
       "email": "berkeley@r3dm.com",
       "url": "http://r3dm.com"
-    }, {
+    },
+    {
       "Name": "Nathan Leniz",
       "email": "terakilobyte@gmail.com",
       "url": "http://terakilobyte.com"
@@ -47,10 +48,10 @@
     "rx": "^2.3.14"
   },
   "devDependencies": {
-    "bluebird": "^2.5.3",
+    "eslint-plugin-react": "^1.4.1",
+    "q": "^1.2.0",
     "rx": "^2.3.14",
     "sinon": "^1.11.1",
-    "tape": "^3.0.2",
-    "eslint-plugin-react": "^1.4.1"
+    "tape": "^3.0.2"
   }
 }
