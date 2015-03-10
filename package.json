@@ -18,7 +18,8 @@
   "scripts": {
     "test": "tape test/*.js"
   },
-  "contributors": [{
+  "contributors": [
+    {
       "name": "François de Campredon",
       "email": "francois.de.campredon@gmail.com",
       "url": "https://github.com/fdecampredon"
@@ -26,7 +27,12 @@
       "Name": "Berkeley Martinez",
       "email": "berkeley@r3dm.com",
       "url": "http://r3dm.com"
-  }],
+    }, {
+      "Name": "Nathan Leniz",
+      "email": "terakilobyte@gmail.com",
+      "url": "http://terakilobyte.com"
+    }
+  ],
   "license": "Apache Version 2",
   "dependencies": {
     "node-uuid": "^1.4.1"
