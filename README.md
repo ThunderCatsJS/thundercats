@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/r3dm/thundercats.png?label=ready&title=Ready)](https://waffle.io/r3dm/thundercats)
 ThunderCats.js
 =======
 
