@@ -1,6 +1,6 @@
 {
   "name": "thundercats.js",
-  "description": "A set of utililities to implements a flux architecture with RxJS",
+  "description": "How the thundercats would build Flux architecture",
   "version": "1.0.0",
   "keywords": [
     "react",
@@ -18,12 +18,18 @@
   "scripts": {
     "test": "tape test/*.js"
   },
+  "author": {
+    "name": "Berkeley Martinez",
+    "email": "berkeley@r3dm.com",
+    "url": "http://r3dm.com"
+  },
   "contributors": [
     {
       "name": "François de Campredon",
       "email": "francois.de.campredon@gmail.com",
       "url": "https://github.com/fdecampredon"
-    }, {
+    },
+    {
       "Name": "Berkeley Martinez",
       "email": "berkeley@r3dm.com",
       "url": "http://r3dm.com"
