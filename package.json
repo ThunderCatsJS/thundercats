@@ -18,6 +18,11 @@
   "scripts": {
     "test": "tape test/*.js"
   },
+  "author": {
+    "name": "Berkeley Martinez",
+    "email": "berkeley@r3dm.com",
+    "url": "http://r3dm.com"
+  },
   "contributors": [{
       "name": "François de Campredon",
       "email": "francois.de.campredon@gmail.com",
