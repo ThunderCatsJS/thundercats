@@ -1,27 +1,32 @@
 {
-  "name": "rx-flux",
+  "name": "thundercats.js",
   "description": "A set of utililities to implements a flux architecture with RxJS",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "keywords": [
     "react",
     "flux",
     "rx",
-    "rxjs"
+    "rxjs",
+    "frp"
   ],
   "main": "index.js",
-  "bugs": "https://github.com/fdecampredon/rx-flux/issues",
+  "bugs": "https://github.com/r3dm/thundercats/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fdecampredon/rx-flux/"
+    "url": "https://github.com/r3dm/thundercats"
   },
   "scripts": {
     "test": "tape test/*.js"
   },
-  "author": {
-    "name": "François de Campredon",
-    "email": "francois.de.campredon@gmail.com",
-    "url": "https://github.com/fdecampredon"
-  },
+  "contributors": [{
+      "name": "François de Campredon",
+      "email": "francois.de.campredon@gmail.com",
+      "url": "https://github.com/fdecampredon"
+    }, {
+      "Name": "Berkeley Martinez",
+      "email": "berkeley@r3dm.com",
+      "url": "http://r3dm.com"
+  }],
   "license": "Apache Version 2",
   "dependencies": {
     "node-uuid": "^1.4.1"
