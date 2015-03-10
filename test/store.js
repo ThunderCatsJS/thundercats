@@ -2,7 +2,7 @@ var test = require('tape');
 var Store = require('../lib/store');
 var Rx = require('rx');
 var sinon = require('sinon');
-var _Promise = Promise || require('bluebird');
+var _Promise = require('bluebird');
 
 test('Store', function (t) {
   t.test('errors', function () {
@@ -220,7 +220,9 @@ test('Store', function (t) {
 
     t.test('operations canceling', function (t) {
 
+
       t.test('basic', function (t) {
+        t.plan(3);
         var value = {};
         var newValue = {};
         var operations = new Rx.Subject();
@@ -258,13 +260,14 @@ test('Store', function (t) {
 
         defer.reject();
 
-        t.equal(
-          spy.calledThrice && spy.getCall(2).args[0],
-          value,
-          'observers should have been notified about the canceling'
-        );
+        defer.promise.finally(function() {
 
-        t.end();
+          t.equal(
+            spy.calledThrice && spy.getCall(2).args[0],
+            value,
+            'observers should have been notified about the canceling'
+          );
+        });
       });
 
       function deferred() {
@@ -329,23 +332,30 @@ test('Store', function (t) {
             'after that the second operation have been applied'
         );
 
-        deferred1.reject();
+        deferred1.reject(new Error('reject 1'));
 
-        t.deepEqual(
-          spy.callThrice && spy.getCall(3).args[0],
-          ['bar'],
-          'observers should have been notified with result of applying the ' +
+        deferred1.promise.finally(function() {
+          t.deepEqual(
+            spy.getCall(3).args[0],
+            ['bar'],
+            'observers should have been notified with result of applying the ' +
             'second operation on the old value after that the first ' +
             'operation has failed'
-        );
+          );
 
-        deferred2.reject();
-        t.deepEqual(
-          spy.callCount === 4 && spy.getCall(4).args[0],
-          [],
-          'observers should have been notified with the initial value after ' +
+        });
+        deferred2.reject(new Error('reject 2'));
+
+
+        deferred2.promise.finally(function() {
+          t.deepEqual(
+            spy.getCall(4).args[0],
+            [],
+            'observers should have been notified with the initial value after ' +
             'that the second operation has failed'
-        );
+          );
+        });
+
 
         t.end();
       });
