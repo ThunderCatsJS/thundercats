@@ -10,7 +10,7 @@ _test('Store', function (t) {
       function () {
         Store.create(5);
       },
-      /Invariant Violation: Store.create\(\.\.\.\): expect an object as argument, given : 5/,
+      /expect an object as argument, given : 5/,
       'it should throw an error if argument passed to Store.create ' +
       'is not an object'
     );
@@ -19,7 +19,7 @@ _test('Store', function (t) {
       function () {
         Store.create({});
       },
-      /Invariant Violation: Store.create\(\.\.\.\): getInitialValue should be a function given : undefined/,
+      /getInitialValue should be a function given : undefined/,
       'it should throw an error if getInitialValue is not defined'
     );
 
@@ -29,7 +29,7 @@ _test('Store', function (t) {
           getInitialValue: true
         });
       },
-      /Invariant Violation: Store.create\(\.\.\.\): getInitialValue should be a function given : true/,
+      /getInitialValue should be a function given : true/,
       'it should throw an error if getInitialValue is not a function '
     );
 
@@ -40,7 +40,7 @@ _test('Store', function (t) {
           getOperations: {}
         });
       },
-      /Invariant Violation: Store.create\(\.\.\.\): getOperations should be a function given : \[object Object\]/,
+      /getOperations should be a function given : \[object Object\]/,
       'it should throw an error if getOperations is not a function '
     );
 
@@ -111,7 +111,7 @@ _test('Store', function (t) {
           });
           store.subscribe(function () {});
         },
-        /Invariant Violation: invalid operation, operations should be an object, given : 5/,
+        /invalid operation, operations should be an object, given : 5/,
         'it should throw an error if getInitialValue is not a function '
       );
 
@@ -127,7 +127,7 @@ _test('Store', function (t) {
           });
           store.subscribe(function () {});
         },
-        /Invariant Violation: invalid operation, operations should have a value or a transform property/,
+        /operations should have a value or a transform property/,
         'it should throw an error if getInitialValue is not a function '
       );
 
