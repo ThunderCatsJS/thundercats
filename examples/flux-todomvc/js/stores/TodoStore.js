@@ -29,7 +29,8 @@ var TodoStore = Store.create({
     return Rx.Observable.merge(
 
       TodoActions.create
-        .map(function ({ todo, promise }) {
+        .map(function(arg) {
+          var { todo, promise } = arg;
           return {
             transform: function (todos) {
               todos = assign({}, todos);
@@ -41,9 +42,10 @@ var TodoStore = Store.create({
         }),
 
       TodoActions.toggleCompleteAll
-        .map(function ({ promise }) {
+        .map(function(arg) {
+          var { promise } = arg;
           return {
-            transform: function (todos) {
+            transform: function(todos) {
               var allCompleted = Object.keys(todos)
                 .every(id => todos[id].complete);
 
@@ -58,7 +60,8 @@ var TodoStore = Store.create({
         }),
 
       TodoActions.toggleComplete
-        .map(function({ id, promise }) {
+        .map(function(arg) {
+          var { id, promise } = arg;
           return {
             transform: todos => {
               return updateTodos(
@@ -72,7 +75,8 @@ var TodoStore = Store.create({
         }),
 
       TodoActions.updateText
-        .map(function ({ id, text, promise }) {
+        .map(function(arg) {
+          var { id, text, promise } = arg;
           return {
             transform: todos => {
               return updateTodos(
@@ -86,7 +90,8 @@ var TodoStore = Store.create({
         }),
 
       TodoActions.destroy
-        .map(function({ id, promise }) {
+        .map(function(arg) {
+          var { id, promise } = arg;
           return {
             transform: todos => {
               todos = assign({}, todos);
@@ -98,7 +103,8 @@ var TodoStore = Store.create({
         }),
 
       TodoActions.destroyCompleted
-        .map(function ({promise}) {
+        .map(function(arg) {
+          var {promise} = arg;
           return {
             transform: todos =>
               Object.keys(todos).reduce(function (result, id) {

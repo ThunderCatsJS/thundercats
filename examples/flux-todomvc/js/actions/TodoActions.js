@@ -20,7 +20,9 @@ var TodoActions = {
 
   // eslint known bug with destructing arguments and block scope
   // see: https://github.com/eslint/eslint/issues/1996
-  updateText: TodoItem.updateTodo.map(function ({ text, id }) {
+  // Using work around
+  updateText: TodoItem.updateTodo.map(function (arg) {
+    var { text, id } = arg;
     return {
       text,
       id,
