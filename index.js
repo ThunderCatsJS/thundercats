@@ -1,4 +1,7 @@
+var Action = require('./lib/action');
+var Store = require('./lib/store');
+
 module.exports = {
-  Store: require('./lib/store'),
-  Action: require('./lib/action')
+  Action: Action,
+  Store: Store
 };
