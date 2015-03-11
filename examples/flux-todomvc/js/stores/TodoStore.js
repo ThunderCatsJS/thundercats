@@ -1,15 +1,16 @@
-
 var Store = require('rx-flux').Store;
 var Rx = require('rx');
+var assign = require('react/lib/Object.assign');
 var TodoService = require('../services/todoService');
 var TodoActions = require('../actions/todoActions');
 
-    
+
 function updateTodos(todos, update, condition) {
+
   return Object.keys(todos).reduce(function (result, id) {
     var todo = todos[id];
     if (!condition || condition(todo)) {
-      result[id] = { ...todo, ...update};
+      result[id] = assign({}, todo, update);
     } else {
       result[id] = todo;
     }
@@ -19,19 +20,20 @@ function updateTodos(todos, update, condition) {
 
 
 var TodoStore = Store.create({
-  getInitialValue() {
+
+  getInitialValue: function() {
     return TodoService.getTodos();
   },
-  
-  getOperations() {
+
+  getOperations: function() {
     return Rx.Observable.merge(
 
       TodoActions.create
-        .map(function ({todo, promise}) {
+        .map(function ({ todo, promise }) {
           return {
             transform: function (todos) {
-              todos = {...todos};
-              todos[todo.id] =  todo;
+              todos = assign({}, todos);
+              todos[todo.id] = todo;
               return todos;
             },
             confirm: promise
@@ -39,14 +41,15 @@ var TodoStore = Store.create({
         }),
 
       TodoActions.toggleCompleteAll
-        .map(function ({promise}) {
+        .map(function ({ promise }) {
           return {
             transform: function (todos) {
-              var allCompleted = Object.keys(todos).every(id => todos[id].complete);
+              var allCompleted = Object.keys(todos)
+                .every(id => todos[id].complete);
 
               return updateTodos(
-                todos, 
-                { complete: !allCompleted }, 
+                todos,
+                { complete: !allCompleted },
                 todo => todo.complete === allCompleted
               );
             },
@@ -55,36 +58,38 @@ var TodoStore = Store.create({
         }),
 
       TodoActions.toggleComplete
-        .map(function({id, promise}) {
+        .map(function({ id, promise }) {
           return {
-            transform: todos => 
-              updateTodos(
-                todos, 
-                { complete: !todos[id].complete }, 
+            transform: todos => {
+              return updateTodos(
+                todos,
+                { complete: !todos[id].complete },
                 todo => todo.id === id
-              ),
+              );
+            },
             confirm: promise
           };
         }),
 
       TodoActions.updateText
-        .map(function ({id, text, promise}) {
+        .map(function ({ id, text, promise }) {
           return {
-            transform: todos => 
-              updateTodos(
-                todos, 
-                { text }, 
+            transform: todos => {
+              return updateTodos(
+                todos,
+                { text },
                 todo => todo.id === id
-              ),
+              );
+            },
             confirm: promise
           };
         }),
 
       TodoActions.destroy
-        .map(function({id, promise}) {
+        .map(function({ id, promise }) {
           return {
-            transform: function (todos) {
-              todos = {... todos};
+            transform: todos => {
+              todos = assign({}, todos);
               delete todos[id];
               return todos;
             },

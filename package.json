@@ -42,12 +42,15 @@
   ],
   "license": "Apache Version 2",
   "dependencies": {
-    "node-uuid": "^1.4.1"
+    "node-uuid": "^1.4.1",
+    "object.assign": "^1.1.1"
   },
   "peerDependencies": {
     "rx": "^2.3.14"
   },
   "devDependencies": {
+    "babel-eslint": "^2.0.0",
+    "eslint": "^0.16.1",
     "eslint-plugin-react": "^1.4.1",
     "q": "^1.2.0",
     "rx": "^2.3.14",

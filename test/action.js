@@ -1,8 +1,8 @@
 var Action = require('../lib/action');
 var Rx = require('rx');
-var test = require('tape');
+var _test = require('tape');
 
-test('Action', function (t) {
+_test('Action', function (t) {
   t.test('create', function (t) {
     var action = Action.create();
     t.ok(typeof action === 'function', 'it should be a function');

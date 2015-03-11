@@ -11,7 +11,6 @@
  */
 
 var React = require('react');
-var React = require('react');
 var ThreadListItem = require('../components/ThreadListItem.react');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
 var StateStreamMixin = require('rx-react').StateStreamMixin;
@@ -30,11 +29,11 @@ function getUnreadCount(threads) {
 
 var ThreadSection = React.createClass({
   mixins: [StateStreamMixin, PureRendererMixin],
-  
+
   contextTypes: {
     threadStore: React.PropTypes.object.isRequired
   },
-  
+
   getStateStream: function() {
     return this.context.threadStore.map(function (data) {
       var threads = data.threads;

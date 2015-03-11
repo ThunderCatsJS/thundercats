@@ -5,35 +5,32 @@ var ReactPropTypes = React.PropTypes;
 var TodoItem = require('./todoItem');
 
 var MainSection = React.createClass({
-  mixins:[PureRendererMixin],
-  
+  mixins: [PureRendererMixin],
+
   propTypes: {
     todos: ReactPropTypes.array.isRequired,
     areAllComplete: ReactPropTypes.bool.isRequired
   },
-  
+
   statics: {
     toggleCompleteAll: EventHandler.create()
   },
 
-  getInitialState() {
+  getInitialState: function() {
     return {
       editing: null
     };
   },
-  
-  onEdit(id) {
+
+  onEdit: function(id) {
     this.setState({editing: id});
   },
-  
-  onCancel() {
+
+  onCancel: function() {
     this.setState({editing: null});
   },
-  
-  /**
-   * @return {object}
-   */
-  render() {
+
+  render: function() {
 
     var {todos, areAllComplete} = this.props;
     var {editing} = this.state;
@@ -49,12 +46,12 @@ var MainSection = React.createClass({
           onChange={MainSection.toggleCompleteAll}
           checked={areAllComplete ? 'checked' : ''}
         />
-      
+
         <label htmlFor="toggle-all">Mark all as complete</label>
         <ul id="todo-list">{
           todos.map(todo => (
-            <TodoItem 
-              key={todo.id} 
+            <TodoItem
+              key={todo.id}
               todo={todo}
               onEdit={this.onEdit}
               onSave={this.onCancel}
@@ -64,9 +61,7 @@ var MainSection = React.createClass({
         }</ul>
       </section>
     );
-  },
-
-
+  }
 });
 
 module.exports = MainSection;

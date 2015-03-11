@@ -2,8 +2,14 @@
   "ecmaFeatures": {
     "arrowFunctions": true,
     "blockBindings": true,
+    "classes": true,
+    "defaultParams": true,
     "destructuring": true,
+    "objectLiteralShorthandMethods": true,
+    "objectLiteralShorthandProperties": true,
+    "restParams": true,
     "superInFunctions": true,
+    "spread": true,
     "templateStrings": true,
     "jsx": true
   },

@@ -6,14 +6,14 @@ var ENTER_KEY = 13;
 
 var Header = React.createClass({
   mixins: [PureRendererMixin],
-  
-  statics : {
-    createTodo: EventHandler.create(),
+
+  statics: {
+    createTodo: EventHandler.create()
   },
-  
-  componentWillMount() {
+
+  componentWillMount: function() {
     this.keyDown = EventHandler.create();
-    
+
     this.keyDown
     .filter(function (event) {
       return event.which === ENTER_KEY;
@@ -31,10 +31,7 @@ var Header = React.createClass({
       event.preventDefault();
     });
   },
-  
-  /**
-   * @return {object}
-   */
+
   render: function() {
     return (
       <header id="header">

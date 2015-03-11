@@ -22,13 +22,15 @@ module.exports = {
       isRead: rawMessage.threadID === currentThreadID
     };
   },
-  
+
   getAllChrono: function (threads) {
     var orderedThreads = [];
-    for (var id in threads) {
+
+    Object.keys(threads).map(function(id) {
       var thread = threads[id];
       orderedThreads.push(thread);
-    }
+    });
+
     orderedThreads.sort(function(a, b) {
       if (a.lastMessage.date < b.lastMessage.date) {
         return -1;

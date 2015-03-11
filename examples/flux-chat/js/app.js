@@ -22,8 +22,8 @@ var React = require('react');
 var threadStore = new ThreadStore();
 var messageStore = new MessageStore(threadStore);
 
-window.React = React; // export for http://fb.me/react-devtools
-
+// export for http://fb.me/react-devtools
+window.React = React;
 
 React.withContext({
   threadStore: threadStore,
@@ -35,6 +35,6 @@ React.withContext({
   );
 });
 
-
-ChatExampleData.init(); // load example data into localstorage
+// load example data into localstorage
+ChatExampleData.init();
 ChatWebAPIUtils.getAllMessages();

@@ -15,8 +15,6 @@ var assign = require('object-assign');
 var ChatActions = require('../actions/ChatActions');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
 
-
-
 function MessageStore(threadStore) {
   Store.call(this);
   this.threadStore = threadStore;
@@ -26,8 +24,8 @@ MessageStore.prototype = Object.create(Store.prototype);
 
 function markAllInThreadRead(messages, threadID) {
   return Object.keys(messages).reduce(function (result, id) {
-    result[id] = messages[id].threadID === threadID ? 
-      assign({}, messages[id], {isRead: true}) : 
+    result[id] = messages[id].threadID === threadID ?
+      assign({}, messages[id], {isRead: true}) :
       messages[id];
 
     return result;
@@ -38,27 +36,27 @@ function markAllInThreadRead(messages, threadID) {
 assign(MessageStore.prototype, {
   constructor: MessageStore,
   init: function () {
-    
+
     this.setValue({});
-    
+
     var store = this;
     var threadStore = this.threadStore;
-    
+
     store.observe(
       ChatActions.clickThread
       .waitFor(threadStore, function (action, threadStoreData) {
         return threadStoreData.currentID;
       }),
-      
+
       function (currentID) {
         store.applyOperation(function (messages) {
           return markAllInThreadRead(messages, currentID);
         }, true);
       }
     );
-    
+
     store.observe(
-      ChatActions.createMessage, 
+      ChatActions.createMessage,
       function (action) {
         var message = action.message;
         store.applyOperation(function (messages) {
@@ -68,8 +66,8 @@ assign(MessageStore.prototype, {
         }, action.promise);
       }
     );
-    
-    
+
+
     store.observe(
       ChatActions.receiveRawMessages
       .waitFor(threadStore, function (rawMessages, threadStoreData) {
@@ -97,8 +95,5 @@ assign(MessageStore.prototype, {
     );
   }
 });
-
-
-
 
 module.exports = MessageStore;

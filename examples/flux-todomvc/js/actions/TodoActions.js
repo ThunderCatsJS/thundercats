@@ -1,5 +1,3 @@
-
-//var Action = require('rx-flux').Action;
 var uuid = require('node-uuid');
 var TodoService = require('../services/todoService');
 
@@ -8,53 +6,40 @@ var Header = require('../components/header');
 var TodoItem = require('../components/todoItem');
 var MainSection = require('../components/mainSection');
 
-
+// warning: makes heavy use es6 destructuring
 var TodoActions = {
 
-  /**
-   * @param  {string} text
-   */
   create: Header.createTodo.map(function(text) {
     var todo = {
-      id: uuid.v4(), 
-      text, 
-      completed: false 
+      id: uuid.v4(),
+      text,
+      completed: false
     };
     return {todo, promise: TodoService.create(todo) };
   }),
 
-  /**
-   * @param  {id : string, text: string} id The ID of the ToDo item, text the new text
-   */
-  updateText: TodoItem.updateTodo.map(function ({text, id}) {
-    return { text, id, promise: TodoService.updateText(id, text)};  
+  // eslint known bug with destructing arguments and block scope
+  // see: https://github.com/eslint/eslint/issues/1996
+  updateText: TodoItem.updateTodo.map(function ({ text, id }) {
+    return {
+      text,
+      id,
+      promise: TodoService.updateText(id, text)
+    };
   }),
 
-  /**
-   * Toggle whether a single ToDo is complete
-   * @param  {object} todo
-   */
   toggleComplete: TodoItem.toggleComplete.map(
     (id) => ({id, promise: TodoService.toggleComplete(id)})
   ),
 
-  /**
-   * Mark all ToDos as complete
-   */
   toggleCompleteAll: MainSection.toggleCompleteAll.map(
     () => ({promise: TodoService.toggleCompleteAll()})
   ),
 
-  /**
-   * @param  {string} id
-   */
   destroy: TodoItem.destroyTodo.map(
     (id) => ({id, promise: TodoService.destroy(id)})
   ),
 
-  /**
-   * Delete all the completed ToDos
-   */
   destroyCompleted: Footer.clearButtonClick.map(
     () => ({promise: TodoService.destroyCompleted()})
   )

@@ -10,14 +10,10 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
-
 var Store = require('rx-flux').Store;
 var assign = require('object-assign');
 var ChatActions = require('../actions/ChatActions');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
-
-
 
 function ThreadStore() {
   Store.call(this);
@@ -33,13 +29,13 @@ assign(ThreadStore.prototype, {
       threads: {},
       currentID: null
     });
-    
+
     store.observe(ChatActions.clickThread, function (threadID) {
       store.applyOperation(function (data) {
         var threads = Object.keys(data.threads).reduce(function (result, id) {
           var thread = data.threads[id];
           if (id === threadID) {
-            var lastMessage = assign({}, thread.lastMessage, {isRead : true});
+            var lastMessage = assign({}, thread.lastMessage, { isRead: true });
             result[id] = assign({}, thread, {lastMessage: lastMessage});
           } else {
             result[id] = thread;
@@ -49,12 +45,12 @@ assign(ThreadStore.prototype, {
         return {threads: threads, currentID: threadID};
       }, true);
     });
-    
+
     store.observe(ChatActions.receiveRawMessages, function (rawMessages) {
       store.applyOperation(function (data) {
         var threads = assign({}, data.threads);
         var currentID = data.currentID;
-        
+
         rawMessages.forEach(function(message) {
           var threadID = message.threadID;
           var thread = threads[threadID];
@@ -74,18 +70,15 @@ assign(ThreadStore.prototype, {
         }
 
         threads[currentID].lastMessage.isRead = true;
-        
+
         return {
           threads: threads,
           currentID: currentID
         };
-        
+
       }, true);
     });
   }
 });
 
-
-
 module.exports = ThreadStore;
-
