@@ -359,6 +359,8 @@ _test('Store', function (t) {
       });
     });
 
+    // todo done above
+
     t.test('lifecycle', function (t) {
 
       var initialValue = new Rx.Subject();
