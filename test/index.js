@@ -5,4 +5,6 @@ var mocha = require('mocha'),
   should = chai.should(),
   Action = require('./../lib/action'),
   Invariant = require('../lib/invariant'),
-  Store = require('../lib/store');
+  Store = require('../lib/store'),
+  sinon = require('sinon'),
+  _Promise = require('bluebird');

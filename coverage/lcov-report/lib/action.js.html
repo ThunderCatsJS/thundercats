@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for lib/action.js</title>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="../prettify.css">
+
+    <link rel="stylesheet" href="../base.css">
+    <style type='text/css'>
+        div.coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header low">
+    <h1>Code coverage report for <span class="entity">lib/action.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">8.33% <small>(3 / 36)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">0% <small>(0 / 9)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">0% <small>(0 / 9)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">8.33% <small>(3 / 36)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../index.html">All files</a> &#187; <a href="index.html">lib/</a> &#187; action.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">var Rx = require('rx'),
+    slice = Array.prototype.slice;
+&nbsp;
+<span class="fstat-no" title="function not covered" >function create(map) {</span>
+<span class="cstat-no" title="statement not covered" >  var observers = [];</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  var actionStart = new Rx.Subject();</span>
+<span class="cstat-no" title="statement not covered" >  var actionEnd = new Rx.Subject();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  var action = <span class="fstat-no" title="function not covered" >function (value) {</span></span>
+<span class="cstat-no" title="statement not covered" >    if (typeof map !== 'undefined') {</span>
+<span class="cstat-no" title="statement not covered" >      if (typeof map === 'function') {</span>
+<span class="cstat-no" title="statement not covered" >        value = map(value);</span>
+      } else {
+<span class="cstat-no" title="statement not covered" >        value = map;</span>
+      }
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    actionStart.onNext(value);</span>
+<span class="cstat-no" title="statement not covered" >    var os = observers.slice(0);</span>
+<span class="cstat-no" title="statement not covered" >    for (var i = 0, len = os.length; i &lt; len; i++) {</span>
+<span class="cstat-no" title="statement not covered" >        os[i].onNext(value);</span>
+    }
+<span class="cstat-no" title="statement not covered" >    actionEnd.onNext();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return value;</span>
+  };
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  for (var key in Rx.Observable.prototype) {</span>
+<span class="cstat-no" title="statement not covered" >    action[key] = Rx.Subject.prototype[key];</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  Rx.Observable.call(action, <span class="fstat-no" title="function not covered" >function (observer) {</span></span>
+<span class="cstat-no" title="statement not covered" >    observers.push(observer);</span>
+<span class="cstat-no" title="statement not covered" >    return {</span>
+      dispose: <span class="fstat-no" title="function not covered" >function () {</span>
+<span class="cstat-no" title="statement not covered" >        var index = observers.indexOf(observer);</span>
+<span class="cstat-no" title="statement not covered" >        if (index !== -1) {</span>
+<span class="cstat-no" title="statement not covered" >          observers.splice(index, 1);</span>
+        }
+      }
+    };
+  });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  action.hasObservers = <span class="fstat-no" title="function not covered" >function () {</span></span>
+<span class="cstat-no" title="statement not covered" >    return observers.length &gt; 0 ||</span>
+      actionStart.hasObservers() ||
+      actionEnd.hasObservers();
+  };
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  action.waitFor = <span class="fstat-no" title="function not covered" >function (observables) {</span></span>
+<span class="cstat-no" title="statement not covered" >    observables = slice.call(arguments);</span>
+<span class="cstat-no" title="statement not covered" >    return actionStart</span>
+      .flatMap(<span class="fstat-no" title="function not covered" >function (value) {</span>
+<span class="cstat-no" title="statement not covered" >        return Rx.Observable.combineLatest(</span>
+          observables.map(<span class="fstat-no" title="function not covered" >function (observable) {</span>
+<span class="cstat-no" title="statement not covered" >            observable = observable.takeUntil(actionEnd).publish();</span>
+<span class="cstat-no" title="statement not covered" >            observable.connect();</span>
+<span class="cstat-no" title="statement not covered" >            return observable;</span>
+          }),
+<span class="fstat-no" title="function not covered" >          function () {</span>
+<span class="cstat-no" title="statement not covered" >            return value;</span>
+          }
+        );
+      });
+  };
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return action;</span>
+}
+&nbsp;
+&nbsp;
+module.exports = { create: create };
+&nbsp;</pre></td></tr>
+</table></pre>
+
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Mar 11 2015 20:30:07 GMT+0900 (JST)</div>
+</div>
+
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+
+<script src="../sorter.js"></script>
+</body>
+</html>
