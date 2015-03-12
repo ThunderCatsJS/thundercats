@@ -49,15 +49,16 @@
     "rx": "^2.3.14"
   },
   "devDependencies": {
-    "q": "^1.2.0",
     "chai": "^2.1.1",
     "chai-as-promised": "^4.3.0",
     "eslint-plugin-react": "^1.4.1",
     "istanbul": "^0.3.7",
     "mocha": "^2.2.1",
     "mocha-istanbul": "^0.2.0",
+    "q": "^1.2.0",
     "rx": "^2.3.14",
     "sinon": "^1.11.1",
+    "sinon-chai": "^2.7.0",
     "tape": "^3.0.2"
   }
 }

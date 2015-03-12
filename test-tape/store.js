@@ -97,6 +97,8 @@ _test('Store', function (t) {
     });
   });
 
+  // todo done above
+
   t.test('operations', function (t) {
     t.test('erros', function () {
       t.throws(
@@ -217,6 +219,8 @@ _test('Store', function (t) {
 
       t.end();
     });
+
+    //todo done above
 
     t.test('operations canceling', function (t) {
 

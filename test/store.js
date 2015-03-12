@@ -8,8 +8,13 @@ var Store = require('../lib/store');
 var Rx = require('rx');
 var sinon = require('sinon');
 var Q = require('q');
+var chaiAsPromised = require('chai-as-promised');
+var sinonChai = require('sinon-chai');
 
-describe('Store', function() {
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
+
+describe('#Store', function() {
 
   describe('#Errors:', function() {
 
@@ -35,6 +40,7 @@ describe('Store', function() {
   });
 
   describe('#Behavior:', function() {
+
     describe('#No Promise or Observable', function() {
       var store;
 
@@ -88,5 +94,162 @@ describe('Store', function() {
         });
       });
     });
+  });
+
+  describe('#Operations', function() {
+
+    describe('#Errors', function() {
+
+      var store;
+
+      before(function () {
+        store = Store.create({
+          getInitialValue: function () {
+            return {};
+          },
+          getOperations: function () {
+            return Rx.Observable.of(5);
+          }
+        });
+      });
+
+      it('should throw an error if getInitialValue is not a function', function() {
+        store.subscribe.bind(function () {}).should.throw();
+      });
+
+      before(function () {
+        var store = Store.create({
+          getInitialValue: function () {
+            return {};
+          },
+          getOperations: function () {
+            return Rx.Observable.of({});
+          }
+        });
+      });
+
+      it('should throw an error if getInitialValue is not a function', function() {
+        store.subscribe.bind(function() {}).should.throw();
+      });
+    });
+
+    describe('#Basic transformation properties', function() {
+
+      var value = { hello: 'world' };
+      var newValue = { foo: 'bar' };
+      var operations = new Rx.Subject();
+      var spy = sinon.spy();
+      var store;
+
+      before(function() {
+        store = Store.create({
+          getInitialValue: function () {
+            return value;
+          },
+
+          getOperations: function () {
+            return operations;
+          }
+        });
+        store.subscribe(spy);
+      });
+
+      it('should passed to the value held by the store to the function operation', function() {
+        operations.onNext({
+          transform: function(val) {
+            val.should.equal(value);
+            return newValue;
+          }
+        });
+      });
+
+      it('the value held by the store should be the one returned by the function' +
+      ' passed to \'applyOperation\'', function() {
+        spy.getCall(0).args[0].should.equal(value);
+      });
+
+      it('observers should have been notified with the new value', function() {
+        spy.getCall(1).args[0].should.equal(newValue);
+      });
+    });
+
+    describe('#Basic set value operation', function() {
+
+      var value = { hello: 'world' };
+      var newValue = { foo: 'bar' };
+      var operations = new Rx.Subject();
+      var spy = sinon.spy();
+      var store;
+
+      before(function() {
+        store = Store.create({
+          getInitialValue: function () {
+            return value;
+          },
+
+          getOperations: function () {
+            return operations;
+          }
+        });
+        store.subscribe(spy);
+        operations.onNext({value: newValue});
+      });
+
+      it('the value held by the store should be the one returned by the ' +
+      'function passed to \'applyOperation\'', function() {
+        spy.getCall(0).args[0].should.equal(value);
+      });
+
+      it('observers should have been notified with the new value', function() {
+        spy.getCall(1).args[0].should.equal(newValue);
+      });
+    });
+
+    describe('#Operations canceling', function () {
+
+      describe('#Basic operations', function () {
+
+        var value = {};
+        var newValue = {};
+        var operations = new Rx.Subject();
+        var spy = sinon.spy();
+        var defer = Q.defer();
+        var store;
+
+        before(function() {
+          store = Store.create({
+            getInitialValue: function() {
+              return value;
+            },
+            getOperations: function() {
+              return operations;
+            }
+          });
+          store.subscribe(spy);
+          operations.onNext({
+            value: newValue,
+            confirm: defer.promise
+          });
+        });
+
+        it('observers should have been notified with the initial value', function () {
+          spy.should.have.been.calledWith(value);
+        });
+
+        it('observers should have been notified with the new value', function () {
+          spy.should.have.been.calledWith(newValue);
+        });
+
+
+        before(function() {
+          defer.reject();
+        });
+
+        it('observers should have been notified about the canceling', function() {
+          return spy.should.have.been.calledThrice && spy.should.have.been.calledWith(value);
+        });
+      });
+    });
+
   });
 });
