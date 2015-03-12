@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-undefined */
+/* eslint-disable no-unused-vars, no-undefined, no-unused-expressions */
 var mocha = require('mocha');
 var chai = require('chai');
 var expect = chai.expect;
@@ -35,36 +35,57 @@ describe('Store', function() {
   });
 
   describe('#Behavior:', function() {
-    var store;
+    describe('#No Promise or Observable', function() {
+      var store;
 
-    before(function() {
-      store = Store.create({
-        getInitialValue: function getInitialValue() {}
+      before(function() {
+        store = Store.create({
+          getInitialValue: function getInitialValue() {}
+        });
       });
-    });
-    var value = 5;
 
-    it('should produce a new Rx.Observable', function() {
-      store.should.be.an.instanceOf(Rx.Observable);
-    });
-
-    it('should not publish a value if getInitialValue return neither a promise nor an observable', function() {
-      store.subscribe(function(val) {
-        expect(undefined).to.equal(val);
+      it('should not publish a value if getInitialValue returns neither a promise nor an observable', function() {
+        store.subscribe(function(val) {
+          expect(val).to.be.undefined;
+        });
       });
     });
 
-    before(function() {
-      store = Store.create({
-        getInitialValue: function () {
-          return Q.resolve(value);
-        }
-      });
-    });
+    describe('#Promises and Observables', function() {
+      var store, value;
 
-    it('should resolve and publish a value if getInitialValue returns a Promise', function () {
-      store.subscribe(function(val) {
-        val.should.eventually.equal(5);
+      before(function() {
+        value = 1;
+        store = Store.create({
+          getInitialValue: function () {
+            return Q.resolve(value);
+          }
+        });
+      });
+
+      it('should produce a new Rx.Observable', function() {
+        store.should.be.an.instanceOf(Rx.Observable);
+      });
+
+      it('should resolve and publish a value if getInitialValue returns a Promise', function () {
+        store.subscribe(function(val) {
+          val.should.equal(value);
+        });
+      });
+
+      before(function() {
+        value = 2;
+        store = Store.create({
+          getInitialValue: function () {
+            return Rx.Observable.of(value);
+          }
+        });
+      });
+
+      it('should publish the observable\'s resolve value if getInitialValue returns an observable', function() {
+        store.subscribe(function(val) {
+          val.should.equal(value);
+        });
       });
     });
   });
