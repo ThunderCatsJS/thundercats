@@ -274,6 +274,8 @@ _test('Store', function (t) {
         });
       });
 
+      // todo done above
+
       t.test('nesting', function (t) {
         var operations = new Rx.Subject();
         var store = Store.create({

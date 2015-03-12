@@ -165,11 +165,15 @@ describe('#Store', function() {
 
       it('the value held by the store should be the one returned by the function' +
       ' passed to \'applyOperation\'', function() {
-        spy.getCall(0).args[0].should.equal(value);
+        spy.should.have.been.calledWith(value);
       });
 
       it('observers should have been notified with the new value', function() {
-        spy.getCall(1).args[0].should.equal(newValue);
+        spy.should.have.been.calledWith(newValue);
+      });
+
+      it('store have been called twice', function() {
+        spy.should.have.been.calledTwice;
       });
     });
 
@@ -197,11 +201,15 @@ describe('#Store', function() {
 
       it('the value held by the store should be the one returned by the ' +
       'function passed to \'applyOperation\'', function() {
-        spy.getCall(0).args[0].should.equal(value);
+        spy.should.have.been.calledWith(value);
       });
 
       it('observers should have been notified with the new value', function() {
-        spy.getCall(1).args[0].should.equal(newValue);
+        spy.should.have.been.calledWith(newValue);
+      });
+
+      it('store have been called twice', function() {
+        spy.should.have.been.calledTwice;
       });
     });
 
@@ -246,9 +254,36 @@ describe('#Store', function() {
         });
 
         it('observers should have been notified about the canceling', function() {
-          return spy.should.have.been.calledThrice && spy.should.have.been.calledWith(value);
+          spy.should.have.been.calledWith(value);
+        });
+
+        it('store should have been called three times', function() {
+          spy.should.have.been.calledThrice;
         });
       });
+
+      describe('#Nesting', function() {
+
+        var operations = new Rx.Subject();
+        var spy = sinon.spy();
+        var deferred1 = Q.defer();
+        var store;
+
+        before(function() {
+          store = Store.create({
+            getInitialValue: function() {
+              return [];
+            },
+            getOperations: function() {
+              return operations;
+            }
+          });
+          store.subscribe(spy);
+        });
+
+      });
+
+
     });
 
   });
