@@ -1,6 +1,6 @@
-var Store  = require('rx-flux').Store;
+var Store = require('rx-flux').Store;
 var Router = require('director').Router;
-var Rx     = require('rx');
+var Rx = require('rx');
 
 var routes = {
     ALL_TODOS: '',
@@ -9,29 +9,26 @@ var routes = {
 };
 
 var RouteStore = Store.create({
-  getInitialValue() {
+  getInitialValue: function() {
     var currentRoute = new Rx.BehaviorSubject('');
 
     var router = Router({
         '/': function () {
-          currentRoute.onNext(routes.ALL_TODOS); 
+          currentRoute.onNext(routes.ALL_TODOS);
         },
         '/active': function () {
-          currentRoute.onNext(routes.ACTIVE_TODOS); 
+          currentRoute.onNext(routes.ACTIVE_TODOS);
         },
-        '/completed':function () {
-          currentRoute.onNext(routes.COMPLETED_TODOS); 
-        },
+        '/completed': function () {
+          currentRoute.onNext(routes.COMPLETED_TODOS);
+        }
     });
     router.init('/');
-    
+
     return currentRoute;
   }
 });
-  
-
 
 RouteStore.routes = routes;
-
 
 module.exports = RouteStore;

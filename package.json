@@ -1,7 +1,7 @@
 {
-  "name": "thundercats.js",
+  "name": "thundercats",
   "description": "How the thundercats would build Flux architecture",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "keywords": [
     "react",
     "flux",
@@ -43,7 +43,8 @@
   ],
   "license": "Apache Version 2",
   "dependencies": {
-    "node-uuid": "^1.4.1"
+    "node-uuid": "^1.4.1",
+    "object.assign": "^1.1.1"
   },
   "peerDependencies": {
     "rx": "^2.3.14"
@@ -59,6 +60,7 @@
     "rx": "^2.3.14",
     "sinon": "^1.11.1",
     "sinon-chai": "^2.7.0",
-    "tape": "^3.0.2"
+    "babel-eslint": "^2.0.0",
+    "eslint": "^0.16.1"
   }
 }

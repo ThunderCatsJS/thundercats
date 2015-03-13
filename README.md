@@ -1,145 +1,53 @@
-[![Stories in Ready](https://badge.waffle.io/r3dm/thundercats.png?label=ready&title=Ready)](https://waffle.io/r3dm/thundercats)
-ThunderCats.js
-=======
-
+[![Circle CI](https://circleci.com/gh/r3dm/thundercats.svg?style=svg)](https://circleci.com/gh/r3dm/thundercats) [![Stories in Ready](https://badge.waffle.io/r3dm/thundercats.png?label=ready&title=Ready)](https://waffle.io/r3dm/thundercats) [![Join the chat at https://gitter.im/r3dm/thundercats](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/r3dm/thundercats?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# ThunderCats.js
 
 > Thundercats, Ho!
-
 
 A [Flux](https://github.com/facebook/flux/) architecture implementation based on [RxJS](https://github.com/Reactive-Extensions/RxJS)
 
 An exodus from [rx-flux](https://github.com/fdecampredon/rx-flux).
 
-The [Flux](https://github.com/facebook/flux/) architecture allows you to think your application as an unidirectional flow of data, this module aims to facilitate the use of [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md) as basis for defining the relations between the different entities composing your application.
+The [Flux](https://github.com/facebook/flux/) architecture allows you to think of your application as an unidirectional flow of data, this module aims to facilitate the use of [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md) as basis for defining the relations between the different entities composing your application.
 
 
-Difference with the Original Flux
----------------------------------
+## Difference with the Facebooks Flux
 
 RxFlux shares more similarities with [RefluxJS](https://github.com/spoike/refluxjs) than with the original architecture.
 
-* A store is an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md) that *holds* a value
+* A store is an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md) that a view layer can listen to for state
 * An action is a function and an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md)
-* A store subscribes to an action and update accordingly its value.
-* There is no central dispatcher.
+* A store subscribes to an action and updates its state accordingly.
+* actions dispatch themselves so no need for a central dispatcher.
 
-Store
------
+Check out our documentation (a work in progress) over at http://r3dm.github.io/thundercats
 
-###Usage
+## Development
 
-A `Store` is an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md) :
+Bring all the PR's!
 
+### Tests
+Please at unit tests for any new code. Tests are written using Mocha and Chai.
 
-###Api
+### Docs
 
-The `Store` *class* inherits from [`Rx.Observable`](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md), it also exposes the following methods:
+There are two sections to documentation: the guide written directly in the source and the API docs generated from Mocha test suites (in progress).
 
+If you find a typo or would like to contribute to the docs, make your changes and run `make` in the root directory using the command line. This should autogenerate the documention. Then simply commit and create a PR. Super simple!
 
-Action
-------
+### Lint
 
-###Usage
+I am very opiniated when it comes to code style, so please run `npm run lint` before commit changes and verify that there are no errors.
 
-An action is a function and an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md), each time you call the action function it will propagate a new value: 
+I find it good practice to run `npm test` (test will also lint files) before making any changes to verify that tests are already passing before making any new changes.
 
-```javascript
-var Action = require('rx-flux').Action;
+general rules to follow
 
-var myAction = Action.create();
+* Horizontal space is precious, vertical space is cheap and plentiful. Keep your indenting sane and to a minimal.
+* Use named functions instead of anonomous functions assigned to variables.
+* For most cases, declare module.exports as a single object with each key a part of the files api at the top, and the named functions underneath this section. 
+* 
+### API
 
-myAction.subscribe(function (value) {
-  console.log(value);
-});
+The api is still new and can be maliable for the forseeable future. If there are features you would like to see please open a new issue for discussion.
 
-myAction('foo'); // log 'foo'
-myAction('bar'); // log 'bar'
-```
-
-When creating an action you can also pass as argument a `map` function to `Action.create`, the value passed to the action will be transformed by that map function, the transformed result will be notified and returned by the action call : 
-
-```javascript
-var Action = require('rx-flux').Action;
-
-var myAction = Action.create(function (string) {
-  return string + ' bar';
-});
-
-myAction.subscribe(function (value) {
-  console.log(value);
-});
-
-var result = myAction('foo'); // log 'foo bar'
-console.log(result) // log 'foo bar'
-```
-
-Note that the `map` function will always be executed, even if there is no active subscription : 
-
-```javascript
-var Action = require('rx-flux').Action;
-
-var myAction = Action.create(function (string) {
-  console.log(string);
-  return string + ' bar';
-});
-
-myAction('foo'); // log 'foo'
-```
-
-An action cannot propagate an `error` or `complete` notification, **if an error is thrown in the map function that error won't be catched** : 
-
-```javascript
-var Action = require('rx-flux').Action;
-
-var myAction = Action.create(function () {
-  throw new Error('error in map function');
-});
-
-myAction.subscribe(function (value) {
-  console.log(value); // will never be called
-}, function (error) {
-  console.log(error); // will never be called
-});
-
-try {
-  myAction('foo'); // no log
-} catch(e) {
-  e // Error('error in map function')
-}
-```
-
-Finally `Action` provide a special operator `waitFor` that operator takes as arguments a list of observables and insure that those observable published a new value during the action notification process before passing the notification : 
-
-```javascript
-var Action = require('rx-flux').Action;
-var Rx = require('rx');
-
-var myAction = Action.create();
-var subject1 = new Rx.Subject();
-var subject2 = new Rx.Subject();
-
-myAction.subscribe(function () {
-  console.log('handler 1'); 
-  subject1.onNext();
-});
-
-myAction.waitFor(subject1, subject2).subscribe(function () {
-  console.log('handler 2'); 
-});
-
-myAction.subscribe(function () {
-  console.log('handler 3'); 
-  subject2.onNext();
-});
-
-myAction();// logs: 'handler 1', 'handler 3', 'handler 2'
-```
-
-###Api
-
-Creating an action:
-* `Action.create(map?: (val: A) => B): Rx.Observable<B> & (a: A) => B` : create a new action
-
-Action instance api: 
-* `waitFor(...observables: Rx.Observable[])`: Rx.Observable: create a new observable that waits that the observables passed as parameters publish a new value before notifying.
-* `hasObservers(): boolean`: returns true if the action has subscribed observers.
+For the most part I want this project to support server-side rendering/isomorphic js. My first inclanation is to get it working using singletons, which presents data leakage challenges. I am sure we are up to that challenge and can come up with a viable solution.

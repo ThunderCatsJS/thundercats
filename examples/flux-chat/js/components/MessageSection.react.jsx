@@ -17,25 +17,21 @@ var StateStreamMixin = require('rx-react').StateStreamMixin;
 var Rx = require('rx');
 var PureRendererMixin = require('react/lib/ReactComponentWithPureRenderMixin');
 
-
-
-
-
 var MessageSection = React.createClass({
 
   mixins: [StateStreamMixin, PureRendererMixin],
-  
+
   contextTypes: {
     threadStore: React.PropTypes.object.isRequired,
     messageStore: React.PropTypes.object.isRequired
   },
-  
+
   getStateStream: function() {
     return Rx.Observable.combineLatest(
       this.context.threadStore,
       this.context.messageStore,
-      
-      
+
+
       function (threadData, messages) {
         var threadMessages = [];
         for (var id in messages) {
@@ -66,8 +62,8 @@ var MessageSection = React.createClass({
   componentDidUpdate: function() {
     this._scrollToBottom();
   },
-  
-  
+
+
   _scrollToBottom: function() {
     var ul = this.refs.messageList.getDOMNode();
     ul.scrollTop = ul.scrollHeight;
@@ -82,13 +78,16 @@ var MessageSection = React.createClass({
         />
       );
     });
+
     return (
       <div className="message-section">
-        <h3 className="message-thread-heading">{this.state.thread && this.state.thread.name}</h3>
+        <h3 className="message-thread-heading">
+          { this.state.thread && this.state.thread.name }
+        </h3>
         <ul className="message-list" ref="messageList">
           {messageListItems}
         </ul>
-        <MessageComposer thread={this.state.thread} />
+        <MessageComposer thread={ this.state.thread }/>
       </div>
     );
   }

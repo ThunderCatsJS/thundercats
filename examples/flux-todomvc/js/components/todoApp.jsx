@@ -21,62 +21,57 @@ var TodoApp = React.createClass({
           todoList.push(todosMap[id]);
           return todoList;
         }, []);
-        
+
         var activeTodosCount = todos.reduce(function (accum, todo) {
           return todo.complete ? accum : accum + 1;
         }, 0);
-        
+
         var completeTodosCount = todos.length - activeTodosCount;
-        
+
         return {
           currentRoute,
-          todos: todos.filter(
-            todo => (
-              currentRoute === RouteStore.routes.ALL_TODOS ||
-              (todo.complete && currentRoute === RouteStore.routes.COMPLETED_TODOS) ||
-              (!todo.complete && currentRoute === RouteStore.routes.ACTIVE_TODOS)
-            )
-          ),
+          todos: todos.filter(todo => {
+            var complete = todo.complete;
+            return currentRoute === RouteStore.routes.ALL_TODOS ||
+              (complete &&
+                currentRoute === RouteStore.routes.COMPLETED_TODOS) ||
+              (!complete &&
+                currentRoute === RouteStore.routes.ACTIVE_TODOS);
+          }),
           areAllComplete: todos.every(todo => todo.complete),
-          activeTodosCount, 
+          activeTodosCount,
           completeTodosCount
         };
       }
     );
   },
-  
 
-  /**
-   * @return {object}
-   */
   render: function() {
     if (!this.state) {
       return null;
     }
     var {
-      todos, 
-      currentRoute, 
-      areAllComplete, 
-      activeTodosCount, 
+      todos,
+      currentRoute,
+      areAllComplete,
+      activeTodosCount,
       completeTodosCount
     } = this.state;
-    
-  	return (
+
+    return (
       <div>
         <Header />
-        <MainSection 
-          todos={todos} areAllComplete={areAllComplete} 
+        <MainSection
+          todos={todos} areAllComplete={areAllComplete}
         />
-        <Footer 
-          currentRoute={currentRoute} 
+        <Footer
+          currentRoute={currentRoute}
           activeTodosCount={activeTodosCount}
           completeTodosCount={completeTodosCount}
         />
       </div>
-  	);
-  },
-
-
+    );
+  }
 });
 
 module.exports = TodoApp;

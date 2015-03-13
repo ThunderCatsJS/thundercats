@@ -4,12 +4,13 @@ var ChatWebAPIUtils = require('../utils/ChatWebAPIUtils');
 var createMessage = Action.create(function(data) {
   var text = data.text;
   var threadID = data.threadID;
-  
+
   var timestamp = Date.now();
   var message = {
     id: 'm_' + timestamp,
     threadID: threadID,
-    authorName: 'Bill', // hard coded for the example
+    // hard coded for the example
+    authorName: 'Bill',
     date: new Date(timestamp),
     text: text,
     isRead: true
@@ -21,7 +22,7 @@ var createMessage = Action.create(function(data) {
     promise: promise
   };
 });
-  
+
 var receiveRawMessages = Action.create();
 var clickThread = Action.create();
 

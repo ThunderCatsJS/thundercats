@@ -11,7 +11,7 @@
  */
 
 var ChatActions = require('../actions/ChatActions');
-var Promise = require('bluebird');
+var Prom = typeof Promise === 'undefined' ? require('bluebird') : Promise;
 
 // !!! Please Note !!!
 // We are using localStorage as an example, but in a real-world scenario, this
@@ -46,7 +46,7 @@ module.exports = {
     rawMessages.push(createdMessage);
     localStorage.setItem('messages', JSON.stringify(rawMessages));
 
-    return Promise.resolve(createdMessage);
+    return Prom.resolve(createdMessage);
   }
 
 };

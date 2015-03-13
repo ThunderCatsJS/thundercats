@@ -8,23 +8,23 @@ function fakeRemoteCall() {
 }
 
 module.exports = {
-  getTodos() {
+  getTodos: function() {
     var todos = localStorage.getItem(NAMESPACE);
     return Promise.resolve(todos ? JSON.parse(todos) : {});
   },
-  
-  init() {
+
+  init: function() {
     var TodoStore = require('../stores/todoStore');
     TodoStore.subscribe(
-      todos => 
+      todos =>
         localStorage.setItem(NAMESPACE, JSON.stringify(todos))
     );
   },
-  
+
   create: fakeRemoteCall,
   updateText: fakeRemoteCall,
   toggleComplete: fakeRemoteCall,
   toggleCompleteAll: fakeRemoteCall,
   destroy: fakeRemoteCall,
-  destroyCompleted: fakeRemoteCall,
+  destroyCompleted: fakeRemoteCall
 };

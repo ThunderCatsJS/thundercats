@@ -20,7 +20,7 @@ var MessageComposer = React.createClass({
   propTypes: {
     thread: React.PropTypes.object
   },
-  
+
   getInitialState: function() {
     return {text: ''};
   },
