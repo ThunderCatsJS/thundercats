@@ -33,6 +33,8 @@ test('Action', function (t) {
     action(3);
   });
 
+  // todo done above
+
   t.test('map', function (t) {
     t.plan(5);
 
@@ -81,6 +83,8 @@ test('Action', function (t) {
     );
 
   });
+
+  // todo done above
 
   t.test('disposal', function (t) {
     t.plan(1);

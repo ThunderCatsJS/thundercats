@@ -2,8 +2,8 @@
 var mocha = require('mocha');
 var chai = require('chai');
 var expect = chai.expect;
+var should = chai.should();
 var Action = require('./../lib/action');
-var Invariant = require('../lib/invariant');
 var Store = require('../lib/store');
 var Rx = require('rx');
 var sinon = require('sinon');
@@ -430,7 +430,7 @@ describe('# Store', function() {
 
         it('on resubscribe it should restart the process', function() {
           initialValue.onNext({});
-          operationsSpy.should.have.been.calledThrice && operations.hasObservers()
+          operationsSpy.should.have.been.calledThrice && operations.hasObservers();
         });
       });
 
