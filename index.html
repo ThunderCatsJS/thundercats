@@ -2,7 +2,7 @@
 
 <html>
     <head>
-        <title>index.js</title>
+        <title>ThunderCats.js</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
         <link rel="stylesheet" media="all" href="docs/docco.css" />
@@ -303,12 +303,6 @@ TODO: make this into a proper Rx.Observable</p>
 
                     </div>
                     
-                    <div class="content"><div class='highlight'><pre>
-<span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>),
-    invariant = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils/invariant'</span>),
-    assign = <span class="hljs-built_in">require</span>(<span class="hljs-string">'object.assign'</span>),
-    slice = <span class="hljs-built_in">Array</span>.prototype.slice;</pre></div></div>
-                    
                 </li>
                 
                 
@@ -318,7 +312,26 @@ TODO: make this into a proper Rx.Observable</p>
                         <div class="pilwrap ">
                             <a class="pilcrow" href="#section-12">&#182;</a>
                         </div>
-                        <h1 id="create">create</h1>
+                        <h1 id="thundercats-action">ThunderCats Action</h1>
+<p>A ThunderCats Action is an Observable that can be called like a function!</p>
+
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>),
+    invariant = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils/invariant'</span>),
+    assign = <span class="hljs-built_in">require</span>(<span class="hljs-string">'object.assign'</span>),
+    slice = <span class="hljs-built_in">Array</span>.prototype.slice;</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-13">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-13">&#182;</a>
+                        </div>
+                        <h2 id="create">create</h2>
 <p>Create a single action object
 Takes a single function <code>map</code> as an argument which will be applied
 to each payload fed to this action. You can this of this as an action
@@ -368,13 +381,13 @@ creator in a traditional flux implementation</p>
                 </li>
                 
                 
-                <li id="section-13">
+                <li id="section-14">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-13">&#182;</a>
+                            <a class="pilcrow" href="#section-14">&#182;</a>
                         </div>
-                        <h2 id="hasobservaer">hasObservaer</h2>
+                        <h3 id="hasobservaer">hasObservaer</h3>
 <p>returns the current number of observers for this action</p>
 
                     </div>
@@ -388,13 +401,13 @@ creator in a traditional flux implementation</p>
                 </li>
                 
                 
-                <li id="section-14">
+                <li id="section-15">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-14">&#182;</a>
+                            <a class="pilcrow" href="#section-15">&#182;</a>
                         </div>
-                        <h2 id="waitfor">waitFor</h2>
+                        <h3 id="waitfor">waitFor</h3>
 <p>takes observables as arguments and will
 wait for each observable to publish a new value until
 All the observers of this action are notified of the new value</p>
@@ -424,11 +437,11 @@ All the observers of this action are notified of the new value</p>
                 </li>
                 
                 
-                <li id="section-15">
+                <li id="section-16">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-15">&#182;</a>
+                            <a class="pilcrow" href="#section-16">&#182;</a>
                         </div>
                         <h1 id="createactions">createActions</h1>
 <p>Create Actions is a helper function to create multiple actions at once.
@@ -489,24 +502,42 @@ This will return an object with a action functions as methods</p>
                 </li>
                 
                 
-                <li id="section-16">
+                <li id="section-17">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-16">&#182;</a>
+                            <a class="pilcrow" href="#section-17">&#182;</a>
                         </div>
                         <h1 id="store">Store</h1>
+<p>A ThunderCats Store is an observable. It can update itself
+according to observables it listens to passed in through
+the <code>getOperations</code> method</p>
 
                     </div>
                     
-                    <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>);
+                    <div class="content"><div class='highlight'><pre>
+<span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>);
 <span class="hljs-keyword">var</span> uuid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'node-uuid'</span>);
 <span class="hljs-keyword">var</span> utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>);
 <span class="hljs-keyword">var</span> invariant = utils.invariant;
 <span class="hljs-keyword">var</span> isPromise = utils.isPromise;
-<span class="hljs-keyword">var</span> isObservable = utils.isObservable;
+<span class="hljs-keyword">var</span> isObservable = utils.isObservable;</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-18">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-18">&#182;</a>
+                        </div>
+                        <h2 id="create">Create</h2>
+<p>Takes a spec object and returns an Rx Observable ThunderCats store</p>
 
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">(spec)</span> </span>{
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">(spec)</span> </span>{
   invariant(
     spec &amp;&amp; <span class="hljs-keyword">typeof</span> spec === <span class="hljs-string">'object'</span>,
     <span class="hljs-string">'Store.create(...): expect an object as argument, given : %s'</span>, spec
@@ -525,34 +556,51 @@ This will return an object with a action functions as methods</p>
   );
 
   <span class="hljs-keyword">var</span> getInitialValue = spec.getInitialValue;
-  <span class="hljs-keyword">var</span> getOperations = spec.getOperations;</pre></div></div>
-                    
-                </li>
-                
-                
-                <li id="section-17">
-                    <div class="annotation">
-                        
-                        <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-17">&#182;</a>
-                        </div>
-                        <p>State</p>
+  <span class="hljs-keyword">var</span> getOperations = spec.getOperations;
 
-                    </div>
-                    
-                    <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> value = <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">var</span> value = <span class="hljs-literal">null</span>;
   <span class="hljs-keyword">var</span> observers = <span class="hljs-built_in">Object</span>.create(<span class="hljs-literal">null</span>);
   <span class="hljs-keyword">var</span> operationsMap = <span class="hljs-built_in">Object</span>.create(<span class="hljs-literal">null</span>);
   <span class="hljs-keyword">var</span> operationsStack = [];
   <span class="hljs-keyword">var</span> valueSubscription = <span class="hljs-literal">null</span>;
   <span class="hljs-keyword">var</span> operationSubscription = <span class="hljs-literal">null</span>;
-  <span class="hljs-keyword">var</span> isPending = <span class="hljs-literal">true</span>;
+  <span class="hljs-keyword">var</span> isPending = <span class="hljs-literal">true</span>;</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-19">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-19">&#182;</a>
+                        </div>
+                        <h3 id="has-observers">Has Observers</h3>
+<p><em>internal method</em></p>
+<p>returns the number of observers watching this store</p>
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hasObservers</span><span class="hljs-params">()</span> </span>{
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hasObservers</span><span class="hljs-params">()</span> </span>{
     <span class="hljs-keyword">return</span> !!<span class="hljs-built_in">Object</span>.keys(observers).length;
-  }
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-20">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-20">&#182;</a>
+                        </div>
+                        <h3 id="notifyobservers">NotifyObservers</h3>
+<p><em>internal method</em></p>
+<p>sends the current value held by the store to its observers</p>
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">notifyObservers</span><span class="hljs-params">(error)</span> </span>{
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">notifyObservers</span><span class="hljs-params">(error)</span> </span>{
     <span class="hljs-built_in">Object</span>.keys(observers).forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(uid)</span> </span>{
       <span class="hljs-keyword">if</span> (error) {
         <span class="hljs-keyword">return</span> observers[uid].onError(error);
@@ -560,9 +608,26 @@ This will return an object with a action functions as methods</p>
         observers[uid].onNext(value);
       }
     });
-  }
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-21">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-21">&#182;</a>
+                        </div>
+                        <h3 id="init">init</h3>
+<p><em>internal method</em></p>
+<p>On first subscription, this function is called to set the initial value
+of the store. The <code>getInitialValue</code> method can return a promise,
+observable or a plain JavaScript object.</p>
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> </span>{
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">init</span><span class="hljs-params">()</span> </span>{
     <span class="hljs-keyword">var</span> initialValue = getInitialValue();
     <span class="hljs-keyword">if</span> (isPromise(initialValue)) {
       initialValue.then(setValue, notifyObservers);
@@ -571,16 +636,46 @@ This will return an object with a action functions as methods</p>
     } <span class="hljs-keyword">else</span> {
       setValue(initialValue);
     }
-  }
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-22">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-22">&#182;</a>
+                        </div>
+                        <h3 id="setvalue">setValue</h3>
+<p><em>internal method</em></p>
+<p>overrides the current value held by the store</p>
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setValue</span><span class="hljs-params">(val)</span> </span>{
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setValue</span><span class="hljs-params">(val)</span> </span>{
     value = val;
     isPending = <span class="hljs-literal">false</span>;
     initOperations();
     notifyObservers();
-  }
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-23">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-23">&#182;</a>
+                        </div>
+                        <h3 id="disposeoperations">disposeOperations</h3>
+<p><em>internal method</em></p>
+<p>Disposes all the stores current subscriptions</p>
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">disposeOperations</span><span class="hljs-params">()</span> </span>{
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">disposeOperations</span><span class="hljs-params">()</span> </span>{
     <span class="hljs-keyword">if</span> (operationSubscription) {
       operationSubscription.dispose();
     }
@@ -588,9 +683,25 @@ This will return an object with a action functions as methods</p>
     operationSubscription = <span class="hljs-literal">null</span>;
     operationsMap = <span class="hljs-built_in">Object</span>.create(<span class="hljs-literal">null</span>);
     operationsStack = [];
-  }
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-24">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-24">&#182;</a>
+                        </div>
+                        <h3 id="initoperations">initOperations</h3>
+<p><em>internal method</em></p>
+<p>gets the observable passed in through getOperations and subscribes the
+store to it’s changes</p>
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">initOperations</span><span class="hljs-params">()</span> </span>{
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">initOperations</span><span class="hljs-params">()</span> </span>{
     disposeOperations();
 
     <span class="hljs-keyword">if</span> (getOperations) {
@@ -600,11 +711,27 @@ This will return an object with a action functions as methods</p>
           <span class="hljs-string">'getOperations(): should return an observable, given : '</span> + operations
         );
       }
-      operationSubscription = operations.subscribe(operationObservers);
+      operationSubscription = operations.subscribe(operationObserver);
     }
-  }
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-25">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-25">&#182;</a>
+                        </div>
+                        <h3 id="dispose">dispose</h3>
+<p><em>internal method</em></p>
+<p>Disposes the subscription to initial value observable if any
+and calls <code>disposeOperations</code></p>
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispose</span><span class="hljs-params">()</span> </span>{
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dispose</span><span class="hljs-params">()</span> </span>{
     <span class="hljs-keyword">if</span> (valueSubscription) {
       valueSubscription.dispose();
     }
@@ -612,45 +739,27 @@ This will return an object with a action functions as methods</p>
     value = <span class="hljs-literal">null</span>;
     valueSubscription = <span class="hljs-literal">null</span>;
     isPending = <span class="hljs-literal">true</span>;
-  }
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-26">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-26">&#182;</a>
+                        </div>
+                        <h3 id="operationobserver">operationObserver</h3>
+<p><em>internal method</em></p>
+<p>This is the observer that observes the stores operation observable
+operations must return an object with at least the property <code>value</code>
+or a method <code>transform</code>. It may also have the additional property <code>confirm</code>
+which must be a promise. This is used to undo the value held by the store</p>
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">cancelOperation</span><span class="hljs-params">(uid)</span> </span>{
-    <span class="hljs-keyword">if</span> (!operationsMap[uid]) {
-        <span class="hljs-keyword">return</span>;
-    }
-
-    <span class="hljs-keyword">var</span> oldValue = operationsMap[uid].oldValue;
-    <span class="hljs-keyword">var</span> index = operationsStack.indexOf(uid);
-
-    value = operationsStack.slice(index + <span class="hljs-number">1</span>).reduce(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(value, uid)</span> </span>{
-        <span class="hljs-keyword">var</span> descriptor = operationsMap[uid];
-        descriptor.oldValue = value;
-        <span class="hljs-keyword">return</span> applyOperation(value, descriptor.operation);
-    }, oldValue);
-
-    operationsStack.splice(index, <span class="hljs-number">1</span>);
-    <span class="hljs-keyword">delete</span> operationsMap[uid];
-    notifyObservers();
-  }
-
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">confirmOperation</span><span class="hljs-params">(uid)</span> </span>{
-    <span class="hljs-keyword">if</span> (!operationsMap[uid]) {
-        <span class="hljs-keyword">return</span>;
-    }
-    operationsMap[uid].confirmed = <span class="hljs-literal">true</span>;
-    <span class="hljs-keyword">var</span> lastIndex = -<span class="hljs-number">1</span>;
-    operationsStack.every(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(uid, index)</span> </span>{
-        <span class="hljs-keyword">if</span> (operationsMap[uid].confirmed) {
-            <span class="hljs-keyword">delete</span> operationsMap[uid];
-            lastIndex = index;
-            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
-        }
-    });
-
-    operationsStack = operationsStack.slice(lastIndex + <span class="hljs-number">1</span>);
-  }
-
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">operationObservers</span><span class="hljs-params">(operation)</span> </span>{
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">operationObserver</span><span class="hljs-params">(operation)</span> </span>{
     invariant(
       operation &amp;&amp; <span class="hljs-keyword">typeof</span> operation === <span class="hljs-string">'object'</span>,
       <span class="hljs-string">'invalid operation, operations should be an object, given : %s'</span>, operation
@@ -666,11 +775,9 @@ This will return an object with a action functions as methods</p>
       <span class="hljs-string">'operations should have a value or a transform property'</span>
     );
 
-
     <span class="hljs-keyword">var</span> oldValue = value;
     value = applyOperation(value, operation);
     notifyObservers();
-
 
     <span class="hljs-keyword">var</span> uid = uuid.v1();
     operationsMap[uid] = {
@@ -694,17 +801,117 @@ This will return an object with a action functions as methods</p>
     } <span class="hljs-keyword">else</span> {
       confirmOperation(uid);
     }
-  }
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-27">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-27">&#182;</a>
+                        </div>
+                        <h3 id="cancel-operations">Cancel Operations</h3>
+<p><em>internal method</em></p>
+<p>If thie promise in <code>confirm</code> is rejected, this method reverts the changes
+made by the operation tied to this promise.</p>
 
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">cancelOperation</span><span class="hljs-params">(uid)</span> </span>{
+    <span class="hljs-keyword">if</span> (!operationsMap[uid]) {
+        <span class="hljs-keyword">return</span>;
+    }
 
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">applyOperation</span><span class="hljs-params">(value, operation)</span> </span>{
+    <span class="hljs-keyword">var</span> oldValue = operationsMap[uid].oldValue;
+    <span class="hljs-keyword">var</span> index = operationsStack.indexOf(uid);
+
+    value = operationsStack.slice(index + <span class="hljs-number">1</span>).reduce(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(value, uid)</span> </span>{
+        <span class="hljs-keyword">var</span> descriptor = operationsMap[uid];
+        descriptor.oldValue = value;
+        <span class="hljs-keyword">return</span> applyOperation(value, descriptor.operation);
+    }, oldValue);
+
+    operationsStack.splice(index, <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">delete</span> operationsMap[uid];
+    notifyObservers();
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-28">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-28">&#182;</a>
+                        </div>
+                        <h3 id="confirm-operation">Confirm Operation</h3>
+<p><em>internal method</em></p>
+<p>This method activates when the promise tied to an operation is resolved.</p>
+
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">confirmOperation</span><span class="hljs-params">(uid)</span> </span>{
+    <span class="hljs-keyword">if</span> (!operationsMap[uid]) {
+        <span class="hljs-keyword">return</span>;
+    }
+    operationsMap[uid].confirmed = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">var</span> lastIndex = -<span class="hljs-number">1</span>;
+    operationsStack.every(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(uid, index)</span> </span>{
+        <span class="hljs-keyword">if</span> (operationsMap[uid].confirmed) {
+            <span class="hljs-keyword">delete</span> operationsMap[uid];
+            lastIndex = index;
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+        }
+    });
+
+    operationsStack = operationsStack.slice(lastIndex + <span class="hljs-number">1</span>);
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-29">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-29">&#182;</a>
+                        </div>
+                        <h3 id="applyoperation">applyOperation</h3>
+<p><em>internal method</em></p>
+<p>If an operation returns a proper object, this method is called.
+It checks to see if a property <code>value</code> exists and returns that, else
+it applies the <code>transform</code> method of the operation on the current value
+held by the store.</p>
+<p>NOTE: If <code>value</code> property is supplied, then the <code>transform</code> method is
+simply ignored</p>
+
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">applyOperation</span><span class="hljs-params">(value, operation)</span> </span>{
     <span class="hljs-keyword">return</span> <span class="hljs-string">'value'</span> <span class="hljs-keyword">in</span> operation ?
       operation.value :
       operation.transform(value);
-  }
+  }</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-30">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-30">&#182;</a>
+                        </div>
+                        <h3 id="subscribe">Subscribe</h3>
+<p>This is the main entry for observers of this <strong>ThunderCats</strong> Store
+This method will track all observers and initiate the store.</p>
 
-
-  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">subscribe</span><span class="hljs-params">(observer)</span> </span>{
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre>  <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">subscribe</span><span class="hljs-params">(observer)</span> </span>{
 
     <span class="hljs-keyword">var</span> uid = uuid.v1();
 
