@@ -21,22 +21,22 @@ describe('# Store', function() {
 
     it('should throw an error if argument passed is not an object', function() {
       Store.create.bind(this, 5).should.
-        throw('Invariant Violation: Store.create(...): expect an object as argument, given : 5');
+        throw('expects an object as argument, given : 5');
     });
 
     it('should throw an error if getInitialValue is not defined', function() {
       Store.create.bind(this, {}).should.
-        throw('Invariant Violation: Store.create(...): getInitialValue should be a function given : undefined');
+        throw('getInitialValue should be a function given : undefined');
     });
 
     it('should throw an error if getInitialValue is not a function', function() {
       Store.create.bind(this, {getInitialValue: true}).should.
-        throw('Invariant Violation: Store.create(...): getInitialValue should be a function given : true');
+        throw('getInitialValue should be a function given : true');
     });
 
     it('should throw an error if getOperations is not a function', function() {
       Store.create.bind(this, {getInitialValue: function() {}, getOperations: {}}).should.
-        throw('Invariant Violation: Store.create(...): getOperations should be a function given : [object Object]');
+        throw('getOperations should be a function given : [object Object]');
     });
   });
 
