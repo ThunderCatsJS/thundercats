@@ -5,6 +5,7 @@ var expect = chai.expect;
 var should = chai.should();
 var Action = require('./../lib/action');
 var Store = require('../lib/store');
+var Mixin = require('../lib/ObservableStateMixin');
 var Rx = require('rx');
 var sinon = require('sinon');
 var Q = require('q');
