@@ -99,39 +99,72 @@ describe('# Store', function() {
 
   describe('## Operations', function() {
 
-    describe('### Errors', function() {
+    describe('### getOperations', function() {
 
-      var store;
-
-      before(function () {
-        store = Store.create({
-          getInitialValue: function () {
-            return {};
-          },
-          getOperations: function () {
-            return Rx.Observable.of(5);
-          }
-        });
+      it('should accept a single observable', function() {
+        var fn = function() {
+          Store.create({
+            getInitialValue: function() {
+              return {};
+            },
+            getOperations: function() {
+              return Rx.Observable.of(2);
+            }
+          });
+        };
+        expect(fn).not.to.throw();
       });
 
-      it('should throw an error if getInitialValue is not a function', function() {
-        store.subscribe.bind(function () {}).should.throw();
+      it('should accept an array of observables', function() {
+        var fn = function() {
+          Store.create({
+            getInitialValue: function() {
+              return {};
+            },
+            getOperations: function() {
+              return [
+                Rx.Observable.of(2),
+                Rx.Observable.of(3),
+                Rx.Observable.of(5)
+              ];
+            }
+          });
+        };
+
+        expect(fn).not.to.throw();
       });
 
-      before(function () {
-        var store = Store.create({
-          getInitialValue: function () {
-            return {};
-          },
-          getOperations: function () {
-            return Rx.Observable.of({});
-          }
-        });
-      });
+      it(
+        'should throw an error if getInitialValue is not a function',
+        function() {
+          var fn = function() {
+            Store.create({
+              getInitialValue: 'Not the momma',
 
-      it('should throw an error if getInitialValue is not a function', function() {
-        store.subscribe.bind(function() {}).should.throw();
-      });
+              getOperations: function () {
+                return Rx.Observable.of(5);
+              }
+            });
+          };
+          expect(fn).to.throw();
+        }
+      );
+
+      it(
+        'should throw an error if getOperations is not a function',
+        function() {
+          var fn = function() {
+            Store.create({
+              getInitialValue: function () {
+                return {};
+              },
+              getOperations: 'Not the momma'
+            });
+          };
+          expect(fn).to.throw();
+        }
+      );
+
     });
 
     describe('### Basic transformation properties', function() {
