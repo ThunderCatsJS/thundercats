@@ -16,7 +16,8 @@
     "url": "https://github.com/r3dm/thundercats"
   },
   "scripts": {
-    "test": "tape test/*.js"
+    "test": "mocha",
+    "cover": "istanbul cover _mocha"
   },
   "author": {
     "name": "Berkeley Martinez",
@@ -49,12 +50,17 @@
     "rx": "^2.3.14"
   },
   "devDependencies": {
-    "babel-eslint": "^2.0.0",
-    "eslint": "^0.16.1",
+    "chai": "^2.1.1",
+    "chai-as-promised": "^4.3.0",
     "eslint-plugin-react": "^1.4.1",
+    "istanbul": "^0.3.7",
+    "mocha": "^2.2.1",
+    "mocha-istanbul": "^0.2.0",
     "q": "^1.2.0",
     "rx": "^2.3.14",
     "sinon": "^1.11.1",
-    "tape": "^3.0.2"
+    "sinon-chai": "^2.7.0",
+    "babel-eslint": "^2.0.0",
+    "eslint": "^0.16.1"
   }
 }

@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for lib/ObservableStateMixin.js</title>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="../prettify.css">
+
+    <link rel="stylesheet" href="../base.css">
+    <style type='text/css'>
+        div.coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header low">
+    <h1>Code coverage report for <span class="entity">lib/ObservableStateMixin.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">14.29% <small>(4 / 28)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">0% <small>(0 / 14)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">0% <small>(0 / 7)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">14.29% <small>(4 / 28)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../index.html">All files</a> &#187; <a href="index.html">lib/</a> &#187; ObservableStateMixin.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// # Observable State Mixin
+//
+// For your components
+&nbsp;
+var Rx = require('rx'),
+    utils = require('../utils'),
+    invariant = utils.invariant,
+    isObservable = utils.isObservable,
+    areObservable = utils.invariant,
+    stateSubscriptions = [];
+&nbsp;
+var ObservableStateMixin = {
+&nbsp;
+  statics: {
+    // Allows subscriptions for all components using this mixin
+    // to be disposed using MyComponent.disposeAllSubscriptions().
+    disposeAllSubscriptions: disposeAllSubscriptions
+  },
+&nbsp;
+  getInitialState: <span class="fstat-no" title="function not covered" >function () {</span>
+<span class="cstat-no" title="statement not covered" >    var displayName =</span>
+      this.constructor.displayName || this.constructor.name || '';
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    invariant(</span>
+      typeof this.getObservable === 'function',
+      '%s should provide "getObservable" or "getObservables" function' +
+        ' or a function',
+      displayName
+    );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this._observableState = this.getObservable(this.props);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    invariant(</span>
+      areObservable(this._observableState) ||
+        isObservable(this._observableState),
+      '"%s.getObservable" should return an Rx.Observable or an array of ' +
+        'Rx.Observables, given : %s',
+      displayName,
+      this._observableState
+    );
+&nbsp;
+    // getObservable can be supplied an array of observables and
+    // ThunderCats will use Rx.Observable.merge to create a single
+    // stream of data
+<span class="cstat-no" title="statement not covered" >    if (areObservable(this._observableState)) {</span>
+<span class="cstat-no" title="statement not covered" >      this._observableState = Rx.Observale.merge(this._observableState);</span>
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    var initialState = null;</span>
+&nbsp;
+    // In GIS we only want to get the initial value without subscribing,
+    // So we use the first filter here.
+    // You cannot use async observable here with server-side rendering as
+    // the subscription will hang around after the component has rendered with
+    // initial state of null;
+<span class="cstat-no" title="statement not covered" >    this._observableState.first().subscribe(<span class="fstat-no" title="function not covered" >function (val) {</span></span>
+<span class="cstat-no" title="statement not covered" >      invariant(</span>
+        typeof val === 'object',
+        'The observable returned by \'%s.getObservable\' should publish ' +
+          'objects or null given : %s',
+        displayName,
+        val
+      );
+<span class="cstat-no" title="statement not covered" >      initialState = val;</span>
+    });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return initialState;</span>
+  },
+&nbsp;
+  componentDidMount: <span class="fstat-no" title="function not covered" >function() {</span>
+    // Now that the component has mounted, we will use a long lived
+    // the subscription
+<span class="cstat-no" title="statement not covered" >    this._stateSubscription =</span>
+      this._observableState.subscribe(this._observer.bind(this));
+&nbsp;
+    // we save all disposable subscriptions to an array so that they can
+    // be disposed of using MyComp.disposeAllSubscriptions()
+<span class="cstat-no" title="statement not covered" >    stateSubscriptions.push(this.__stateSubscription);</span>
+  },
+&nbsp;
+  componentWillUnmount: <span class="fstat-no" title="function not covered" >function () {</span>
+    // On unmount, the subscription to the observable state is disposed
+    // and removed from the global subscription array
+<span class="cstat-no" title="statement not covered" >    if (this._stateSubscription) {</span>
+<span class="cstat-no" title="statement not covered" >      this._stateSubscription.dispose();</span>
+<span class="cstat-no" title="statement not covered" >      var index = stateSubscriptions.indexOf(this._stateSubscription);</span>
+<span class="cstat-no" title="statement not covered" >      if (index !== -1) {</span>
+<span class="cstat-no" title="statement not covered" >        stateSubscriptions.splice(index, 1);</span>
+      }
+    }
+  },
+&nbsp;
+  // This is the observer that will watch the observable state.
+  // TODO: make this into a proper Rx.Observable
+  _stateObserver: <span class="fstat-no" title="function not covered" >function (val) {</span>
+<span class="cstat-no" title="statement not covered" >    var displayName =</span>
+      this.constructor.displayName || this.constructor.name || '';
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    invariant(</span>
+      typeof val === 'object',
+      'The observable returned by \'%s.getObservable\' should publish ' +
+      'Objects or null given : %s',
+      displayName,
+      val
+    );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.setState(val);</span>
+  }
+};
+&nbsp;
+// Dispose of all the subscriptions created by this mixin.
+<span class="fstat-no" title="function not covered" >function disposeAllSubscriptions() {</span>
+<span class="cstat-no" title="statement not covered" >  stateSubscriptions.forEach(<span class="fstat-no" title="function not covered" >function (subscription) {</span></span>
+<span class="cstat-no" title="statement not covered" >    subscription.dispose();</span>
+  });
+<span class="cstat-no" title="statement not covered" >  stateSubscriptions = [];</span>
+}
+&nbsp;
+module.exports = ObservableStateMixin;
+&nbsp;
+// Original source from https://github.com/fdecampredon/rx-react
+&nbsp;</pre></td></tr>
+</table></pre>
+
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Mar 14 2015 01:11:54 GMT+0900 (JST)</div>
+</div>
+
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+
+<script src="../sorter.js"></script>
+</body>
+</html>
