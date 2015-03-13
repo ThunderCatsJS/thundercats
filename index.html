@@ -20,7 +20,8 @@
                         <div class="pilwrap ">
                             <a class="pilcrow" href="#section-1">&#182;</a>
                         </div>
-                        <p><a href="https://circleci.com/gh/r3dm/thundercats"><img src="https://circleci.com/gh/r3dm/thundercats.svg?style=svg" alt="Circle CI"></a> <a href="https://waffle.io/r3dm/thundercats"><img src="https://badge.waffle.io/r3dm/thundercats.png?label=ready&amp;title=Ready" alt="Stories in Ready"></a> <a href="https://gitter.im/r3dm/thundercats?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/Join%20Chat.svg" alt="Join the chat at https://gitter.im/r3dm/thundercats"></a></p>
+                        <p><a href="https://circleci.com/gh/r3dm/thundercats"><img src="https://circleci.com/gh/r3dm/thundercats.svg?style=svg" alt="Circle CI"></a> <a href="https://coveralls.io/r/r3dm/thundercats"><img src="https://coveralls.io/repos/r3dm/thundercats/badge.svg" alt="Coverage Status"></a> <a href="https://gemnasium.com/r3dm/thundercats"><img src="https://gemnasium.com/r3dm/thundercats.svg" alt="Dependency Status"></a></p>
+<p><a href="https://waffle.io/r3dm/thundercats"><img src="https://badge.waffle.io/r3dm/thundercats.png?label=ready&amp;title=Ready" alt="Stories in Ready"></a> <a href="https://gitter.im/r3dm/thundercats?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/Join%20Chat.svg" alt="Join the chat at https://gitter.im/r3dm/thundercats"></a></p>
 <h1 id="thundercats-js">ThunderCats.js</h1>
 <blockquote>
 <p>Thundercats, Ho!</p>
@@ -51,8 +52,8 @@
 <ul>
 <li>Horizontal space is precious, vertical space is cheap and plentiful. Keep your indenting sane and to a minimal.</li>
 <li>Use named functions instead of anonomous functions assigned to variables.</li>
-<li>For most cases, declare module.exports as a single object with each key a part of the files api at the top, and the named functions underneath this section. </li>
-<li><h3 id="api">API</h3>
+<li>For most cases, declare module.exports as a single object with each key a part of the files api at the top, and the named functions underneath this section.
+*<h3 id="api">API</h3>
 </li>
 </ul>
 <p>The api is still new and can be maliable for the forseeable future. If there are features you would like to see please open a new issue for discussion.</p>
@@ -508,20 +509,40 @@ This will return an object with a action functions as methods</p>
                         <div class="pilwrap ">
                             <a class="pilcrow" href="#section-17">&#182;</a>
                         </div>
-                        <h1 id="store">Store</h1>
-<p>A ThunderCats Store is an observable. It can update itself
-according to observables it listens to passed in through
-the <code>getOperations</code> method</p>
+                        <h1 id="set-state-utility">Set State utility</h1>
+<p>A helper function to pass as an argument to Rx.Observable.map;
+If your Observable passes a object, this will assign the properties of
+that object to the current value held in the store.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> newMappedObservable = someAction
+  .map(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(newDats)</span> </span>{
+    <span class="hljs-keyword">return</span> { <span class="hljs-string">'someCoolKey'</span>: newDats };
+  })
+  .map(setStateUtil);
+</code></pre>
+<p>now this newMappedObservable can be passed into your ThunderCats Stores
+getOperations spec definition</p>
 
                     </div>
                     
-                    <div class="content"><div class='highlight'><pre>
-<span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>);
-<span class="hljs-keyword">var</span> uuid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'node-uuid'</span>);
-<span class="hljs-keyword">var</span> utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>);
-<span class="hljs-keyword">var</span> invariant = utils.invariant;
-<span class="hljs-keyword">var</span> isPromise = utils.isPromise;
-<span class="hljs-keyword">var</span> isObservable = utils.isObservable;</pre></div></div>
+                    <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> invariant = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>).invariant,
+    assign = <span class="hljs-built_in">Object</span>.assign || <span class="hljs-built_in">require</span>(<span class="hljs-string">'object.assign'</span>);
+
+<span class="hljs-built_in">module</span>.exports = setStateUtil;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">setStateUtil</span><span class="hljs-params">(newStateToSet)</span> </span>{
+  invariant(
+    newStateToSet || <span class="hljs-keyword">typeof</span> newStateToSet === <span class="hljs-string">'object'</span>,
+    <span class="hljs-string">'setStateUtil expects an object, but got %s'</span>,
+    newStateToSet
+  );
+  <span class="hljs-keyword">return</span> {
+    transform: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(oldState)</span> </span>{
+      <span class="hljs-keyword">var</span> newState = {};
+      assign(newState, oldState, newStateToSet);
+      <span class="hljs-keyword">return</span> newState;
+    }
+  };
+}</pre></div></div>
                     
                 </li>
                 
@@ -531,6 +552,30 @@ the <code>getOperations</code> method</p>
                         
                         <div class="pilwrap ">
                             <a class="pilcrow" href="#section-18">&#182;</a>
+                        </div>
+                        <h1 id="store">Store</h1>
+<p>A ThunderCats Store is an observable. It can update itself
+according to observables it listens to passed in through
+the <code>getOperations</code> method</p>
+
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>),
+    uuid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'node-uuid'</span>),
+    utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>),
+    invariant = utils.invariant,
+    isPromise = utils.isPromise,
+    isObservable = utils.isObservable,
+    areObservable = utils.areObservable;</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-19">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-19">&#182;</a>
                         </div>
                         <h2 id="create">Create</h2>
 <p>Takes a spec object and returns an Rx Observable ThunderCats store</p>
@@ -569,11 +614,11 @@ the <code>getOperations</code> method</p>
                 </li>
                 
                 
-                <li id="section-19">
+                <li id="section-20">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-19">&#182;</a>
+                            <a class="pilcrow" href="#section-20">&#182;</a>
                         </div>
                         <h3 id="has-observers">Has Observers</h3>
 <p><em>internal method</em></p>
@@ -588,11 +633,11 @@ the <code>getOperations</code> method</p>
                 </li>
                 
                 
-                <li id="section-20">
+                <li id="section-21">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-20">&#182;</a>
+                            <a class="pilcrow" href="#section-21">&#182;</a>
                         </div>
                         <h3 id="notifyobservers">NotifyObservers</h3>
 <p><em>internal method</em></p>
@@ -613,11 +658,11 @@ the <code>getOperations</code> method</p>
                 </li>
                 
                 
-                <li id="section-21">
+                <li id="section-22">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-21">&#182;</a>
+                            <a class="pilcrow" href="#section-22">&#182;</a>
                         </div>
                         <h3 id="init">init</h3>
 <p><em>internal method</em></p>
@@ -641,11 +686,11 @@ observable or a plain JavaScript object.</p>
                 </li>
                 
                 
-                <li id="section-22">
+                <li id="section-23">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-22">&#182;</a>
+                            <a class="pilcrow" href="#section-23">&#182;</a>
                         </div>
                         <h3 id="setvalue">setValue</h3>
 <p><em>internal method</em></p>
@@ -663,11 +708,11 @@ observable or a plain JavaScript object.</p>
                 </li>
                 
                 
-                <li id="section-23">
+                <li id="section-24">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-23">&#182;</a>
+                            <a class="pilcrow" href="#section-24">&#182;</a>
                         </div>
                         <h3 id="disposeoperations">disposeOperations</h3>
 <p><em>internal method</em></p>
@@ -688,11 +733,11 @@ observable or a plain JavaScript object.</p>
                 </li>
                 
                 
-                <li id="section-24">
+                <li id="section-25">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-24">&#182;</a>
+                            <a class="pilcrow" href="#section-25">&#182;</a>
                         </div>
                         <h3 id="initoperations">initOperations</h3>
 <p><em>internal method</em></p>
@@ -706,10 +751,18 @@ store to it’s changes</p>
 
     <span class="hljs-keyword">if</span> (getOperations) {
       <span class="hljs-keyword">var</span> operations = getOperations();
-      <span class="hljs-keyword">if</span> (!isObservable(operations)) {
-        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">TypeError</span>(
-          <span class="hljs-string">'getOperations(): should return an observable, given : '</span> + operations
-        );
+
+      invariant(
+        areObservable(operations) ||
+          isObservable(operations),
+        <span class="hljs-string">'"%s.getObservable" should return an Rx.Observable or an array of '</span> +
+          <span class="hljs-string">'Rx.Observables, given : %s'</span>,
+        <span class="hljs-string">'ThunderCats Store'</span>,
+        operations
+      );
+
+      <span class="hljs-keyword">if</span> (areObservable(operations)) {
+        operations = Rx.Observable.merge(operations);
       }
       operationSubscription = operations.subscribe(operationObserver);
     }
@@ -718,11 +771,11 @@ store to it’s changes</p>
                 </li>
                 
                 
-                <li id="section-25">
+                <li id="section-26">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-25">&#182;</a>
+                            <a class="pilcrow" href="#section-26">&#182;</a>
                         </div>
                         <h3 id="dispose">dispose</h3>
 <p><em>internal method</em></p>
@@ -744,11 +797,11 @@ and calls <code>disposeOperations</code></p>
                 </li>
                 
                 
-                <li id="section-26">
+                <li id="section-27">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-26">&#182;</a>
+                            <a class="pilcrow" href="#section-27">&#182;</a>
                         </div>
                         <h3 id="operationobserver">operationObserver</h3>
 <p><em>internal method</em></p>
@@ -806,11 +859,11 @@ which must be a promise. This is used to undo the value held by the store</p>
                 </li>
                 
                 
-                <li id="section-27">
+                <li id="section-28">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-27">&#182;</a>
+                            <a class="pilcrow" href="#section-28">&#182;</a>
                         </div>
                         <h3 id="cancel-operations">Cancel Operations</h3>
 <p><em>internal method</em></p>
@@ -841,11 +894,11 @@ made by the operation tied to this promise.</p>
                 </li>
                 
                 
-                <li id="section-28">
+                <li id="section-29">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-28">&#182;</a>
+                            <a class="pilcrow" href="#section-29">&#182;</a>
                         </div>
                         <h3 id="confirm-operation">Confirm Operation</h3>
 <p><em>internal method</em></p>
@@ -873,11 +926,11 @@ made by the operation tied to this promise.</p>
                 </li>
                 
                 
-                <li id="section-29">
+                <li id="section-30">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-29">&#182;</a>
+                            <a class="pilcrow" href="#section-30">&#182;</a>
                         </div>
                         <h3 id="applyoperation">applyOperation</h3>
 <p><em>internal method</em></p>
@@ -899,11 +952,11 @@ simply ignored</p>
                 </li>
                 
                 
-                <li id="section-30">
+                <li id="section-31">
                     <div class="annotation">
                         
                         <div class="pilwrap ">
-                            <a class="pilcrow" href="#section-30">&#182;</a>
+                            <a class="pilcrow" href="#section-31">&#182;</a>
                         </div>
                         <h3 id="subscribe">Subscribe</h3>
 <p>This is the main entry for observers of this <strong>ThunderCats</strong> Store

@@ -1,6 +1,6 @@
-[![Circle CI](https://circleci.com/gh/r3dm/thundercats.svg?style=svg)] (https://circleci.com/gh/r3dm/thundercats) [![Coverage Status](https://coveralls.io/repos/r3dm/thundercats/badge.svg)](https://coveralls.io/r/r3dm/thundercats) [![Dependency Status](https://gemnasium.com/r3dm/thundercats.svg)](https://gemnasium.com/r3dm/thundercats)
+[![Circle CI](https://circleci.com/gh/r3dm/thundercats.svg?style=svg)](https://circleci.com/gh/r3dm/thundercats) [![Coverage Status](https://coveralls.io/repos/r3dm/thundercats/badge.svg)](https://coveralls.io/r/r3dm/thundercats) [![Dependency Status](https://gemnasium.com/r3dm/thundercats.svg)](https://gemnasium.com/r3dm/thundercats)
 
-[![Stories in Ready](https://badge.waffle.io/r3dm/thundercats.png?label=ready&title=Ready)](https://waffle.io/r3dm/thundercats) [![Join the chat at https://gitter.im/r3dm/thundercats](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/r3dm/thundercats?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
+[![Stories in Ready](https://badge.waffle.io/r3dm/thundercats.png?label=ready&title=Ready)](https://waffle.io/r3dm/thundercats) [![Join the chat at https://gitter.im/r3dm/thundercats](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/r3dm/thundercats?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 # ThunderCats.js
 
 > Thundercats, Ho!
@@ -46,8 +46,8 @@ general rules to follow
 
 * Horizontal space is precious, vertical space is cheap and plentiful. Keep your indenting sane and to a minimal.
 * Use named functions instead of anonomous functions assigned to variables.
-* For most cases, declare module.exports as a single object with each key a part of the files api at the top, and the named functions underneath this section. 
-* 
+* For most cases, declare module.exports as a single object with each key a part of the files api at the top, and the named functions underneath this section.
+*
 ### API
 
 The api is still new and can be maliable for the forseeable future. If there are features you would like to see please open a new issue for discussion.
