@@ -62,13 +62,11 @@ var TodoApp = React.createClass({
       <div>
         <Header />
         <MainSection
-          todos={todos} areAllComplete={areAllComplete}
-        />
+          todos={todos} areAllComplete={areAllComplete}/>
         <Footer
           currentRoute={currentRoute}
           activeTodosCount={activeTodosCount}
-          completeTodosCount={completeTodosCount}
-        />
+          completeTodosCount={completeTodosCount}/>
       </div>
     );
   }

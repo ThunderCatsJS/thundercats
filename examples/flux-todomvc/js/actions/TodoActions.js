@@ -18,11 +18,7 @@ var TodoActions = {
     return {todo, promise: TodoService.create(todo) };
   }),
 
-  // eslint known bug with destructing arguments and block scope
-  // see: https://github.com/eslint/eslint/issues/1996
-  // Using work around
-  updateText: TodoItem.updateTodo.map(function (arg) {
-    var { text, id } = arg;
+  updateText: TodoItem.updateTodo.map(function ({ text, id }) {
     return {
       text,
       id,
