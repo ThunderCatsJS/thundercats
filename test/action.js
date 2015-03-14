@@ -32,11 +32,14 @@ describe('# Action', function() {
       action = Action.create();
     });
 
-    it('should notify passed value to subscribed observer when called', function() {
-      action.subscribe(function (val) {
-        val.should.equal(3);
-      });
-    });
+    it(
+      'should notify passed value to subscribed observer when called',
+      function() {
+        action.subscribe(function (val) {
+          val.should.equal(3);
+        });
+      }
+    );
 
     after(function() {
       action(3);
@@ -50,11 +53,14 @@ describe('# Action', function() {
     var action;
 
 
-    //it('should pass the value passed as parameter to the map function', function() {
-    //  action = Action.create(function(val) {
-    //    return value2;
-    //  });
-    //});
+    // it(
+    //   'should pass the value passed as parameter to the map function',
+    //   function() {
+    //     action = Action.create(function(val) {
+    //       return value2;
+    //     });
+    //   }
+    // );
 
     before(function() {
       action = Action.create(function(val) {
@@ -68,9 +74,9 @@ describe('# Action', function() {
       });
     });
 
-    //it('should return the value returned by map', function() {
-    //  action(value1).should.equal.value2;
-    //});
+    // it('should return the value returned by map', function() {
+    //   action(value1).should.equal.value2;
+    // });
 
     it('should throw an error when an error is thrown in the map', function() {
       Action.create(function() {

@@ -28,16 +28,6 @@ describe('# Store', function() {
       Store.create.bind(this, {}).should.
         throw('getInitialValue should be a function given : undefined');
     });
-
-    it('should throw an error if getInitialValue is not a function', function() {
-      Store.create.bind(this, {getInitialValue: true}).should.
-        throw('getInitialValue should be a function given : true');
-    });
-
-    it('should throw an error if getOperations is not a function', function() {
-      Store.create.bind(this, {getInitialValue: function() {}, getOperations: {}}).should.
-        throw('getOperations should be a function given : [object Object]');
-    });
   });
 
   describe('## Behavior:', function() {
@@ -51,11 +41,15 @@ describe('# Store', function() {
         });
       });
 
-      it('should not publish a value if getInitialValue returns neither a promise nor an observable', function() {
-        store.subscribe(function(val) {
-          expect(val).to.be.undefined;
-        });
-      });
+      it(
+        'should not publish a value if getInitialValue returns neither ' +
+          'a promise nor an observable',
+        function() {
+          store.subscribe(function(val) {
+            expect(val).to.be.undefined;
+          });
+        }
+      );
     });
 
     describe('### Promises and Observables', function() {
@@ -74,11 +68,15 @@ describe('# Store', function() {
         store.should.be.an.instanceOf(Rx.Observable);
       });
 
-      it('should resolve and publish a value if getInitialValue returns a Promise', function () {
-        store.subscribe(function(val) {
-          val.should.equal(value);
-        });
-      });
+      it(
+        'should resolve and publish a value if getInitialValue returns ' +
+         ' a Promise',
+        function () {
+          store.subscribe(function(val) {
+            val.should.equal(value);
+          });
+        }
+      );
 
       before(function() {
         value = 2;
@@ -89,11 +87,16 @@ describe('# Store', function() {
         });
       });
 
-      it('should publish the observable\'s resolve value if getInitialValue returns an observable', function() {
-        store.subscribe(function(val) {
-          val.should.equal(value);
-        });
-      });
+      it(
+        'should publish the observable\'s resolve value if getInitialValue ' +
+          'returns an observable',
+        function() {
+          store.subscribe(function(val) {
+            val.should.equal(value);
+          });
+        }
+      );
+
     });
   });
 
@@ -188,19 +191,26 @@ describe('# Store', function() {
         store.subscribe(spy);
       });
 
-      it('should passed to the value held by the store to the function operation', function() {
-        operations.onNext({
-          transform: function(val) {
-            val.should.equal(value);
-            return newValue;
-          }
-        });
-      });
+      it(
+        'should passed to the value held by the store to the function ' +
+          'operation',
+        function() {
+          operations.onNext({
+            transform: function(val) {
+              val.should.equal(value);
+              return newValue;
+            }
+          });
+        }
+      );
 
-      it('the value held by the store should be the one returned by the function' +
-      ' passed to \'applyOperation\'', function() {
-        spy.should.have.been.calledWith(value);
-      });
+      it(
+        'the value held by the store should be the one returned by ' +
+          'the function passed to \'applyOperation\'',
+        function() {
+          spy.should.have.been.calledWith(value);
+        }
+      );
 
       it('observers should have been notified with the new value', function() {
         spy.should.have.been.calledWith(newValue);
@@ -209,6 +219,7 @@ describe('# Store', function() {
       it('store have been called twice', function() {
         spy.should.have.been.calledTwice;
       });
+
     });
 
     describe('### Basic set value operation', function() {
@@ -274,22 +285,31 @@ describe('# Store', function() {
           });
         });
 
-        it('observers should have been notified with the initial value', function () {
-          spy.should.have.been.calledWith(value);
-        });
+        it(
+          'observers should have been notified with the initial value',
+          function () {
+            spy.should.have.been.calledWith(value);
+          }
+        );
 
-        it('observers should have been notified with the new value', function () {
-          spy.should.have.been.calledWith(newValue);
-        });
+        it(
+          'observers should have been notified with the new value',
+          function () {
+            spy.should.have.been.calledWith(newValue);
+          }
+        );
 
 
         before(function() {
           defer.reject();
         });
 
-        it('observers should have been notified about the canceling', function() {
-          spy.should.have.been.calledWith(value);
-        });
+        it(
+          'observers should have been notified about the canceling',
+          function() {
+            spy.should.have.been.calledWith(value);
+          }
+        );
 
         it('store should have been called three times', function() {
           spy.should.have.been.calledThrice;
@@ -385,10 +405,15 @@ describe('# Store', function() {
           });
         });
 
-        it('getInitialValue and getOperatons should ' +
-        'not have been called before a subsription', function() {
-          initialValueSpy.should.not.have.been.called && operationsSpy.should.not.have.been.called;
-        });
+        it(
+          'getInitialValue and getOperatons should not have been called ' +
+           'before a subsription',
+          function() {
+            initialValueSpy.should.not.have.been.called;
+            operationsSpy.should.not.have.been.called;
+          }
+        );
+
       });
 
       describe('#### Subscription event setup', function() {
@@ -398,26 +423,38 @@ describe('# Store', function() {
           });
         });
 
-        it('on the first subscription the store should get the initialValue and ' +
-        'subscribe to the returned observable', function () {
-          initialValueSpy.should.have.been.calledOnce && initialValue.hasObservers();
-        });
+        it(
+          'on the first subscription the store should get the initialValue ' +
+            'and subscribe to the returned observable',
+          function () {
+            initialValueSpy.should.have.been.calledOnce;
+            initialValue.hasObservers();
+          }
+        );
 
-        it('until initialValue\'s observable pushes a new value getOperations ' +
-        'should not have been called', function () {
-          operationsSpy.should.not.have.been.called;
-        });
+        it(
+          'until initialValue\'s observable pushes a new value getOperations ' +
+            'should not have been called',
+          function () {
+            operationsSpy.should.not.have.been.called;
+          }
+        );
+
       });
-      describe('#### Subscription event operations', function() {
 
+      describe('#### Subscription event operations', function() {
         before(function() {
           initialValue.onNext({});
         });
 
-        it('when the initialValue resolves to a value operations spy should ' +
-        'have been called', function() {
-          operationsSpy.should.have.been.called && operations.hasObservers();
-        });
+        it(
+          'when the initialValue resolves to a value operations spy should ' +
+          'have been called',
+          function() {
+            operationsSpy.should.have.been.called;
+            operations.hasObservers();
+          }
+        );
       });
 
       describe('', function() {
@@ -429,13 +466,16 @@ describe('# Store', function() {
           initialValue.onNext({});
         });
 
-        it('when the initialValue pushes a new value the store should dispose of the ' +
-        'subscription to operations, re-invoke getOperations and subscribe to ' +
-        'the returned observable', function() {
-          operationsSpy.should.have.been.calledTwice &&
-          operations.hasObservers() &&
-          !oldOperations.hasObservers();
-        });
+        it(
+          'when the initialValue pushes a new value the store should ' +
+            'dispose of the subscription to operations, re-invoke ' +
+            'getOperations and subscribe to the returned observable',
+          function() {
+            operationsSpy.should.have.been.calledTwice;
+            operations.hasObservers();
+            oldOperations.hasObservers();
+          }
+        );
       });
 
       describe('', function() {
@@ -444,10 +484,14 @@ describe('# Store', function() {
           disposable.dispose();
         });
 
-        it('when all the subscription to the store has been disposed, it ' +
-        'should dispose the subscription on operations and initialValue', function() {
-          !initialValue.hasObservers() && !operations.hasObservers();
-        });
+        it(
+          'when all the subscription to the store has been disposed, it ' +
+            'should dispose the subscription on operations and initialValue',
+          function() {
+            !initialValue.hasObservers();
+            !operations.hasObservers();
+          }
+        );
       });
 
       describe('', function() {
@@ -458,13 +502,16 @@ describe('# Store', function() {
 
         it('on resubscribe it should restart the process', function() {
           store.subscribe(function() {});
-          initialValueSpy.should.have.been.calledTwice && initialValue.hasObservers() &&
-          operationsSpy.should.have.been.calledTwice && !operations.hasObservers();
+          initialValueSpy.should.have.been.calledTwice;
+          initialValue.hasObservers();
+          operationsSpy.should.have.been.calledTwice;
+          !operations.hasObservers();
         });
 
         it('on resubscribe it should restart the process', function() {
           initialValue.onNext({});
-          operationsSpy.should.have.been.calledThrice && operations.hasObservers();
+          operationsSpy.should.have.been.calledThrice;
+          operations.hasObservers();
         });
       });
 

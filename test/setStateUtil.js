@@ -1,6 +1,5 @@
 var chai = require('chai');
 chai.should();
-// var sinon = require('sinon');
 var setStateUtil = require('../lib/setStateUtil');
 
 describe('# Set State Util', function() {
