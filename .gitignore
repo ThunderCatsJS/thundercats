@@ -2,3 +2,4 @@ node_modules
 .idea
 docs/index.js
 coverage
+.log
