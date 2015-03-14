@@ -15,9 +15,9 @@ var sinonChai = require('sinon-chai');
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
-describe('# Action', function() {
+describe('Action', function() {
 
-  describe('## Create', function() {
+  describe('Create', function() {
 
     it('should be a function', function() {
       var action = Action.create();
@@ -25,7 +25,7 @@ describe('# Action', function() {
     });
   });
 
-  describe('## Call', function() {
+  describe('Call', function() {
     var action;
 
     before(function() {
@@ -46,7 +46,7 @@ describe('# Action', function() {
     });
   });
 
-  describe('## Map', function() {
+  describe('Map', function() {
 
     var value1 = {}, value2 = {};
     var spy = sinon.spy();
@@ -85,7 +85,7 @@ describe('# Action', function() {
     });
   });
 
-  describe('## Disposal', function() {
+  describe('Disposal', function() {
 
     var spy1 = sinon.spy(), spy2 = sinon.spy(), spy3 = sinon.spy();
     var action;
@@ -114,7 +114,7 @@ describe('# Action', function() {
     });
   });
 
-  describe('## Observers', function() {
+  describe('Observers', function() {
 
     var action, disposable;
     before(function() {
