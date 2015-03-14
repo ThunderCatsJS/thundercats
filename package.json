@@ -16,8 +16,9 @@
     "url": "https://github.com/r3dm/thundercats"
   },
   "scripts": {
-    "test": "mocha",
     "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "mocha",
     "cover": "istanbul cover _mocha"
   },
   "author": {
