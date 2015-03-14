@@ -17,6 +17,7 @@
   },
   "scripts": {
     "test": "mocha",
+    "lint": "eslint .",
     "cover": "istanbul cover _mocha"
   },
   "author": {
