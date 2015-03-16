@@ -236,6 +236,7 @@
     "react/no-did-mount-set-state": 2,
     "react/no-did-update-set-state": 2,
     "react/jsx-uses-react": 1,
+    "react/jsx-uses-vars": 1,
     "react/react-in-jsx-scope": 1
   }
 }

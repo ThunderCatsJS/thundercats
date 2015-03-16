@@ -3,11 +3,16 @@
   "description": "How the thundercats would build Flux architecture",
   "version": "1.2.2",
   "keywords": [
+    "thundercats",
     "react",
+    "reactjs",
     "flux",
+    "dispatcher",
+    "isomorphic",
     "rx",
     "rxjs",
-    "frp"
+    "frp",
+    "reactive"
   ],
   "main": "index.js",
   "bugs": "https://github.com/r3dm/thundercats/issues",
@@ -55,7 +60,7 @@
   "devDependencies": {
     "chai": "^2.1.1",
     "chai-as-promised": "^4.3.0",
-    "eslint-plugin-react": "^1.4.1",
+    "eslint-plugin-react": "^1.5.0",
     "istanbul": "^0.3.7",
     "mocha": "^2.2.1",
     "mocha-istanbul": "^0.2.0",

@@ -1,15 +1,9 @@
-/* eslint-disable no-unused-vars, no-undefined, no-unused-expressions */
-var mocha = require('mocha');
+/* eslint-disable no-unused-expressions */
 var chai = require('chai');
-var expect = chai.expect;
-var should = chai.should();
+chai.should();
 var Action = require('./../lib/action');
-var Store = require('../lib/store');
-var Mixin = require('../lib/ObservableStateMixin');
-var Rx = require('rx');
-var sinon = require('sinon');
-var Q = require('q');
 var chaiAsPromised = require('chai-as-promised');
+var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 
 chai.use(chaiAsPromised);
@@ -19,64 +13,72 @@ describe('Action', function() {
 
   describe('Create', function() {
 
-    it('should be a function', function() {
+    it('should create a function observable', function() {
       var action = Action.create();
-      action.should.be.a.function;
+      action.should.be.a('function');
+      action.subscribe.should.to.be.a('function');
     });
   });
 
   describe('Call', function() {
     var action;
 
-    before(function() {
+    beforeEach(function() {
       action = Action.create();
     });
 
     it(
       'should notify passed value to subscribed observer when called',
-      function() {
-        action.subscribe(function (val) {
+      function(done) {
+        action.first().subscribe(function (val) {
           val.should.equal(3);
+          done();
         });
+
+        action(3);
       }
     );
-
-    after(function() {
-      action(3);
-    });
   });
 
   describe('Map', function() {
-
-    var value1 = {}, value2 = {};
-    var spy = sinon.spy();
+    var value1 = {};
+    var value2 = {};
+    var map;
+    var spy;
     var action;
 
-
-    // it(
-    //   'should pass the value passed as parameter to the map function',
-    //   function() {
-    //     action = Action.create(function(val) {
-    //       return value2;
-    //     });
-    //   }
-    // );
-
-    before(function() {
-      action = Action.create(function(val) {
+    beforeEach(function() {
+      map = function() {
         return value2;
-      });
+      };
+
+      spy = sinon.spy(map);
+      action = Action.create(spy);
     });
 
-    it('should pass the result of the map function to observers', function() {
-      action.subscribe(function(val) {
-        val.should.equal(value2);
-      });
-    });
+    it(
+      'should pass the value passed as parameter to the map function',
+      function(done) {
+        action.first().subscribe(function() {
+          done();
+        });
+        action(value1);
+        spy.should.have.been.calledOnce;
+        spy.should.have.been.calledWith(value1);
+      }
+    );
 
-    // it('should return the value returned by map', function() {
-    //   action(value1).should.equal.value2;
-    // });
+
+    it(
+      'should pass the result of the map function to observers',
+      function(done) {
+        action.first().subscribe(function(val) {
+          val.should.equal(value2);
+          done();
+        });
+        action(value1);
+      }
+    );
 
     it('should throw an error when an error is thrown in the map', function() {
       Action.create(function() {
@@ -85,39 +87,33 @@ describe('Action', function() {
     });
   });
 
-  describe('Disposal', function() {
+  describe('disposal', function() {
 
-    var spy1 = sinon.spy(), spy2 = sinon.spy(), spy3 = sinon.spy();
+    var spy;
     var action;
 
-    before(function() {
+    beforeEach(function() {
       action = Action.create();
-
-    });
-
-    it('should not call observer that has been disposed', function() {
-      action.subscribe(spy1).dispose();
-      action(3);
-      spy1.should.not.have.been.called;
+      spy = sinon.spy();
     });
 
     it('should call observer that isn\'t disposed', function() {
-      action.subscribe(spy2);
+      action.subscribe(spy);
       action(3);
-      spy2.should.have.been.called;
+      spy.should.have.been.called;
     });
 
     it('should not call observer that has been disposed', function() {
-      action.subscribe(spy3).dispose();
+      action.subscribe(spy).dispose();
       action(3);
-      spy3.should.not.have.been.called;
+      spy.should.not.have.been.called;
     });
   });
 
-  describe('Observers', function() {
+  describe('observers', function() {
 
     var action, disposable;
-    before(function() {
+    beforeEach(function() {
       action = Action.create();
     });
 
@@ -131,6 +127,7 @@ describe('Action', function() {
     });
 
     it('should return false if observers have been disposed of', function() {
+      disposable = action.subscribe(function() { });
       disposable.dispose();
       action.hasObservers().should.be.false;
     });
