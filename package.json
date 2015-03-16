@@ -24,7 +24,7 @@
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "mocha",
-    "cover": "istanbul cover _mocha"
+    "cover": "istanbul cover _mocha && istanbul-coveralls"
   },
   "author": {
     "name": "Berkeley Martinez",
@@ -61,14 +61,15 @@
   "devDependencies": {
     "chai": "^2.1.1",
     "chai-as-promised": "^4.3.0",
+    "eslint": "^0.17.0",
     "eslint-plugin-react": "^1.5.0",
     "istanbul": "^0.3.7",
+    "istanbul-coveralls": "^1.0.2",
     "mocha": "^2.2.1",
     "mocha-istanbul": "^0.2.0",
     "q": "^1.2.0",
     "rx": "^2.3.14",
     "sinon": "^1.11.1",
-    "sinon-chai": "^2.7.0",
-    "eslint": "^0.17.0"
+    "sinon-chai": "^2.7.0"
   }
 }
