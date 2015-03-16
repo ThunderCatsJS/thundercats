@@ -1,7 +1,4 @@
-var invariant = require('./invariant');
-
 module.exports = {
-  invariant: invariant,
   isPromise: isPromise,
   isObservable: isObservable,
   areObservable: areObservable
