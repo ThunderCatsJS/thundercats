@@ -1,7 +1,7 @@
 {
   "name": "thundercats",
   "description": "How the thundercats would build Flux architecture",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "keywords": [
     "react",
     "flux",
