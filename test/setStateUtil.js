@@ -2,7 +2,7 @@ var chai = require('chai');
 chai.should();
 var setStateUtil = require('../lib/setStateUtil');
 
-describe('# Set State Util', function() {
+describe('Set State Util', function() {
   var operation;
   beforeEach(function() {
     operation = setStateUtil({ cool: 'swag' });

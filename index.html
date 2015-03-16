@@ -388,7 +388,7 @@ creator in a traditional flux implementation</p>
                         <div class="pilwrap ">
                             <a class="pilcrow" href="#section-14">&#182;</a>
                         </div>
-                        <h3 id="hasobservaer">hasObservaer</h3>
+                        <h3 id="has-observers">Has Observers</h3>
 <p>returns the current number of observers for this action</p>
 
                     </div>
@@ -408,7 +408,7 @@ creator in a traditional flux implementation</p>
                         <div class="pilwrap ">
                             <a class="pilcrow" href="#section-15">&#182;</a>
                         </div>
-                        <h3 id="waitfor">waitFor</h3>
+                        <h3 id="wait-for">Wait For</h3>
 <p>takes observables as arguments and will
 wait for each observable to publish a new value until
 All the observers of this action are notified of the new value</p>
@@ -444,7 +444,7 @@ All the observers of this action are notified of the new value</p>
                         <div class="pilwrap ">
                             <a class="pilcrow" href="#section-16">&#182;</a>
                         </div>
-                        <h1 id="createactions">createActions</h1>
+                        <h2 id="create-actions">Create Actions</h2>
 <p>Create Actions is a helper function to create multiple actions at once.
 It can take a string which will create one action,
 an Array of strings,
@@ -1003,6 +1003,65 @@ This method will track all observers and initiate the store.</p>
 <span class="hljs-built_in">module</span>.exports = {
   create: create
 };</pre></div></div>
+                    
+                </li>
+                
+                
+                <li id="section-32">
+                    <div class="annotation">
+                        
+                        <div class="pilwrap ">
+                            <a class="pilcrow" href="#section-32">&#182;</a>
+                        </div>
+                        <h1 id="wait-for-utility">Wait For Utility</h1>
+<p>Takes observables for arguments
+Converts them to hot observables
+then waits for each one to publish a value</p>
+<p>It can also take an optional timeout(number of miliseconds)
+as the first argument. By default this timeout is 3 seconds.</p>
+<p>If the timeout is exceeded, the observers will be notified
+on the onError observer. If no onError observer is supplied
+the timeout is going to throw the Error</p>
+<p>returns an observable.</p>
+<p>Note: it’s good practice to use a firstOrDefault
+observable if you just want a short lived subscription</p>
+
+                    </div>
+                    
+                    <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>),
+    utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>),
+    invariant = utils.invariant,
+    areObservable = utils.areObservable,
+    debug = <span class="hljs-built_in">require</span>(<span class="hljs-string">'debug'</span>)(<span class="hljs-string">'thundercats:waitFor'</span>);
+
+<span class="hljs-built_in">module</span>.exports = waitFor;
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">waitFor</span><span class="hljs-params">(timeout, observables)</span> </span>{
+  observables = [].slice.call(<span class="hljs-built_in">arguments</span>);
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> timeout === <span class="hljs-string">'number'</span>) {
+    observables = observables.slice(<span class="hljs-number">1</span>);
+  } <span class="hljs-keyword">else</span> {
+    timeout = <span class="hljs-number">3000</span>;
+  }
+  invariant(
+    areObservable(observables),
+    <span class="hljs-string">'waitFor takes only observables with optional number as the '</span> +
+      <span class="hljs-string">'first agruments'</span>
+  );
+  debug(<span class="hljs-string">'setting waitFor with timeout %s'</span>, timeout);
+  <span class="hljs-keyword">return</span> Rx.Observable.combineLatest(
+    observables.map(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(obs)</span> </span>{
+      <span class="hljs-keyword">var</span> published = obs.publish();
+      published.connect();
+      <span class="hljs-keyword">return</span> published;
+    }),
+    <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(values)</span> </span>{
+      values = [].slice.call(<span class="hljs-built_in">arguments</span>);
+      debug(<span class="hljs-string">'waitFor complete'</span>);
+      <span class="hljs-keyword">return</span> values;
+    }
+  ).timeout(timeout);
+}</pre></div></div>
                     
                 </li>
                 
