@@ -78,7 +78,7 @@
                     <div class="content"><div class='highlight'><pre>
 <span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>),
     utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>),
-    invariant = utils.invariant,
+    invariant = <span class="hljs-built_in">require</span>(<span class="hljs-string">'invariant'</span>),
     isObservable = utils.isObservable,
     areObservable = utils.areObservable,
     stateSubscriptions = [];
@@ -110,8 +110,7 @@ to be disposed using MyComponent.disposeAllSubscriptions().</p>
 
     invariant(
       <span class="hljs-keyword">typeof</span> <span class="hljs-keyword">this</span>.getObservable === <span class="hljs-string">'function'</span>,
-      <span class="hljs-string">'%s should provide "getObservable" or "getObservables" function'</span> +
-        <span class="hljs-string">' or a function'</span>,
+      <span class="hljs-string">'%s should provide "getObservable" function'</span>,
       displayName
     );
 
@@ -319,7 +318,7 @@ TODO: make this into a proper Rx.Observable</p>
                     </div>
                     
                     <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>),
-    invariant = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils/invariant'</span>),
+    invariant = <span class="hljs-built_in">require</span>(<span class="hljs-string">'invariant'</span>),
     assign = <span class="hljs-built_in">require</span>(<span class="hljs-string">'object.assign'</span>),
     slice = <span class="hljs-built_in">Array</span>.prototype.slice;</pre></div></div>
                     
@@ -347,12 +346,8 @@ creator in a traditional flux implementation</p>
   <span class="hljs-keyword">var</span> actionEnd = <span class="hljs-keyword">new</span> Rx.Subject();
 
   <span class="hljs-keyword">var</span> action = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(value)</span> </span>{
-    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> map !== <span class="hljs-string">'undefined'</span>) {
-      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> map === <span class="hljs-string">'function'</span>) {
-        value = map(value);
-      } <span class="hljs-keyword">else</span> {
-        value = map;
-      }
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> map === <span class="hljs-string">'function'</span>) {
+      value = map(value);
     }
 
     actionStart.onNext(value);
@@ -524,7 +519,7 @@ getOperations spec definition</p>
 
                     </div>
                     
-                    <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> invariant = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>).invariant,
+                    <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> invariant = <span class="hljs-built_in">require</span>(<span class="hljs-string">'invariant'</span>),
     assign = <span class="hljs-built_in">Object</span>.assign || <span class="hljs-built_in">require</span>(<span class="hljs-string">'object.assign'</span>);
 
 <span class="hljs-built_in">module</span>.exports = setStateUtil;
@@ -564,7 +559,7 @@ the <code>getOperations</code> method</p>
     debug = <span class="hljs-built_in">require</span>(<span class="hljs-string">'debug'</span>)(<span class="hljs-string">'cats:store'</span>),
     uuid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'node-uuid'</span>),
     utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>),
-    invariant = utils.invariant,
+    invariant = <span class="hljs-built_in">require</span>(<span class="hljs-string">'invariant'</span>),
     isPromise = utils.isPromise,
     isObservable = utils.isObservable,
     areObservable = utils.areObservable;</pre></div></div>
@@ -1030,7 +1025,7 @@ observable if you just want a short lived subscription</p>
                     
                     <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>),
     utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>),
-    invariant = utils.invariant,
+    invariant = <span class="hljs-built_in">require</span>(<span class="hljs-string">'invariant'</span>),
     areObservable = utils.areObservable,
     debug = <span class="hljs-built_in">require</span>(<span class="hljs-string">'debug'</span>)(<span class="hljs-string">'thundercats:waitFor'</span>);
 
