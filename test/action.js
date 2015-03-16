@@ -12,7 +12,6 @@ chai.use(sinonChai);
 describe('Action', function() {
 
   describe('Create', function() {
-
     it('should create a function observable', function() {
       var action = Action.create();
       action.should.be.a('function');
