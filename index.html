@@ -80,7 +80,7 @@
     utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>),
     invariant = utils.invariant,
     isObservable = utils.isObservable,
-    areObservable = utils.invariant,
+    areObservable = utils.areObservable,
     stateSubscriptions = [];
 
 <span class="hljs-keyword">var</span> ObservableStateMixin = {
@@ -195,7 +195,7 @@ the subscription</p>
                     </div>
                     
                     <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>._stateSubscription =
-      <span class="hljs-keyword">this</span>._observableState.subscribe(<span class="hljs-keyword">this</span>._observer.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
+      <span class="hljs-keyword">this</span>._observableState.subscribe(<span class="hljs-keyword">this</span>._stateObserver.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
                     
                 </li>
                 
@@ -561,6 +561,7 @@ the <code>getOperations</code> method</p>
                     </div>
                     
                     <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> Rx = <span class="hljs-built_in">require</span>(<span class="hljs-string">'rx'</span>),
+    debug = <span class="hljs-built_in">require</span>(<span class="hljs-string">'debug'</span>)(<span class="hljs-string">'cats:store'</span>),
     uuid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'node-uuid'</span>),
     utils = <span class="hljs-built_in">require</span>(<span class="hljs-string">'../utils'</span>),
     invariant = utils.invariant,
@@ -583,20 +584,30 @@ the <code>getOperations</code> method</p>
                     </div>
                     
                     <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">create</span><span class="hljs-params">(spec)</span> </span>{
+  <span class="hljs-keyword">if</span> (!spec.name) {
+    debug(<span class="hljs-string">'All anon stores shall be known as Betty'</span>);
+  }
+
+  <span class="hljs-keyword">var</span> name = <span class="hljs-keyword">typeof</span> spec.name === <span class="hljs-string">'string'</span> ? spec.name : <span class="hljs-string">'Betty'</span>;
+
   invariant(
     spec &amp;&amp; <span class="hljs-keyword">typeof</span> spec === <span class="hljs-string">'object'</span>,
-    <span class="hljs-string">'Store.create(...): expect an object as argument, given : %s'</span>, spec
+    <span class="hljs-string">'ThunderCats Store %s expects an object as argument, given : %s'</span>,
+    name,
+    spec
   );
 
   invariant(
     spec.getInitialValue &amp;&amp; <span class="hljs-keyword">typeof</span> spec.getInitialValue === <span class="hljs-string">'function'</span>,
-    <span class="hljs-string">'Store.create(...): getInitialValue should be a function given : %s'</span>,
+    <span class="hljs-string">'ThunderCats Store %s: getInitialValue should be a function given : %s'</span>,
+    name,
     spec.getInitialValue
   );
 
   invariant(
     !spec.getOperations || <span class="hljs-keyword">typeof</span> spec.getOperations === <span class="hljs-string">'function'</span>,
-    <span class="hljs-string">'Store.create(...): getOperations should be a function given : %s'</span>,
+    <span class="hljs-string">'ThunderCats Store %s: getOperations should be a function given : %s'</span>,
+    name,
     spec.getOperations
   );
 
