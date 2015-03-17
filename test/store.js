@@ -15,64 +15,78 @@ var sinonChai = require('sinon-chai');
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
-describe(' Store', function() {
+describe('Store', function() {
 
-  describe(' Errors:', function() {
+  describe('create:', function() {
+
+    it('should produce a new Rx.Observable', function() {
+      var store = Store.create({
+        getInitialValue: function() { }
+      });
+      store.should.be.an.instanceOf(Rx.Observable);
+    });
 
     it('should throw an error if argument passed is not an object', function() {
-      Store.create.bind(this, 5).should.
-        throw('expects an object as argument, given : 5');
+      Store.create.bind(this, 5)
+        .should
+        .throw('expects an object as argument, given : 5');
     });
 
-    it('should throw an error if getInitialValue is not defined', function() {
-      Store.create.bind(this, {}).should.
-        throw('getInitialValue should be a function given : undefined');
-    });
   });
 
-  describe(' Get Initial Value:', function() {
+  describe('getInitialValue:', function() {
 
-    describe(' Normal function', function() {
-      it(
-        'should publish null if getInitialValue returns neither null',
-        function() {
+    it('should publish null if getInitialValue returns null', function() {
+      var store = Store.create({
+        getInitialValue: function () {}
+      });
 
-          var store = Store.create({
-            getInitialValue: function () {}
-          });
-
-          store.subscribe(function(val) {
-            expect(val).to.be.undefined;
-          });
-        }
-      );
-
-      it(
-        'should return a value on initial subscription if `getInitialValue` ' +
-          'returns a value',
-        function() {
-          var store = Store.create({
-            getInitialValue: function () {
-              return 5;
-            }
-          });
-
-          store.subscribe(function(val) {
-            expect(val).to.be.a('number');
-          });
-        }
-      );
+      store.subscribe(function(val) {
+        expect(val).to.be.undefined;
+      });
     });
 
-    describe(' Promises and Observables', function() {
+    it(
+      'should return a value on initial subscription if `getInitialValue` ' +
+      'returns a value',
+      function() {
+        var store = Store.create({
+          getInitialValue: function () {
+            return 5;
+          }
+        });
+
+        store.subscribe(function(val) {
+          expect(val).to.be.a('number');
+        });
+      }
+    );
+
+    it('should throw an error if getInitialValue is not defined', function() {
+      Store.create.bind(this, {})
+        .should
+        .throw('getInitialValue should be a function given : undefined');
+    });
+
+    it(
+      'should throw an error if getInitialValue is not a function',
+      function() {
+        var fn = function() {
+          Store.create({
+            getInitialValue: 'Not the momma',
+
+            getOperations: function () {
+              return Rx.Observable.of(5);
+            }
+          });
+        };
+        expect(fn).to.throw();
+      }
+    );
+
+    describe('with promises and observables', function() {
       var store, value;
 
-      it('should produce a new Rx.Observable', function() {
-        store = Store.create({
-          getInitialValue: function() { }
-        });
-        store.should.be.an.instanceOf(Rx.Observable);
-      });
 
       it(
         'should resolve and publish a value if getInitialValue returns ' +
@@ -89,6 +103,10 @@ describe(' Store', function() {
             val.should.equal(value);
           });
         }
+      );
+
+      it(
+        'should notify observers if get initial value promise is rejected'
       );
 
 
@@ -109,12 +127,27 @@ describe(' Store', function() {
           });
         }
       );
+
+      it(
+        'should notify observers if get initial value observable errors',
+        function() {
+          store = Store.create({
+            getInitialValue: function () {
+              return Rx.Observable.throw('snarf?');
+            }
+          });
+
+          store.subscribe(function() { }, function(err) {
+            err.should.be.instanceOf(Error);
+          });
+        }
+      );
     });
   });
 
-  describe(' Operations', function() {
+  describe('operations', function() {
 
-    describe(' getOperations', function() {
+    describe('getOperations', function() {
 
       it('should accept a single observable', function() {
         var fn = function() {
@@ -149,21 +182,6 @@ describe(' Store', function() {
         expect(fn).not.to.throw();
       });
 
-      it(
-        'should throw an error if getInitialValue is not a function',
-        function() {
-          var fn = function() {
-            Store.create({
-              getInitialValue: 'Not the momma',
-
-              getOperations: function () {
-                return Rx.Observable.of(5);
-              }
-            });
-          };
-          expect(fn).to.throw();
-        }
-      );
 
       it(
         'should throw an error if getOperations is not a function',
@@ -180,9 +198,50 @@ describe(' Store', function() {
         }
       );
 
+      it('should throw if it does not return an observable');
+      it('should throw if it return an array with a non-observable');
     });
 
-    describe(' Basic transformation properties', function() {
+    describe('set value', function() {
+
+      var value = { hello: 'world' };
+      var newValue = { foo: 'bar' };
+      var operations = new Rx.Subject();
+      var spy = sinon.spy();
+      var store;
+
+      before(function() {
+        store = Store.create({
+          getInitialValue: function () {
+            return value;
+          },
+
+          getOperations: function () {
+            return operations;
+          }
+        });
+        store.subscribe(spy);
+      });
+
+      it(
+        'the value held by the store should be the one returned by the ' +
+          'value held by the object passed to `getOperations`',
+        function() {
+          spy.should.have.been.calledWith(value);
+        }
+      );
+
+      it('should have notified observers with the new value', function() {
+        operations.onNext({value: newValue});
+        spy.should.have.been.calledWith(newValue);
+      });
+
+      it('should have called observers twice', function() {
+        spy.should.have.been.calledTwice;
+      });
+    });
+
+    describe('transforms', function() {
 
       var value = { hello: 'world' };
       var newValue = { foo: 'bar' };
@@ -234,21 +293,21 @@ describe(' Store', function() {
 
     });
 
-    describe(' Basic set value operation', function() {
+    describe('canceling', function () {
 
-      var value = { hello: 'world' };
-      var newValue = { foo: 'bar' };
+      var value = {};
+      var newValue = {};
       var operations = new Rx.Subject();
       var spy = sinon.spy();
+      var defer = Q.defer();
       var store;
 
       before(function() {
         store = Store.create({
-          getInitialValue: function () {
+          getInitialValue: function() {
             return value;
           },
-
-          getOperations: function () {
+          getOperations: function() {
             return operations;
           }
         });
@@ -256,82 +315,40 @@ describe(' Store', function() {
       });
 
       it(
-        'the value held by the store should be the one returned by the ' +
-          'value held by the object passed to `getOperations`',
-        function() {
+        'should have notified observers with the initial value',
+        function () {
+          spy.should.have.been.calledOnce;
           spy.should.have.been.calledWith(value);
         }
       );
 
-      it('should have notified observers with the new value', function() {
-        operations.onNext({value: newValue});
-        spy.should.have.been.calledWith(newValue);
-      });
-
-      it('should have called observers twice', function() {
-        spy.should.have.been.calledTwice;
-      });
-    });
-
-    describe(' Operations canceling', function () {
-
-      describe(' Basic operations', function () {
-
-        var value = {};
-        var newValue = {};
-        var operations = new Rx.Subject();
-        var spy = sinon.spy();
-        var defer = Q.defer();
-        var store;
-
-        before(function() {
-          store = Store.create({
-            getInitialValue: function() {
-              return value;
-            },
-            getOperations: function() {
-              return operations;
-            }
+      it(
+        'should have notified observers with the new value',
+        function () {
+          operations.onNext({
+            value: newValue,
+            confirm: defer.promise
           });
-          store.subscribe(spy);
-        });
+          spy.should.have.been.calledTwice;
+          spy.should.have.been.calledWith(newValue);
+        }
+      );
 
-        it(
-          'should have notified observers with the initial value',
-          function () {
-            spy.should.have.been.calledOnce;
-            spy.should.have.been.calledWith(value);
-          }
-        );
-
-        it(
-          'should have notified observers with the new value',
-          function () {
-            operations.onNext({
-              value: newValue,
-              confirm: defer.promise
+      it(
+        'observers should have been notified about the canceling',
+        function(done) {
+          defer.reject();
+          defer.promise.then(
+            function() { },
+            function() {
+              spy.should.have.been.calledThrice;
+              spy.should.have.been.calledWith(value);
+              done();
             });
-            spy.should.have.been.calledTwice;
-            spy.should.have.been.calledWith(newValue);
-          }
-        );
+        }
+      );
 
-        it(
-          'observers should have been notified about the canceling',
-          function(done) {
-            defer.reject();
-            defer.promise.then(
-              function() { },
-              function() {
-                spy.should.have.been.calledThrice;
-                spy.should.have.been.calledWith(value);
-                done();
-              });
-          }
-        );
-      });
-
-      describe('Nesting', function() {
+      describe('with nesting', function() {
 
         var operations = new Rx.Subject();
         var spy = sinon.spy();
@@ -407,138 +424,93 @@ describe(' Store', function() {
       });
     });
 
-    describe('Lifecycle', function() {
+  });
 
-      var initialValue = new Rx.Subject();
-      var initialValueSpy = sinon.spy(function () {
+  describe('lifecycle', function() {
+
+    var initialValue;
+    var initialValueSpy;
+    var operations;
+    var operationsSpy;
+    var store, disposable;
+
+    beforeEach(function() {
+      initialValue = new Rx.Subject();
+      initialValueSpy = sinon.spy(function () {
         return initialValue;
       });
 
-      var operations = new Rx.Subject();
-      var operationsSpy = sinon.spy(function () {
+      operations = new Rx.Subject();
+      operationsSpy = sinon.spy(function () {
         return operations;
       });
-      var store, disposable;
 
-      describe('Before subscription events', function() {
-
-        before(function() {
-          store = Store.create({
-            getInitialValue: initialValueSpy,
-            getOperations: operationsSpy
-          });
-        });
-
-        it(
-          'getInitialValue and getOperatons should not have been called ' +
-           'before a subsription',
-          function() {
-            initialValueSpy.should.not.have.been.called;
-            operationsSpy.should.not.have.been.called;
-          }
-        );
-
+      store = Store.create({
+        getInitialValue: initialValueSpy,
+        getOperations: operationsSpy
       });
-
-      describe('Subscription event setup', function() {
-
-        before(function () {
-          disposable = store.subscribe(function () {
-          });
-        });
-
-        it(
-          'on the first subscription the store should get the initialValue ' +
-            'and subscribe to the returned observable',
-          function () {
-            initialValueSpy.should.have.been.calledOnce;
-            initialValue.hasObservers();
-          }
-        );
-
-        it(
-          'until initialValue\'s observable pushes a new value getOperations ' +
-            'should not have been called',
-          function () {
-            operationsSpy.should.not.have.been.called;
-          }
-        );
-
-      });
-
-      describe('Subscription event operations', function() {
-        before(function() {
-          initialValue.onNext({});
-        });
-
-        it(
-          'when the initialValue resolves to a value operations spy should ' +
-          'have been called',
-          function() {
-            operationsSpy.should.have.been.called;
-            operations.hasObservers();
-          }
-        );
-      });
-
-      describe('', function() {
-
-        var oldOperations = operations;
-        operations = new Rx.Subject();
-
-        before(function () {
-          initialValue.onNext({});
-        });
-
-        it(
-          'when the initialValue pushes a new value the store should ' +
-            'dispose of the subscription to operations, re-invoke ' +
-            'getOperations and subscribe to the returned observable',
-          function() {
-            operationsSpy.should.have.been.calledTwice;
-            operations.hasObservers();
-            oldOperations.hasObservers();
-          }
-        );
-      });
-
-      describe('', function() {
-
-        before(function() {
-          disposable.dispose();
-        });
-
-        it(
-          'when all the subscription to the store has been disposed, it ' +
-            'should dispose the subscription on operations and initialValue',
-          function() {
-            !initialValue.hasObservers();
-            !operations.hasObservers();
-          }
-        );
-      });
-
-      describe('', function() {
-
-        before(function() {
-          store.subscribe(function() {});
-        });
-
-        it('on resubscribe it should restart the process', function() {
-          store.subscribe(function() {});
-          initialValueSpy.should.have.been.calledTwice;
-          initialValue.hasObservers();
-          operationsSpy.should.have.been.calledTwice;
-          !operations.hasObservers();
-        });
-
-        it('on resubscribe it should restart the process', function() {
-          initialValue.onNext({});
-          operationsSpy.should.have.been.calledThrice;
-          operations.hasObservers();
-        });
-      });
-
     });
+
+    it(
+      'should not have called getInitialValue and getOperatons' +
+      'before a subscription',
+      function() {
+        initialValueSpy.should.not.have.been.called;
+        operationsSpy.should.not.have.been.called;
+      }
+    );
+
+    it(
+      'should subscribe to operations observable on initial subscription',
+      function () {
+        store.subscribe(function () { });
+        initialValue.hasObservers().should.be.true;
+        initialValueSpy.should.have.been.calledOne;
+      }
+    );
+
+    it(
+      'should not subscribe to operations until initial value observable ' +
+      'publishes first value',
+      function () {
+        store.subscribe(function(value) {
+          value.should.equal('snarf');
+        });
+        operationsSpy.should.not.have.been.called;
+        initialValue.onNext('snarf');
+        operationsSpy.should.have.been.calledOnce;
+        operations.hasObservers().should.be.true;
+      }
+    );
+
+    it(
+      'should dispose subscriptions to observable and initial value ' +
+      'observable when store disposes last observer',
+      function() {
+        var disposable = store.subscribe(function() { });
+        initialValue.hasObservers().should.be.true;
+        initialValue.onNext(true);
+        operations.hasObservers().should.be.true;
+        disposable.dispose();
+        initialValue.hasObservers().should.be.false;
+        operations.hasObservers().should.be.false;
+      }
+    );
+
+    it(
+      'should resubscribe to observables when store is resubscribed',
+      function() {
+        var disposable = store.subscribe(function() { });
+        initialValue.onNext(true);
+        operations.hasObservers().should.be.true;
+        disposable.dispose();
+        initialValue.hasObservers().should.be.false;
+        operations.hasObservers().should.be.false;
+        store.subscribe(function() {});
+        initialValue.onNext(true);
+        initialValue.hasObservers().should.be.true;
+        operations.hasObservers().should.be.true;
+      }
+    );
   });
 });
