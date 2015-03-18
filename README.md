@@ -11,7 +11,6 @@ An exodus from [rx-flux](https://github.com/fdecampredon/rx-flux).
 
 The [Flux](https://github.com/facebook/flux/) architecture allows you to think of your application as an unidirectional flow of data, this module aims to facilitate the use of [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md) as basis for defining the relations between the different entities composing your application.
 
-
 ## Difference with the Facebooks Flux
 
 RxFlux shares more similarities with [RefluxJS](https://github.com/spoike/refluxjs) than with the original architecture.
@@ -19,7 +18,7 @@ RxFlux shares more similarities with [RefluxJS](https://github.com/spoike/reflux
 * A store is an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md) that a view layer can listen to for state
 * An action is a function and an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md)
 * A store subscribes to an action and updates its state accordingly.
-* actions dispatch themselves so no need for a central dispatcher.
+* Actions dispatch themselves so no need for a central dispatcher.
 
 Check out our documentation (a work in progress) over at http://r3dm.github.io/thundercats
 
@@ -34,22 +33,22 @@ Please at unit tests for any new code. Tests are written using Mocha and Chai.
 
 There are two sections to documentation: the guide written directly in the source and the API docs generated from Mocha test suites (in progress).
 
-If you find a typo or would like to contribute to the docs, make your changes and run `make` in the root directory using the command line. This should autogenerate the documention. Then simply commit and create a PR. Super simple!
+If you find a typo or would like to contribute to the docs, make your changes and run `make` in the root directory using the command line. This should autogenerate the documentation. Then simply commit and create a PR. Super simple!
 
 ### Lint
 
-I am very opiniated when it comes to code style, so please run `npm run lint` before commit changes and verify that there are no errors.
+I am very opinionated when it comes to code style, so please run `npm run lint` before commit changes and verify that there are no errors.
 
 I find it good practice to run `npm test` (test will also lint files) before making any changes to verify that tests are already passing before making any new changes.
 
-general rules to follow
+#### General rules to follow
 
-* Horizontal space is precious, vertical space is cheap and plentiful. Keep your indenting sane and to a minimal.
-* Use named functions instead of anonomous functions assigned to variables.
+* Horizontal space is precious, vertical space is cheap and plentiful. Keep your indenting sane and to a minimum.
+* Use named functions instead of anonymous functions assigned to variables.
 * For most cases, declare module.exports as a single object with each key a part of the files api at the top, and the named functions underneath this section.
-*
+
 ### API
 
-The api is still new and can be maliable for the forseeable future. If there are features you would like to see please open a new issue for discussion.
+The api is still new and can be malleable for the foreseeable future. If there are features you would like to see please open a new issue for discussion.
 
-For the most part I want this project to support server-side rendering/isomorphic js. My first inclanation is to get it working using singletons, which presents data leakage challenges. I am sure we are up to that challenge and can come up with a viable solution.
+For the most part I want this project to support server-side rendering/isomorphic js. My first inclination is to get it working using singletons, which presents data leakage challenges. I am sure we are up to that challenge and can come up with a viable solution.
