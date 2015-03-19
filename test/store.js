@@ -151,32 +151,42 @@ describe('Store', function() {
 
       it('should accept a single observable', function() {
         var fn = function() {
-          Store.create({
+          var store = Store.create({
             getInitialValue: function() {
               return {};
             },
             getOperations: function() {
-              return Rx.Observable.of(2);
+              return Rx.Observable.of({
+                value: 'pi'
+              });
             }
           });
+          store.subscribe(function() { });
         };
         expect(fn).not.to.throw();
       });
 
       it('should accept an array of observables', function() {
         var fn = function() {
-          Store.create({
+          var store = Store.create({
             getInitialValue: function() {
               return {};
             },
             getOperations: function() {
               return [
-                Rx.Observable.of(2),
-                Rx.Observable.of(3),
-                Rx.Observable.of(5)
+                Rx.Observable.of({
+                  value: 'pi'
+                }),
+                Rx.Observable.of({
+                  value: 'i'
+                }),
+                Rx.Observable.of({
+                  value: 'ro'
+                })
               ];
             }
           });
+          store.subscribe(function() { });
         };
 
         expect(fn).not.to.throw();
@@ -198,8 +208,46 @@ describe('Store', function() {
         }
       );
 
-      it('should throw if it does not return an observable');
-      it('should throw if it return an array with a non-observable');
+      it(
+        'should throw if it does not return an observable',
+        function() {
+          var fn = function() {
+            var store = Store.create({
+              getInitialValue: function () {
+                return {};
+              },
+
+              getOperations: function() {
+                return 'not the momma';
+              }
+            });
+            store.subscribe(function() { });
+          };
+          expect(fn).to.throw();
+        }
+      );
+
+      it(
+        'should throw if it return an array with a non-observable',
+        function() {
+          var fn = function() {
+            var store = Store.create({
+              getInitialValue: function () {
+                return {};
+              },
+
+              getOperations: function() {
+                return [
+                  Rx.Observable.from('is the momma'),
+                  'not the momma'
+                ];
+              }
+            });
+            store.subscribe(function() { });
+          };
+          expect(fn).to.throw();
+        }
+      );
     });
 
     describe('set value', function() {

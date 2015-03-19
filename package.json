@@ -24,7 +24,8 @@
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "mocha",
-    "cover": "istanbul cover _mocha && istanbul-coveralls"
+    "coverAlls": "istanbul cover _mocha && istanbul-coveralls",
+    "cover": "istanbul cover _mocha"
   },
   "author": {
     "name": "Berkeley Martinez",
