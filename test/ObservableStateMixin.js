@@ -1,22 +1,99 @@
-/* eslint-disable no-unused-expressions */
-// var Rx = require('rx');
-var chai = require('chai');
-// var expect = chai.expect;
-// var ObservableStateMixin = require('../').ObservableStateMixin;
-// var sinon = require('sinon');
+var Rx = require('rx'),
+    chai = require('chai'),
+    utils = require('./utils'),
+    expect = chai.expect,
+    ObservableStateMixin = require('../').ObservableStateMixin;
+
 chai.should();
 chai.use(require('sinon-chai'));
+
+// var sinon = require('sinon');
 
 describe('Observable State Mixin', function() {
 
   describe('getObservable', function() {
-    it('should throw an error if `getObservable` is not defined');
-    it('should throw an error if `getObservable` is not a function');
-    it('should throw if `getObservable` does not return an observable');
+
+    it('should throw an error if `getObservable` is not defined', function() {
+      expect(utils.createRenderSpecFunc({
+        displayName: 'monkey',
+        mixins: [ObservableStateMixin],
+        getNOTObservable: function() {
+          return Rx.Observable.empty();
+        },
+        render: function() {
+          return null;
+        }
+      })).to.throw(/should provide "getObservable" function/);
+    });
+
     it(
-      'should throw if `getObservable` does not return an array of observables'
+      'should throw an error if `getObservable` is not a function',
+      function() {
+        expect(utils.createRenderSpecFunc({
+          displayName: 'monkey',
+          mixins: [ObservableStateMixin],
+          getObservable: 'island',
+          render: function() {
+            return null;
+          }
+        })).to.throw(/should provide "getObservable" function/);
+      }
     );
-    it('should throw if observable state does returns not object or null');
+    it(
+      'should throw if `getObservable` does not return an observable',
+      function() {
+        expect(utils.createRenderSpecFunc({
+          displayName: 'monkey',
+          mixins: [ObservableStateMixin],
+          getObservable: function() {
+            return 'island';
+          },
+          render: function() {
+            return null;
+          }
+        })).to.throw(/should return an Rx.Observable/);
+      }
+    );
+    it(
+      'should throw if `getObservable` does not return an array of observables',
+      function() {
+        expect(utils.createRenderSpecFunc({
+          displayName: 'monkey',
+          mixins: [ObservableStateMixin],
+          getObservable: function() {
+            return [
+              Rx.Observable.from({}),
+              'island'
+            ];
+          },
+          render: function() {
+            return null;
+          }
+        }))
+          .to
+          .throw(
+            /should return an Rx.Observable or an array of Rx.Observables/
+          );
+      }
+    );
+
+    it(
+      'should throw if observable state does returns not object or null',
+      function() {
+        expect(utils.createRenderSpecFunc({
+          displayName: 'monkey',
+          mixins: [ObservableStateMixin],
+          getObservable: function() {
+            return Rx.Observable.from([5, 2]);
+          },
+          render: function() {
+            return null;
+          }
+        }))
+          .to
+          .throw(/should publish objects or null/);
+      }
+    );
   });
 
   describe('initial state', function() {

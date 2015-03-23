@@ -66,9 +66,11 @@
     "eslint-plugin-react": "^1.5.0",
     "istanbul": "^0.3.7",
     "istanbul-coveralls": "^1.0.2",
+    "jsdom": "^4.0.4",
     "mocha": "^2.2.1",
     "mocha-istanbul": "^0.2.0",
     "q": "^1.2.0",
+    "react": "^0.13.1",
     "rx": "^2.3.14",
     "sinon": "^1.11.1",
     "sinon-chai": "^2.7.0"
