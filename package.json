@@ -62,8 +62,8 @@
   "devDependencies": {
     "chai": "^2.1.1",
     "chai-as-promised": "^4.3.0",
-    "eslint": "^0.17.0",
-    "eslint-plugin-react": "^1.5.0",
+    "eslint": "^0.17.1",
+    "eslint-plugin-react": "^1.6.0",
     "istanbul": "^0.3.7",
     "istanbul-coveralls": "^1.0.2",
     "jsdom": "^4.0.4",
