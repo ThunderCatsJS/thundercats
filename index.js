@@ -1,8 +1,8 @@
-var Action = require('./lib/action'),
-    ObservableStateMixin = require('./lib/ObservableStateMixin'),
-    setStateUtil = require('./lib/setStateUtil'),
-    Store = require('./lib/store'),
-    waitFor = require('./lib/waitFor');
+var Action = require('./dist/action'),
+    ObservableStateMixin = require('./dist/ObservableStateMixin'),
+    setStateUtil = require('./dist/setStateUtil'),
+    Store = require('./dist/store'),
+    waitFor = require('./dsit/waitFor');
 
 module.exports = {
   Action: Action,

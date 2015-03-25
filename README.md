@@ -5,29 +5,23 @@
 
 > Thundercats, Ho!
 
-A [Flux](https://github.com/facebook/flux/) architecture implementation based on [RxJS](https://github.com/Reactive-Extensions/RxJS)
-
-An exodus from [rx-flux](https://github.com/fdecampredon/rx-flux).
+A [Flux](https://github.com/facebook/flux/) architecture implementation by Thunderians based on [RxJS](https://github.com/Reactive-Extensions/RxJS)
 
 The [Flux](https://github.com/facebook/flux/) architecture allows you to think of your application as an unidirectional flow of data, this module aims to facilitate the use of [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md) as basis for defining the relations between the different entities composing your application.
 
-## Difference with the Facebooks Flux
+## Install
 
-RxFlux shares more similarities with [RefluxJS](https://github.com/spoike/refluxjs) than with the original architecture.
-
-* A store is an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md) that a view layer can listen to for state
-* An action is a function and an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md)
-* A store subscribes to an action and updates its state accordingly.
-* Actions dispatch themselves so no need for a central dispatcher.
-
-Check out our documentation (a work in progress) over at http://r3dm.github.io/thundercats
+```
+npm install thundercats
+```
 
 ## Development
 
-Bring all the PR's!
-
 ### Tests
 Please at unit tests for any new code. Tests are written using Mocha and Chai.
+Tests now use JSDOM, which require the use of io.js. If you aren't already using
+io.js, seriously yall switch already. ThunderCats.js still works Node, just
+testing requires io.js.
 
 ### Docs
 
@@ -37,7 +31,7 @@ If you find a typo or would like to contribute to the docs, make your changes an
 
 ### Lint
 
-I am very opinionated when it comes to code style, so please run `npm run lint` before commit changes and verify that there are no errors.
+run `npm run lint` before commit changes and verify that there are no errors.
 
 I find it good practice to run `npm test` (test will also lint files) before making any changes to verify that tests are already passing before making any new changes.
 
@@ -50,5 +44,4 @@ I find it good practice to run `npm test` (test will also lint files) before mak
 ### API
 
 The api is still new and can be malleable for the foreseeable future. If there are features you would like to see please open a new issue for discussion.
-
 For the most part I want this project to support server-side rendering/isomorphic js. My first inclination is to get it working using singletons, which presents data leakage challenges. I am sure we are up to that challenge and can come up with a viable solution.
