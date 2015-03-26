@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
 var chai = require('chai');
 chai.should();
-var Action = require('./../lib/action');
+var Action = require('../').Action;
 var chaiAsPromised = require('chai-as-promised');
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');

@@ -21,7 +21,7 @@
     "url": "https://github.com/r3dm/thundercats"
   },
   "scripts": {
-    "prepublish": "babel lib/ --out-dir dist/",
+    "prepublish": "babel --loose all lib/ --out-dir dist/",
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "mocha",

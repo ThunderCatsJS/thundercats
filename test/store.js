@@ -3,9 +3,8 @@ var mocha = require('mocha');
 var chai = require('chai');
 var expect = chai.expect;
 var should = chai.should();
-var Action = require('./../lib/action');
-var Store = require('../lib/store');
-var Mixin = require('../lib/ObservableStateMixin');
+var Store = require('../').Store;
+var Mixin = require('../').ObservableStateMixin;
 var Rx = require('rx');
 var sinon = require('sinon');
 var Q = require('q');
@@ -19,11 +18,12 @@ describe('Store', function() {
 
   describe('create:', function() {
 
-    it('should produce a new Rx.Observable', function() {
+    it('should be an observable', function() {
       var store = Store.create({
         getInitialValue: function() { }
       });
-      store.should.be.an.instanceOf(Rx.Observable);
+      store.should.be.an.instanceOf(Store);
+      store.subscribe.should.be.a('function');
     });
 
     it('should throw an error if argument passed is not an object', function() {
@@ -345,12 +345,15 @@ describe('Store', function() {
 
       var value = {};
       var newValue = {};
-      var operations = new Rx.Subject();
-      var spy = sinon.spy();
-      var defer = Q.defer();
+      var operations;
+      var spy;
+      var defer;
       var store;
 
       before(function() {
+        operations = new Rx.Subject();
+        spy = sinon.spy();
+        defer = Q.defer();
         store = Store.create({
           getInitialValue: function() {
             return value;
@@ -386,13 +389,11 @@ describe('Store', function() {
         'observers should have been notified about the canceling',
         function(done) {
           defer.reject();
-          defer.promise.then(
-            function() { },
-            function() {
-              spy.should.have.been.calledThrice;
-              spy.should.have.been.calledWith(value);
-              done();
-            });
+          defer.promise.catch(function() {
+            spy.should.have.been.calledThrice;
+            spy.should.have.been.calledWith(value);
+            done();
+          });
         }
       );
 
