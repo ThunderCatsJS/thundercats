@@ -15,6 +15,17 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 describe('Store', function() {
+  describe('construct', function() {
+    it('should create a new store using new method', function() {
+      // var store = new Store();
+    });
+    it('should be an observable');
+    it(
+      'should throw an error if in initialValue or getInitialValue ' +
+      'is not provided'
+    );
+    it('should throw an error if pass you pass');
+  });
 
   describe('create:', function() {
 
