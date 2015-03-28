@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-expressions */
 var chai = require('chai');
 chai.should();
+var expect = chai.expect;
 var chaiAsPromised = require('chai-as-promised');
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
@@ -66,6 +67,75 @@ describe('Action', function() {
       action.should.be.a('function');
       action.subscribe.should.to.be.a('function');
     });
+  });
+
+  describe('creatActions', function() {
+    it(
+      'should take a single string and create ' +
+      'an object with an action method observable',
+      function() {
+        var actions = Action.createActions('getKatnip');
+        actions.getKatnip.should.exist;
+        actions.getKatnip.subscribe.should.be.a('function');
+      }
+    );
+
+    it('should take an array of strings', function() {
+      var actions = Action.createActions([
+        'getKatnip',
+        'takeNap'
+      ]);
+      actions.getKatnip.should.exist;
+      actions.getKatnip.subscribe.should.be.a('function');
+      actions.takeNap.should.exist;
+      actions.takeNap.subscribe.should.be.a('function');
+    });
+
+    it('should take an array of objects and strings', function() {
+      var actions = Action.createActions([
+        'getKatnip',
+        { name: 'takeNap' }
+      ]);
+
+      actions.getKatnip.should.exist;
+      actions.getKatnip.subscribe.should.be.a('function');
+      actions.takeNap.should.exist;
+      actions.takeNap.subscribe.should.be.a('function');
+    });
+
+    it('should take an array of objects and strings', function() {
+      var actions = Action.createActions([
+        'getKatnip',
+        {
+          name: 'fetchPaper',
+          map: function(value) {
+            return {
+              order: value,
+              response: 'nope'
+            };
+          }
+        }
+      ]);
+
+      actions.getKatnip.should.exist;
+      actions.fetchPaper.should.exist;
+      actions.fetchPaper.subscribe.should.be.a('function');
+      actions.fetchPaper.subscribe(function(value) {
+        value.should.be.an('object');
+        value.order.should.equal('now');
+        value.response.should.equal('nope');
+      });
+      actions.fetchPaper('now');
+    });
+
+    it(
+      'should throw if given anything other than a string or an array',
+      function() {
+        expect(function() {
+          Action.createActions({});
+        }).to.throw(/expects a string or an array/);
+      }
+    );
   });
 
   describe('call', function() {
