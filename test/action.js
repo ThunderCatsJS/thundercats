@@ -6,6 +6,7 @@ var chaiAsPromised = require('chai-as-promised');
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 
+var Rx = require('rx');
 var Action = require('../').Action;
 var inherits = require('../utils').inherits;
 
@@ -202,6 +203,47 @@ describe('Action', function() {
       Action.create(function() {
         throw new Error('test');
       }).should.throw();
+    });
+  });
+
+  describe('waitFor', function() {
+    var action, observable1, observable2;
+
+    beforeEach(function() {
+      observable1 = new Rx.BehaviorSubject('jaga');
+      observable2 = new Rx.BehaviorSubject('lion-o');
+      action = Action.create('tryWaitFor');
+    });
+
+
+    it('should accept a single observable', function() {
+      var waitForObservable = action.waitFor(observable1);
+      waitForObservable.subscribe.should.to.be.a('function');
+    });
+
+    it('should accept multiple observables', function() {
+      var waitForObservable = action.waitFor(observable1, observable2);
+      waitForObservable.subscribe.should.to.be.a('function');
+    });
+
+    it(
+      'should not publish for observables that have an initial value',
+      function(done) {
+        var spy = sinon.spy(function(value) {
+          value.should.equal('meow');
+          done();
+        });
+        var waitForObservable = action.waitFor(observable1);
+        waitForObservable.firstOrDefault().subscribe(spy);
+        spy.should.have.not.been.called;
+        action('meow');
+        observable1.onNext();
+        spy.should.have.been.calledOnce;
+      });
+    it('should throw if given non observable argument', function() {
+      expect(function() {
+        action.waitFor('not the momma');
+      }).to.throw(/takes only observables as arguments/);
     });
   });
 
