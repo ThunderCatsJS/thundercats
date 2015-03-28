@@ -26,7 +26,7 @@ describe('waitFor', function() {
   });
 
   it(
-    'should accept timeout ',
+    'should accept timeout',
     function() {
       var waitForObservable = waitFor(5000, observable1, observable2);
       waitForObservable.subscribe.should.to.be.a('function');

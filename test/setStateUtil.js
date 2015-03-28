@@ -1,6 +1,6 @@
 var chai = require('chai');
 chai.should();
-var setStateUtil = require('../lib/setStateUtil');
+var setStateUtil = require('../').setStateUtil;
 
 describe('Set State Util', function() {
   var operation;
