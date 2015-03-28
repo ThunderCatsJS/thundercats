@@ -192,13 +192,11 @@ describe('Observable State Mixin', function() {
   });
 
   describe('subscription', function() {
-    var observable1, observable2, spy, spy2;
+    var observable1, spy;
 
     beforeEach(function() {
       spy = sinon.spy();
-      spy2 = sinon.spy();
       observable1 = new Rx.BehaviorSubject({ test: 'one'});
-      observable2 = new Rx.BehaviorSubject({ test2: 'purrfect' });
     });
 
     it('should subscribe to observable state after mount', function() {
