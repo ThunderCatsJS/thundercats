@@ -1,17 +1,66 @@
 /* eslint-disable no-unused-expressions */
 var chai = require('chai');
 chai.should();
-var Action = require('../').Action;
 var chaiAsPromised = require('chai-as-promised');
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
+
+var Action = require('../').Action;
+var inherits = require('../utils').inherits;
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 describe('Action', function() {
 
-  describe('Create', function() {
+  describe('class', function() {
+    it('should create an instance of Action', function() {
+      var actions = new Action();
+      actions.should.be.an.instanceOf(Action);
+    });
+
+    describe('subclass', function() {
+      var ThunderCatsHo;
+      var catActions;
+
+      beforeEach(function() {
+        ThunderCatsHo = function ThunderCatsHo() {
+          Action.call(this);
+        };
+
+        inherits(ThunderCatsHo, Action);
+
+        ThunderCatsHo.prototype.getInBox = function(value) {
+          return {
+            author: value,
+            result: 'disobey'
+          };
+        };
+
+        catActions = new ThunderCatsHo();
+      });
+
+      it('should be extend-able', function() {
+        catActions.should.be.an.instanceOf(ThunderCatsHo);
+        catActions.getInBox.should.exist;
+      });
+
+      it('should produce observables for defined methods', function() {
+        catActions.getInBox.subscribe.should.be.a('function');
+      });
+
+      it('should respect original action function', function() {
+        catActions.getInBox.subscribe(function(value) {
+          value.should.be.an('object');
+          value.author.should.equal('human');
+          value.result.should.equal('disobey');
+        });
+        catActions.getInBox('human');
+      });
+    });
+  });
+
+  describe('create', function() {
     it('should create a function observable', function() {
       var action = Action.create();
       action.should.be.a('function');
@@ -19,7 +68,7 @@ describe('Action', function() {
     });
   });
 
-  describe('Call', function() {
+  describe('call', function() {
     var action;
 
     beforeEach(function() {
@@ -39,7 +88,7 @@ describe('Action', function() {
     );
   });
 
-  describe('Map', function() {
+  describe('map', function() {
     var value1 = {};
     var value2 = {};
     var map;
