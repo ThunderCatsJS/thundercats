@@ -23,12 +23,6 @@ function areObservable(observables) {
 }
 
 function inherits(subClass, superClass) {
-  if (typeof superClass !== 'function' && superClass !== null) {
-    throw new TypeError(
-      'Super expression must either be null or a function, not ' +
-      typeof superClass
-    );
-  }
   subClass.prototype = Object.create(
     superClass && superClass.prototype,
     {
@@ -40,8 +34,5 @@ function inherits(subClass, superClass) {
       }
     }
   );
-
-  if (superClass) {
-    subClass.super = superClass;
-  }
+  subClass.super = superClass;
 }
