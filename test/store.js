@@ -3,31 +3,82 @@ var mocha = require('mocha');
 var chai = require('chai');
 var expect = chai.expect;
 var should = chai.should();
+var sinon = require('sinon');
+var chaiAsPromised = require('chai-as-promised');
+
+var Rx = require('rx');
+var Q = require('q');
 var Store = require('../').Store;
 var Mixin = require('../').ObservableStateMixin;
-var Rx = require('rx');
-var sinon = require('sinon');
-var Q = require('q');
-var chaiAsPromised = require('chai-as-promised');
-var sinonChai = require('sinon-chai');
+var inherits = require('../utils').inherits;
 
 chai.use(chaiAsPromised);
-chai.use(sinonChai);
+chai.use(require('sinon-chai'));
 
 describe('Store', function() {
   describe('construct', function() {
-    it('should create a new store using new method', function() {
-      // var store = new Store();
+    var store, observable;
+
+    beforeEach(function() {
+      observable = new Rx.Subject();
+      function ExtendStore() {
+        Store.call(this);
+      }
+
+      inherits(ExtendStore, Store);
+
+      ExtendStore.prototype.getInitialValue = function() {
+        return { name: 'Lion-O' };
+      };
+
+      ExtendStore.prototype.getOperations = function() {
+        return observable;
+      };
+
+      store = new ExtendStore();
     });
-    it('should be an observable');
+
+    it('should be an instance of ThunderCats Store', function() {
+      store.should.be.an.instanceOf(Store);
+    });
+
+    it('should be an observable', function() {
+      var spy = sinon.spy();
+      store.subscribe.should.be.a('function');
+      store.subscribe(spy);
+      observable.onNext({ value: { name: 'purr' }});
+      spy.should.have.been.calledWith({ name: 'purr' });
+    });
+
     it(
-      'should throw an error if in initialValue or getInitialValue ' +
-      'is not provided'
+      'should throw an error if in getInitialValue is not provided',
+      function() {
+        expect(function() {
+          store = new Store();
+          store.subscribe(function() { });
+        }).to.throw(/getInitialValue not implemented/);
+      }
     );
-    it('should throw an error if pass you pass');
+
+    it(
+      'should throw an error if in getOperations is not provided',
+      function() {
+        expect(function() {
+          function ExtendStore() {
+            Store.call(this);
+          }
+          inherits(ExtendStore, Store);
+          ExtendStore.prototype.getInitialValue = function() {
+            return { name: 'Lion-O' };
+          };
+          store = new ExtendStore();
+          store.subscribe(function() { });
+        }).to.throw(/getOperations not implemented/);
+      }
+    );
   });
 
-  describe('create:', function() {
+  describe('create', function() {
 
     it('should be an observable', function() {
       var store = Store.create({
@@ -40,7 +91,7 @@ describe('Store', function() {
     it('should throw an error if argument passed is not an object', function() {
       Store.create.bind(this, 5)
         .should
-        .throw('expects an object as argument, given : 5');
+        .throw(/expects an object as argument/);
     });
 
   });
@@ -76,7 +127,7 @@ describe('Store', function() {
     it('should throw an error if getInitialValue is not defined', function() {
       Store.create.bind(this, {})
         .should
-        .throw('getInitialValue should be a function given : undefined');
+        .throw(/getInitialValue should be a function/);
     });
 
     it(
@@ -91,19 +142,18 @@ describe('Store', function() {
             }
           });
         };
-        expect(fn).to.throw();
+        expect(fn).to.throw(/getInitialValue should be a function/);
       }
     );
 
     describe('with promises and observables', function() {
       var store, value;
 
-
       it(
         'should resolve and publish a value if getInitialValue returns ' +
-         ' a Promise',
+        ' and resolves a Promise',
         function () {
-          value = 1;
+          value = { name: 'Lion-O' };
           store = Store.create({
             getInitialValue: function () {
               return Q.resolve(value);
@@ -117,9 +167,24 @@ describe('Store', function() {
       );
 
       it(
-        'should notify observers if get initial value promise is rejected'
-      );
+        'should notify observers if get initial value promise is rejected',
+        function(done) {
+          value = { name: 'Lion-O' };
+          var spy = sinon.spy();
+          store = Store.create({
+            name: 'Bob',
+            getInitialValue: function () {
+              return Q.reject(value);
+            }
+          });
 
+          store.subscribe(spy, function(val) {
+            spy.should.not.have.been.called;
+            val.should.equal(value);
+            done();
+          });
+        }
+      );
 
       it(
         'should publish the observable\'s resolve value if getInitialValue ' +
