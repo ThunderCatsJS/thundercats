@@ -268,7 +268,6 @@ describe('Store', function() {
         expect(fn).not.to.throw();
       });
 
-
       it(
         'should throw an error if getOperations is not a function',
         function() {
@@ -348,8 +347,7 @@ describe('Store', function() {
       });
 
       it(
-        'the value held by the store should be the one returned by the ' +
-          'value held by the object passed to `getOperations`',
+        'should pass the value held by the store to the observers',
         function() {
           spy.should.have.been.calledWith(value);
         }
@@ -358,9 +356,6 @@ describe('Store', function() {
       it('should have notified observers with the new value', function() {
         operations.onNext({value: newValue});
         spy.should.have.been.calledWith(newValue);
-      });
-
-      it('should have called observers twice', function() {
         spy.should.have.been.calledTwice;
       });
     });
@@ -387,9 +382,17 @@ describe('Store', function() {
       });
 
       it(
-        'should passed to the value held by the store to the operations ' +
-          'transform',
+        'should pass the value held by the store to operations',
         function() {
+          spy.should.have.been.calledWith(value);
+        }
+      );
+
+      it(
+        'should passed to the value held by the store to the operations ' +
+        'transform',
+        function() {
+          spy.should.have.not.been.calledWith(newValue);
           operations.onNext({
             transform: function(val) {
               val.should.equal(value);
@@ -399,25 +402,13 @@ describe('Store', function() {
         }
       );
 
-      it(
-        'the value held by the store should be the one returned by ' +
-          'the function passed to `applyOperation`',
-        function() {
-          spy.should.have.been.calledWith(value);
-        }
-      );
-
-      it('observers should have been notified with the new value', function() {
+      it('should have notified observers with the new value', function() {
         spy.should.have.been.calledWith(newValue);
-      });
-
-      it('store have been called twice', function() {
         spy.should.have.been.calledTwice;
       });
-
     });
 
-    describe('canceling', function () {
+    describe('confirming', function() {
 
       var value = {};
       var newValue = {};
@@ -442,10 +433,57 @@ describe('Store', function() {
       });
 
       it(
-        'should have notified observers with the initial value',
+        'should register a new entry in store history with confirm promise',
+        function() {
+          store._history.size.should.equal(0);
+          operations.onNext({
+            value: newValue,
+            confirm: defer.promise
+          });
+          store._history.size.should.equal(1);
+        }
+      );
+
+      it('should remove that entry on promise resolve', function(done) {
+        defer.resolve();
+        defer.promise.then(function() {
+          store._history.size.should.equal(0);
+          done();
+        });
+      });
+    });
+
+    describe('canceling', function () {
+
+      var value = {};
+      var newValue = {};
+      var operations;
+      var spy;
+      var defer;
+      var defer2;
+      var store;
+
+      before(function() {
+        operations = new Rx.Subject();
+        spy = sinon.spy();
+        defer = Q.defer();
+        store = Store.create({
+          getInitialValue: function() {
+            return {};
+          },
+          getOperations: function() {
+            return operations;
+          }
+        });
+        store.subscribe(spy);
+      });
+
+      it(
+        'should notify observers with the initial value',
         function () {
           spy.should.have.been.calledOnce;
           spy.should.have.been.calledWith(value);
+          operations.onNext({ value: value });
         }
       );
 
@@ -456,17 +494,15 @@ describe('Store', function() {
             value: newValue,
             confirm: defer.promise
           });
-          spy.should.have.been.calledTwice;
           spy.should.have.been.calledWith(newValue);
         }
       );
 
       it(
-        'observers should have been notified about the canceling',
+        'should have notified observers about the canceling',
         function(done) {
           defer.reject();
           defer.promise.catch(function() {
-            spy.should.have.been.calledThrice;
             spy.should.have.been.calledWith(value);
             done();
           });
@@ -501,16 +537,16 @@ describe('Store', function() {
         });
 
         it(
-          'should have notified observers with the transformed value ' +
-            'after the first operation has been applied',
+          'should notify observers with the transformed value ' +
+          'after the first operation has been applied',
           function() {
             spy.should.have.been.calledWith(['foo']);
           }
         );
 
         it(
-          'should have notified observers with the transformed value ' +
-            'after the second operation has been applied',
+          'should notify observers with the transformed value ' +
+          'after the second operation has been applied',
           function() {
             operations.onNext({
               transform: function (arr) {
@@ -523,9 +559,9 @@ describe('Store', function() {
         );
 
         it(
-          'should have notified observers with result of applying the ' +
-            'second operation on the old value after the first ' +
-            'operation has failed',
+          'should notify observers with result of applying the ' +
+          'second operation on the old value after the first ' +
+          'operation has failed',
           function(done) {
             deferred1.reject();
             deferred1.promise.catch(function() {
@@ -536,9 +572,9 @@ describe('Store', function() {
         );
 
         it(
-          'should have notified observers with the initial value after' +
-            ' the second operation has failed',
-            function(done) {
+          'should notify observers with the initial value after ' +
+          'the second operation has failed',
+          function(done) {
             deferred2.reject();
             deferred2.promise.catch(function() {
               spy.should.have.been.calledWith([]);
@@ -548,7 +584,6 @@ describe('Store', function() {
         );
       });
     });
-
   });
 
   describe('lifecycle', function() {
@@ -635,6 +670,44 @@ describe('Store', function() {
         initialValue.onNext(true);
         initialValue.hasObservers().should.be.true;
         operations.hasObservers().should.be.true;
+      }
+    );
+  });
+
+  describe('outliers', function() {
+    var initialValue;
+    var initialValueSpy;
+    var operations;
+    var operationsSpy;
+    var store, disposable;
+
+    beforeEach(function() {
+      initialValue = new Rx.Subject();
+      initialValueSpy = sinon.spy(function () {
+        return initialValue;
+      });
+
+      operations = new Rx.Subject();
+      operationsSpy = sinon.spy(function () {
+        return operations;
+      });
+
+      store = Store.create({
+        getInitialValue: initialValueSpy,
+        getOperations: operationsSpy
+      });
+    });
+
+    it(
+      'should throw if an operation id is used that does not exist ' +
+      'within its history',
+      function() {
+        expect(
+          store._confirmOperation.bind(store, 'not an id')
+        ).to.throw(/an unknown operation id was used/);
+        expect(
+          store._cancelOperation.bind(store, 'not an id')
+        ).to.throw(/an unknown operation id was used/);
       }
     );
   });
