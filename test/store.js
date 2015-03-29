@@ -444,6 +444,15 @@ describe('Store', function() {
         }
       );
 
+      it('should respect previous operations', function() {
+        var defer2 = Q.defer();
+        operations.onNext({
+          value: {},
+          confirm: defer2.promise
+        });
+        defer2.reject();
+      });
+
       it('should remove that entry on promise resolve', function(done) {
         defer.resolve();
         defer.promise.then(function() {
