@@ -35,6 +35,14 @@ describe('Store', function() {
         return observable;
       };
 
+      ExtendStore.prototype.opsOnError = function(err) {
+        console.log('an error occurred in operations with ' + err);
+      };
+
+      ExtendStore.prototype.opsOnCompleted = function() {
+        throw new Error('ops completed unexpectedly');
+      };
+
       store = new ExtendStore();
     });
 
@@ -48,6 +56,22 @@ describe('Store', function() {
       store.subscribe(spy);
       observable.onNext({ value: { name: 'purr' }});
       spy.should.have.been.calledWith({ name: 'purr' });
+    });
+
+    it('should override built in operations onError handler', function() {
+      expect(function() {
+        var spy = sinon.spy();
+        store.subscribe(spy);
+        observable.onError(new Error('Do not cross streams'));
+      }).to.not.throw();
+    });
+
+    it('should override built in operations onComplete handler', function() {
+      expect(function() {
+        var spy = sinon.spy();
+        store.subscribe(spy);
+        observable.onCompleted("I ain't got nothing left");
+      }).to.throw(/ops completed/);
     });
 
     it(
@@ -188,7 +212,7 @@ describe('Store', function() {
 
       it(
         'should publish the observable\'s resolve value if getInitialValue ' +
-          'returns an observable',
+        'returns an observable',
         function() {
           value = 2;
 
@@ -323,6 +347,23 @@ describe('Store', function() {
           expect(fn).to.throw();
         }
       );
+
+      it('should throw if operations observable errors', function() {
+        var observable = new Rx.Subject();
+        var fn = function() {
+          var store = Store.create({
+            getInitialValue: function () {
+              return {};
+            },
+            getOperations: function() {
+              return observable;
+            }
+          });
+          store.subscribe(function() { });
+          observable.onError(new Error('catastrophy'));
+        };
+        expect(fn).to.throw(/catastrophy/);
+      });
     });
 
     describe('set value', function() {
