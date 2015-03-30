@@ -1,4 +1,4 @@
-var Action = require('rx-flux').Action;
+var Action = require('thundercats').Action;
 var ChatWebAPIUtils = require('../utils/ChatWebAPIUtils');
 
 var createMessage = Action.create(function(data) {

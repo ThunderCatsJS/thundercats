@@ -9,7 +9,7 @@
     "object-assign": "^1.0.0",
     "react": "^0.12.0",
     "rx": "^2.3.22",
-    "rx-flux": "^0.1.0",
+    "thundercats": "^1.5.0",
     "rx-react": "^0.1.0"
   },
   "devDependencies": {

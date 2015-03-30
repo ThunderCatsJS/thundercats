@@ -10,7 +10,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var Store = require('rx-flux').Store;
+var Store = require('thundercats').Store;
 var assign = require('object-assign');
 var ChatActions = require('../actions/ChatActions');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
