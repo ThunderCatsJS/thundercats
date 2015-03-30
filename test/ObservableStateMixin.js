@@ -111,6 +111,80 @@ describe('Observable State Mixin', function() {
       // spy2.should.have.been.calledWith('purrfect');
     });
 
+    it('should report on observable state completion', function() {
+      expect(function() {
+        var observable = new Rx.BehaviorSubject({ yo: 'bo' });
+        var func = utils.createRenderSpecFunc({
+          mixins: [ObservableStateMixin],
+          getObservable: function() {
+            return observable;
+          },
+          render: function() {
+            return null;
+          }
+        });
+        func();
+        observable.onCompleted();
+      }).to.not.throw();
+    });
+
+    it('should overwrite built in onCompleted handler', function() {
+      expect(function() {
+        var observable = new Rx.BehaviorSubject({ yo: 'bo' });
+        var func = utils.createRenderSpecFunc({
+          mixins: [ObservableStateMixin],
+          getObservable: function() {
+            return observable;
+          },
+          onCompleted: function() {
+            throw new Error('Observable State completed');
+          },
+          render: function() {
+            return null;
+          }
+        });
+        func();
+        observable.onCompleted();
+      }).to.throw('Observable State completed');
+    });
+
+    it('should throw if observable state errors', function() {
+      expect(function() {
+        var observable = new Rx.BehaviorSubject({ yo: 'bo' });
+        var func = utils.createRenderSpecFunc({
+          mixins: [ObservableStateMixin],
+          getObservable: function() {
+            return observable;
+          },
+          render: function() {
+            return null;
+          }
+        });
+        func();
+        observable.onError('failed to launch');
+      }).to.throw(/an error has occurred in the observable state/i);
+    });
+
+    it('should override built in onError handler', function() {
+      expect(function() {
+        var observable = new Rx.BehaviorSubject({ yo: 'bo' });
+        var func = utils.createRenderSpecFunc({
+          mixins: [ObservableStateMixin],
+          onError: function() {
+            console.warn('an error occurred, but it is koo');
+          },
+          getObservable: function() {
+            return observable;
+          },
+          render: function() {
+            return null;
+          }
+        });
+        func();
+        observable.onError('failed to launch');
+      }).to.not.throw();
+    });
+
     it('should throw if it is not defined', function() {
       expect(utils.createRenderSpecFunc({
         mixins: [ObservableStateMixin],
@@ -136,6 +210,7 @@ describe('Observable State Mixin', function() {
         })).to.throw(/should provide "getObservable" function/);
       }
     );
+
     it(
       'should throw if it does not return an observable',
       function() {
@@ -151,6 +226,7 @@ describe('Observable State Mixin', function() {
         })).to.throw(/should return an Rx.Observable/);
       }
     );
+
     it(
       'should throw if it does not return an array of observables',
       function() {
