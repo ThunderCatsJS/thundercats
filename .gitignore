@@ -1,6 +1,7 @@
 node_modules
 .idea
-docs/index.js
+docs
+index.html
 dist
 coverage
 *.log
