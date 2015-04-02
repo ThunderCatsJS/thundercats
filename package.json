@@ -55,7 +55,8 @@
     "es6-map": "^0.1.1",
     "invariant": "^2.0.0",
     "node-uuid": "^1.4.1",
-    "object.assign": "^1.1.1"
+    "object.assign": "^1.1.1",
+    "warning": "^1.0.0"
   },
   "peerDependencies": {
     "rx": "^2.3.14"

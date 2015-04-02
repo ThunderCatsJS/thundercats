@@ -1,8 +1,7 @@
 module.exports = {
-  inherits: inherits,
+  areObservable: areObservable,
   isPromise: isPromise,
-  isObservable: isObservable,
-  areObservable: areObservable
+  isObservable: isObservable
 };
 
 function isPromise(promise) {
@@ -20,19 +19,4 @@ function areObservable(observables) {
   return observables.reduce(function(bool, observable) {
     return bool && isObservable(observable);
   }, true);
-}
-
-function inherits(subClass, superClass) {
-  subClass.prototype = Object.create(
-    superClass && superClass.prototype,
-    {
-      constructor: {
-        value: subClass,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    }
-  );
-  subClass.super = superClass;
 }
