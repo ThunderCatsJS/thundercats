@@ -1,118 +1,41 @@
-var Store = require('rx-flux').Store;
-var Rx = require('rx');
-var assign = require('react/lib/Object.assign');
-var TodoService = require('../services/todoService');
-var TodoActions = require('../actions/todoActions');
+/*
+ * Copyright (c) 2014, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * TodoStore
+ */
 
+var EventEmitter = require('events').EventEmitter;
+var TodoConstants = require('../constants/TodoConstants');
+var assign = require('object-assign');
+var Store = require('thundercats').Store;
+var TodoActions = require('../actions/TodoActions')
 
-function updateTodos(todos, update, condition) {
+var CHANGE_EVENT = 'change';
 
-  return Object.keys(todos).reduce(function (result, id) {
-    var todo = todos[id];
-    if (!condition || condition(todo)) {
-      result[id] = assign({}, todo, update);
-    } else {
-      result[id] = todo;
-    }
-    return result;
-  }, {});
+class TodoStore extends Store {
+  constructor () {
+    super()
+  }
+  getInitialValue() {
+    return {
+      _todos: {}
+    };
+  }
+  getOperations() {
+    return [
+      TodoActions.create,
+      TodoActions.updateText,
+      TodoActions.toggleComplete,
+      TodoActions.toggleCompleteAll,
+      TodoActions.destroy,
+      TodoActions.destroyCompleted
+    ];
+  }
 }
 
-
-var TodoStore = Store.create({
-
-  getInitialValue: function() {
-    return TodoService.getTodos();
-  },
-
-  getOperations: function() {
-    return Rx.Observable.merge(
-
-      TodoActions.create
-        .map(function({ todo, promise }) {
-          return {
-            transform: function (todos) {
-              todos = assign({}, todos);
-              todos[todo.id] = todo;
-              return todos;
-            },
-            confirm: promise
-          };
-        }),
-
-      TodoActions.toggleCompleteAll
-        .map(function({ promise }) {
-          return {
-            transform: function(todos) {
-              var allCompleted = Object.keys(todos)
-                .every(id => todos[id].complete);
-
-              return updateTodos(
-                todos,
-                { complete: !allCompleted },
-                todo => todo.complete === allCompleted
-              );
-            },
-            confirm: promise
-          };
-        }),
-
-      TodoActions.toggleComplete
-        .map(function({ id, promise }) {
-          return {
-            transform: todos => {
-              return updateTodos(
-                todos,
-                { complete: !todos[id].complete },
-                todo => todo.id === id
-              );
-            },
-            confirm: promise
-          };
-        }),
-
-      TodoActions.updateText
-        .map(function({ id, text, promise }) {
-          return {
-            transform: todos => {
-              return updateTodos(
-                todos,
-                { text },
-                todo => todo.id === id
-              );
-            },
-            confirm: promise
-          };
-        }),
-
-      TodoActions.destroy
-        .map(function({ id, promise }) {
-          return {
-            transform: todos => {
-              todos = assign({}, todos);
-              delete todos[id];
-              return todos;
-            },
-            confirm: promise
-          };
-        }),
-
-      TodoActions.destroyCompleted
-        .map(function({promise}) {
-          return {
-            transform: todos =>
-              Object.keys(todos).reduce(function (result, id) {
-                var todo = todos[id];
-                if (!todo.complete) {
-                  result[id] = todo;
-                }
-                return result;
-              }, {}),
-            confirm: promise
-          };
-        })
-    );
-  }
-});
-
-module.exports = TodoStore;
+module.exports = new TodoStore;
