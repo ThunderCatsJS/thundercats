@@ -1,16 +1,11 @@
+var Action = require('../').Action;
+
 module.exports = {
   areObservable: areObservable,
-  isPromise: isPromise,
-  isObservable: isObservable
+  isActions: isActions,
+  isObservable: isObservable,
+  isPromise: isPromise
 };
-
-function isPromise(promise) {
-  return promise && typeof promise.then === 'function';
-}
-
-function isObservable(observable) {
-  return observable && typeof observable.subscribe === 'function';
-}
 
 function areObservable(observables) {
   if (!Array.isArray(observables)) {
@@ -19,4 +14,16 @@ function areObservable(observables) {
   return observables.reduce(function(bool, observable) {
     return bool && isObservable(observable);
   }, true);
+}
+
+function isActions(_Action) {
+  Action.isPrototypeOf(_Action);
+}
+
+function isObservable(observable) {
+  return observable && typeof observable.subscribe === 'function';
+}
+
+function isPromise(promise) {
+  return promise && typeof promise.then === 'function';
 }
