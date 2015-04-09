@@ -5,6 +5,7 @@
     "classes": true,
     "defaultParams": true,
     "destructuring": true,
+    "objectLiteralComputedProperties": true,
     "objectLiteralShorthandMethods": true,
     "objectLiteralShorthandProperties": true,
     "restParams": true,
