@@ -1,49 +1,54 @@
 /* eslint-disable no-unused-expressions */
-var chai = require('chai');
+const chai = require('chai');
+const expect = chai.expect;
+const chaiAsPromised = require('chai-as-promised');
+const sinon = require('sinon');
+const sinonChai = require('sinon-chai');
 chai.should();
-var expect = chai.expect;
-var chaiAsPromised = require('chai-as-promised');
-var sinon = require('sinon');
-var sinonChai = require('sinon-chai');
 
-var Rx = require('rx');
-var Action = require('../').Action;
-var inherits = require('../utils').inherits;
+const Rx = require('rx');
+const Actions = require('../').Actions;
+const inherits = require('../utils').inherits;
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
-describe('Action', function() {
+describe('Actions', function() {
 
   describe('class', function() {
     it('should create an instance of Action', function() {
-      var actions = new Action();
-      actions.should.be.an.instanceOf(Action);
+      let actions = new Actions();
+      actions.should.be.an.instanceOf(Actions);
     });
 
     describe('subclass', function() {
-      var ThunderCatsHo;
-      var catActions;
+      let CatActions;
+      let catActions;
 
       beforeEach(function() {
-        ThunderCatsHo = function ThunderCatsHo() {
-          Action.call(this);
-        };
+        class CatActions extends Actions {
+          constructor() {
+            super();
+          }
 
-        inherits(ThunderCatsHo, Action);
-
-        ThunderCatsHo.prototype.getInBox = function(value) {
-          return {
-            author: value,
-            result: 'disobey'
-          };
-        };
-
-        catActions = new ThunderCatsHo();
+          getInBox(value) {
+            return {
+              author: value,
+              result: 'disobey'
+            };
+          }
+          passThrough(value) {
+            return value;
+          }
+          errorMap() {
+            throw new Error('test');
+          }
+        }
+        catActions = new CatActions();
       });
 
       it('should be extend-able', function() {
-        catActions.should.be.an.instanceOf(ThunderCatsHo);
+        catActions.should.be.an.instanceOf(Actions);
         catActions.getInBox.should.exist;
       });
 
@@ -51,7 +56,7 @@ describe('Action', function() {
         catActions.getInBox.subscribe.should.be.a('function');
       });
 
-      it('should respect original action function', function() {
+      it('should respect original map function', function() {
         catActions.getInBox.subscribe(function(value) {
           value.should.be.an('object');
           value.author.should.equal('human');
@@ -59,237 +64,138 @@ describe('Action', function() {
         });
         catActions.getInBox('human');
       });
-    });
-  });
 
-  describe('create', function() {
-    it('should create a function observable', function() {
-      var action = Action.create();
-      action.should.be.a('function');
-      action.subscribe.should.to.be.a('function');
-    });
-  });
-
-  describe('creatActions', function() {
-    it(
-      'should take a single string and create ' +
-      'an object with an action method observable',
-      function() {
-        var actions = Action.createActions('getKatnip');
-        actions.getKatnip.should.exist;
-        actions.getKatnip.subscribe.should.be.a('function');
-      }
-    );
-
-    it('should take an array of strings', function() {
-      var actions = Action.createActions([
-        'getKatnip',
-        'takeNap'
-      ]);
-      actions.getKatnip.should.exist;
-      actions.getKatnip.subscribe.should.be.a('function');
-      actions.takeNap.should.exist;
-      actions.takeNap.subscribe.should.be.a('function');
-    });
-
-    it('should take an array of objects and strings', function() {
-      var actions = Action.createActions([
-        'getKatnip',
-        { name: 'takeNap' }
-      ]);
-
-      actions.getKatnip.should.exist;
-      actions.getKatnip.subscribe.should.be.a('function');
-      actions.takeNap.should.exist;
-      actions.takeNap.subscribe.should.be.a('function');
-    });
-
-    it('should take an array of objects and strings', function() {
-      var actions = Action.createActions([
-        'getKatnip',
-        {
-          name: 'fetchPaper',
-          map: function(value) {
-            return {
-              order: value,
-              response: 'nope'
-            };
-          }
+      it(
+        'should notify passed value to subscribed observer when called',
+        function(done) {
+          catActions.passThrough.first().subscribe(function (val) {
+            val.should.equal(3);
+            done();
+          });
+          catActions.passThrough(3);
         }
-      ]);
+      );
 
-      actions.getKatnip.should.exist;
-      actions.fetchPaper.should.exist;
-      actions.fetchPaper.subscribe.should.be.a('function');
-      actions.fetchPaper.subscribe(function(value) {
-        value.should.be.an('object');
-        value.order.should.equal('now');
-        value.response.should.equal('nope');
-      });
-      actions.fetchPaper('now');
-    });
-
-    it(
-      'should throw if given anything other than a string or an array',
-      function() {
+      it('should throw an error when an error is thrown in the map', function() {
         expect(function() {
-          Action.createActions({});
-        }).to.throw(/expects a string or an array/);
-      }
-    );
-  });
-
-  describe('call', function() {
-    var action;
-
-    beforeEach(function() {
-      action = Action.create();
-    });
-
-    it(
-      'should notify passed value to subscribed observer when called',
-      function(done) {
-        action.first().subscribe(function (val) {
-          val.should.equal(3);
-          done();
-        });
-
-        action(3);
-      }
-    );
-  });
-
-  describe('map', function() {
-    var value1 = {};
-    var value2 = {};
-    var map;
-    var spy;
-    var action;
-
-    beforeEach(function() {
-      map = function() {
-        return value2;
-      };
-
-      spy = sinon.spy(map);
-      action = Action.create(spy);
-    });
-
-    it(
-      'should pass the value passed as parameter to the map function',
-      function(done) {
-        action.first().subscribe(function() {
-          done();
-        });
-        action(value1);
-        spy.should.have.been.calledOnce;
-        spy.should.have.been.calledWith(value1);
-      }
-    );
-
-
-    it(
-      'should pass the result of the map function to observers',
-      function(done) {
-        action.first().subscribe(function(val) {
-          val.should.equal(value2);
-          done();
-        });
-        action(value1);
-      }
-    );
-
-    it('should throw an error when an error is thrown in the map', function() {
-      Action.create(function() {
-        throw new Error('test');
-      }).should.throw();
+          catActions.errorMap();
+        }).to.throw();
+      });
     });
   });
+
+
 
   describe('waitFor', function() {
-    var action, observable1, observable2;
+    let catActions, CatActions, observable1, observable2;
 
     beforeEach(function() {
+      class CatActions extends Actions {
+        constructor() {
+          super();
+        }
+        tryWaitFor(val) {
+          return val;
+        }
+      }
       observable1 = new Rx.BehaviorSubject('jaga');
       observable2 = new Rx.BehaviorSubject('lion-o');
-      action = Action.create('tryWaitFor');
+      catActions = new CatActions();
     });
 
 
     it('should accept a single observable', function() {
-      var waitForObservable = action.waitFor(observable1);
+      let waitForObservable = catActions.tryWaitFor.waitFor(observable1);
       waitForObservable.subscribe.should.to.be.a('function');
     });
 
     it('should accept multiple observables', function() {
-      var waitForObservable = action.waitFor(observable1, observable2);
+      let waitForObservable = catActions.tryWaitFor.waitFor(observable1, observable2);
       waitForObservable.subscribe.should.to.be.a('function');
     });
 
     it(
       'should not publish for observables that have an initial value',
       function(done) {
-        var spy = sinon.spy(function(value) {
+        let spy = sinon.spy(function(value) {
           value.should.equal('meow');
           done();
         });
-        var waitForObservable = action.waitFor(observable1);
+        let waitForObservable = catActions.tryWaitFor.waitFor(observable1);
         waitForObservable.firstOrDefault().subscribe(spy);
         spy.should.have.not.been.called;
-        action('meow');
+        catActions.tryWaitFor('meow');
         observable1.onNext();
         spy.should.have.been.calledOnce;
-      });
+      }
+    );
+
     it('should throw if given non observable argument', function() {
       expect(function() {
-        action.waitFor('not the momma');
+        catActions.tryWaitFor.waitFor('not the momma');
       }).to.throw(/takes only observables as arguments/);
     });
   });
 
   describe('disposal', function() {
 
-    var spy;
-    var action;
+    let spy;
+    let catActions, CatActions;
 
     beforeEach(function() {
-      action = Action.create();
+      class CatActions extends Actions {
+        constructor() {
+          super();
+        }
+        doThis(val) {
+          return val;
+        }
+      }
+      catActions = new CatActions();
       spy = sinon.spy();
     });
 
     it('should call observer that isn\'t disposed', function() {
-      action.subscribe(spy);
-      action(3);
+      catActions.doThis.subscribe(spy);
+      catActions.doThis(3);
       spy.should.have.been.called;
     });
 
     it('should not call observer that has been disposed', function() {
-      action.subscribe(spy).dispose();
-      action(3);
+      catActions.doThis.subscribe(spy).dispose();
+      catActions.doThis(3);
       spy.should.not.have.been.called;
     });
   });
 
   describe('observers', function() {
 
-    var action, disposable;
+    let catActions, CatActions, disposable;
     beforeEach(function() {
-      action = Action.create();
+      class CatActions extends Actions {
+        constructor() {
+          super();
+        }
+        doThis(val) {
+          return val;
+        }
+      }
+      catActions = new CatActions();
     });
 
     it('should return false if the action has no observers', function() {
-      action.hasObservers().should.be.false;
+      catActions.doThis.hasObservers().should.be.false;
     });
 
     it('should return true if the action as observers', function() {
-      disposable = action.subscribe(function () {});
-      action.hasObservers().should.be.true;
+      disposable = catActions.doThis.subscribe(function () {});
+      catActions.doThis.hasObservers().should.be.true;
     });
 
     it('should return false if observers have been disposed of', function() {
-      disposable = action.subscribe(function() { });
+      disposable = catActions.doThis.subscribe(function() { });
       disposable.dispose();
-      action.hasObservers().should.be.false;
+      catActions.doThis.hasObservers().should.be.false;
     });
   });
 });
