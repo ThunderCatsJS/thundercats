@@ -22,20 +22,21 @@
 // * onError
 // * onCompleted
 //
-const React = require('react/addons'),
+'use strict';
+
+var React = require('react/addons'),
     invariant = require('invariant'),
-    assign = require('object.assign'),
+
+// warning = require('warnging'),
+assign = require('object.assign'),
     utils = require('../utils'),
     isObservable = utils.isObservable;
 
-const Container = React.createClass({
+var Container = React.createClass({
   displayName: 'ThunderCatainer',
 
   propTypes: {
-    actions: React.PropTypes.oneOfType([
-      React.PropTypes.string,
-      React.PropTypes.arrayOf(React.PropTypes.string)
-    ]),
+    actions: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.arrayOf(React.PropTypes.string)]),
     children: React.PropTypes.element,
     fetchAction: React.PropTypes.string,
     fetchPayload: React.PropTypes.object,
@@ -56,19 +57,13 @@ const Container = React.createClass({
   // * register the store
   // * get the initial value of the store
   //
-  getInitialState: function () {
+  getInitialState: function getInitialState() {
 
-    this.state.store = this.getStore(this.props.store);
+    this.store = this.getStore(this.props.store);
 
-    invariant(
-      this.state.store && isObservable(this.state.store),
-      '%s should get at a store but found none for %s',
-      this.displayName,
-      this.props.store
-    );
+    invariant(this.store && isObservable(this.store), '%s should get at a store but found none for %s', this.displayName, this.props.store);
 
-
-    let val = this.state.store.__getValue || null;
+    var val = this.store.__getValue || null;
     this._checkVal(val);
     return val;
   },
@@ -82,8 +77,8 @@ const Container = React.createClass({
   // * call the data fetch action with fetch payload
   // * register the store to wait for data fetch completion
   //
-  componentWillMount: function() {
-    const cat = this.context.cat;
+  componentWillMount: function componentWillMount() {
+    var cat = this.context.cat;
     // register actions
     if (this.props.actions) {
       var actionsName = this.props.actions;
@@ -91,18 +86,18 @@ const Container = React.createClass({
         actionsName = [actionsName];
       }
 
-      actionsName.forEach(function(actionsName) {
-        this.state[actionsName] = cat.getAction(actionsName);
+      actionsName.forEach(function (actionsName) {
+        this.props[actionsName] = cat.getAction(actionsName);
       });
     }
-    const fetchAction = this.props.fetchAction;
-    const fetchPayload = this.props.fetchPayload || {};
+    var fetchAction = this.props.fetchAction;
+    var fetchPayload = this.props.fetchPayload || {};
     // initiate fetch if fetchAction is supplied
     if (fetchAction && this.props[fetchAction]) {
       cat.registerFetcher(this.props[fetchAction], {
         fetchPayload: fetchPayload,
         fetchName: fetchAction,
-        storeName: this.state.store.displayName
+        storeName: this.store.displayName
       });
     }
   },
@@ -112,25 +107,21 @@ const Container = React.createClass({
   // This is where we subscribe to the observable Store and track its value.
   // Updates to the stores value will call setState on the container and the
   // container will add that value to child's props
-  componentDidMount: function() {
+  componentDidMount: function componentDidMount() {
     // Now that the component has mounted, we will use a long lived
     // the subscription
-    this.storeSubscription = this.state.store.subscribe(
-      this.storeOnNext,
-      this.props.onError || this._storeOnNext,
-      this.props.onCompleted || this._storeOnCompleted
-    );
+    this.storeSubscription = this.store.subscribe(this.storeOnNext, this.props.onError || this._storeOnNext, this.props.onCompleted || this._storeOnCompleted);
   },
 
   // ### Component Will Unmount
   //
   // On unmount, the subscription to the observable Store is disposed
-  componentWillUnmount: function () {
+  componentWillUnmount: function componentWillUnmount() {
     this.storeSubscription.dispose();
   },
 
   // This is the observer that will watch the observable Store.
-  _storeOnNext: function (val) {
+  _storeOnNext: function _storeOnNext(val) {
     this._checkVal(val);
     this.setState(val);
   },
@@ -138,36 +129,26 @@ const Container = React.createClass({
   // If the observable Store throws an error this method will be called. This
   // can be overwritten by providing `onError` function on the props of this
   // container
-  _storeOnError: function(err) {
-    throw new Error(
-      'ThunderCats Store encountered an error and has shutdown with: ' + err
-    );
+  _storeOnError: function _storeOnError(err) {
+    throw new Error('ThunderCats Store encountered an error and has shutdown with: ' + err);
   },
 
   // If the observable Store completes, this method is called. This can be
   // overwritten by providing `onCompleted` function on the props of the
   // container
-  _storeOnCompleted: function() {
+  _storeOnCompleted: function _storeOnCompleted() {
     console.warn('Store has shutdown without error');
   },
 
   // Checks to make sure the value provided by the store is either an object or
   // null
-  _checkVal: function(val) {
-    invariant(
-      typeof val === 'object',
-      'The store %s should publish objects or null given: %s',
-      this.state.store.displayName,
-      val
-    );
+  _checkVal: function _checkVal(val) {
+    invariant(typeof val === 'object', 'The store %s should publish objects or null given: %s', this.store.displayName, val);
   },
 
-  render: function() {
+  render: function render() {
 
-    return React.addons.cloneWithProps(
-      this.props.children,
-      assign({}, this.state)
-    );
+    return React.addons.cloneWithProps(this.props.children, assign({}, this.state));
   }
 });
 
