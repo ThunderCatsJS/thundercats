@@ -329,7 +329,7 @@ describe('Store', function() {
       it('should throw if not a function', function() {
         expect(() => {
           catActions.doAction({ transform: 'not the momma' });
-        }).to.throw(/invalid operation/)
+        }).to.throw(/invalid operation/);
       });
     });
 
@@ -604,7 +604,7 @@ describe('Store', function() {
 });
 
 function createActions(spy) {
-  spy = spy || function(val) { return val;}
+  spy = spy || function(val) { return val; };
   class CatActions extends Actions {
     constructor() {
       super();

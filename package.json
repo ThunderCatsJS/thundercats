@@ -29,7 +29,7 @@
     "pretest": "npm run lint",
     "test": "mocha --compilers js:babel/register",
     "coverAlls": "istanbul cover _mocha --compilers js:babel/register && istanbul-coveralls",
-    "cover": "istanbul cover _mocha"
+    "cover": "istanbul cover _mocha --compilers js:babel/register"
   },
   "browserify-shim": {
     "react": "global:React",
@@ -59,7 +59,7 @@
     "chai": "^2.1.1",
     "chai-as-promised": "^4.3.0",
     "envify": "^3.4.0",
-    "eslint": "^0.18.0",
+    "eslint": "^0.19.0",
     "eslint-plugin-react": "^2.1.0",
     "istanbul": "^0.3.7",
     "istanbul-coveralls": "^1.0.2",

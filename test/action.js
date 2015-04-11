@@ -8,7 +8,6 @@ chai.should();
 
 const Rx = require('rx');
 const Actions = require('../').Actions;
-const inherits = require('../utils').inherits;
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
@@ -22,7 +21,6 @@ describe('Actions', function() {
     });
 
     describe('subclass', function() {
-      let CatActions;
       let catActions;
 
       beforeEach(function() {
@@ -76,18 +74,19 @@ describe('Actions', function() {
         }
       );
 
-      it('should throw an error when an error is thrown in the map', function() {
-        expect(function() {
-          catActions.errorMap();
-        }).to.throw();
-      });
+      it(
+        'should throw an error when an error is thrown in the map',
+        function() {
+          expect(function() {
+            catActions.errorMap();
+          }).to.throw();
+        }
+      );
     });
   });
 
-
-
   describe('waitFor', function() {
-    let catActions, CatActions, observable1, observable2;
+    let catActions, observable1, observable2;
 
     beforeEach(function() {
       class CatActions extends Actions {
@@ -110,7 +109,8 @@ describe('Actions', function() {
     });
 
     it('should accept multiple observables', function() {
-      let waitForObservable = catActions.tryWaitFor.waitFor(observable1, observable2);
+      let waitForObservable =
+        catActions.tryWaitFor.waitFor(observable1, observable2);
       waitForObservable.subscribe.should.to.be.a('function');
     });
 
@@ -140,7 +140,7 @@ describe('Actions', function() {
   describe('disposal', function() {
 
     let spy;
-    let catActions, CatActions;
+    let catActions;
 
     beforeEach(function() {
       class CatActions extends Actions {
@@ -170,7 +170,7 @@ describe('Actions', function() {
 
   describe('observers', function() {
 
-    let catActions, CatActions, disposable;
+    let catActions, disposable;
     beforeEach(function() {
       class CatActions extends Actions {
         constructor() {
