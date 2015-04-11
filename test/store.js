@@ -13,7 +13,7 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 describe('Store', function() {
-  describe('construct', function() {
+  describe('instantiation', function() {
     let store, CatStore, catActions;
 
     beforeEach(function() {
@@ -183,7 +183,7 @@ describe('Store', function() {
       });
     });
 
-    describe('set value', function() {
+    describe('value', function() {
 
       let value = { hello: 'world' };
       let newValue = { foo: 'bar' };
@@ -212,13 +212,73 @@ describe('Store', function() {
       );
 
       it('should have notified observers with the new value', function() {
-        catActions.doAction.onNext({value: newValue});
+        catActions.doAction.onNext({ value: newValue });
         spy.should.have.been.calledWith(newValue);
         spy.should.have.been.calledTwice;
       });
+
+      it('should not throw if value is null', function() {
+        expect(() => {
+          catActions.doAction({ value: null });
+        }).to.not.throw();
+      });
+
+      it('should throw if value is not an object', function() {
+        expect(() => {
+          catActions.doAction({ value: 'not the momma' });
+        }).to.throw(/invalid operation/);
+      });
     });
 
-    describe('transforms', function() {
+    describe('set', function() {
+      let value = { hello: 'world' };
+      let newValue = { foo: 'bar' };
+      let spy = sinon.spy();
+      let CatStore;
+      let catActions;
+      let store;
+
+      before(function() {
+        catActions = createActions();
+        class CatStore extends Store {
+          constructor() {
+            super();
+            this.registerActions(catActions);
+            this.__value = value;
+          }
+        }
+        store = new CatStore();
+        store.subscribe(spy);
+      });
+
+      it('should assign new values to store value', function() {
+        spy.should.have.not.been.calledWith(
+          sinon.match({ hello: 'world', foo: 'bar' })
+        );
+        catActions.doAction({ set: newValue });
+        spy.lastCall.should.have.been.calledWith(
+          sinon.match({ hello: 'world', foo: 'bar' })
+        );
+      });
+
+      it('should not throw if set is null', function() {
+        expect(() => {
+          catActions.doAction({
+            set: null
+          });
+        }).to.not.throw();
+      });
+
+      it('should throw if set is not an object or null', function() {
+        expect(() => {
+          catActions.doAction({
+            set: 'yo yo yo'
+          });
+        }).to.throw(/invalid operation/);
+      });
+    });
+
+    describe('transform', function() {
 
       let value = { hello: 'world' };
       let newValue = { foo: 'bar' };
@@ -264,6 +324,12 @@ describe('Store', function() {
       it('should have notified observers with the new value', function() {
         spy.should.have.been.calledWith(newValue);
         spy.should.have.been.calledTwice;
+      });
+
+      it('should throw if not a function', function() {
+        expect(() => {
+          catActions.doAction({ transform: 'not the momma' });
+        }).to.throw(/invalid operation/)
       });
     });
 
