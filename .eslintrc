@@ -5,6 +5,8 @@
     "classes": true,
     "defaultParams": true,
     "destructuring": true,
+    "generators": true,
+    "modules": true,
     "objectLiteralComputedProperties": true,
     "objectLiteralShorthandMethods": true,
     "objectLiteralShorthandProperties": true,
