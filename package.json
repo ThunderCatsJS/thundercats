@@ -28,8 +28,8 @@
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "mocha --compilers js:babel/register",
-    "coverAlls": "istanbul cover _mocha --compilers js:babel/register && istanbul-coveralls",
-    "cover": "istanbul cover _mocha --compilers js:babel/register"
+    "coverAlls": "istanbul cover _mocha -- --compilers js:babel/register && istanbul-coveralls",
+    "cover": "istanbul cover _mocha -- --compilers js:babel/register"
   },
   "browserify-shim": {
     "react": "global:React",
