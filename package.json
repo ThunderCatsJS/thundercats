@@ -22,14 +22,14 @@
   },
   "scripts": {
     "build-clean": "rm -rf build/global/* && rm -rf build/npm/*",
-    "build-global": "NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t babelify -t browserify-shim -g envify -o build/global/ThunderCats.js && NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t babelify -t browserify-shim -g envify -p [minifyify --no-map --uglify[--compress --mangle --dead_code]] -o build/global/ThunderCats.min.js",
+    "build-global": "NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional runtime ] -t browserify-shim -g envify -o build/global/ThunderCats.js && NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional runtime ] -t browserify-shim -g envify -p [minifyify --no-map --uglify[--compress --mangle --dead_code]] -o build/global/ThunderCats.min.js",
     "build-npm": "mkdir build/npm/lib && babel ./lib -d build/npm/lib && cp README.md build/npm && cp index.js build/npm && node -p 'p=require(\"./package\");p.main=\"lib\";p.scripts=p.devDependencies=p[\"browserify-shim\"]=undefined;JSON.stringify(p,null,2)' > build/npm/package.json",
     "build": "npm run build-clean && npm run build-global && npm run build-npm",
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "mocha --compilers js:babel/register",
-    "coverAlls": "istanbul cover _mocha -- --compilers js:babel/register && istanbul-coveralls",
-    "cover": "istanbul cover _mocha -- --compilers js:babel/register"
+    "test": "mocha --compilers js:./registerWithOptions.js",
+    "coverAlls": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js && istanbul-coveralls",
+    "cover": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js"
   },
   "browserify-shim": {
     "react": "global:React",
@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "babel": "^5.0.12",
+    "babel-runtime": "^5.0.12",
     "babelify": "^6.0.2",
     "browserify": "^9.0.8",
     "browserify-shim": "^3.8.3",
