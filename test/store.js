@@ -13,7 +13,7 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 describe('Store', function() {
-  describe('instantiation', function() {
+  describe('class', function() {
     let store, CatStore, catActions;
 
     beforeEach(function() {
@@ -180,6 +180,22 @@ describe('Store', function() {
           catActions.doAction.onError('catastrophy');
         };
         expect(fn).to.throw(/catastrophy/);
+      });
+
+      it('should complain when action completes', function() {
+        let catActions = createActions();
+        class ExtendStore extends Store {
+          constructor() {
+            super();
+            this.value = { name: 'Lion-O' };
+            this.registerActions(catActions);
+          }
+        }
+        let store = new ExtendStore();
+        let onCompletedSpy = sinon.spy(store, 'opsOnCompleted');
+        store.subscribe(function() {});
+        catActions.doAction.onCompleted();
+        onCompletedSpy.should.have.been.calledOnce;
       });
     });
 
@@ -570,6 +586,57 @@ describe('Store', function() {
         catActions.doAction.hasObservers().should.be.false;
         store.subscribe(function() {});
         catActions.doAction.hasObservers().should.be.true;
+      }
+    );
+  });
+
+  describe('serialize', function() {
+    it('should produce a string with the correct data', function() {
+      let catActions = createActions();
+      class CatStore extends Store {
+        constructor() {
+          super();
+          this.registerActions(catActions);
+          this.__value = { cats: 'meow' };
+        }
+      }
+      let store = new CatStore();
+      let dats = store.serialize();
+      dats.should.be.a.string;
+      dats.should.equal(JSON.stringify({ cats: 'meow' }));
+    });
+  });
+
+  describe('deserialize', function() {
+    let value, stringyValue, store, catActions;
+    beforeEach(function() {
+      value = { cats: 'meow' };
+      stringyValue = JSON.stringify(value);
+      catActions = createActions();
+      class CatStore extends Store {
+        constructor() {
+          super();
+          this.registerActions(catActions);
+          this.__value = null;
+        }
+      }
+      store = new CatStore();
+    });
+
+    it('should update store data', function() {
+      expect(store.__value).to.be.null;
+      store.deserialize(stringyValue);
+      expect(store.__value).to.not.be.null;
+      store.__value.should.deep.equal(value);
+    });
+
+    it(
+      'should throw if data deserializes to non object or non null',
+      function() {
+        expect(store.__value).to.be.null;
+        expect(() => {
+          store.deserialize('true');
+        }).to.throw(/deserialize must return an object or null/);
       }
     );
   });
