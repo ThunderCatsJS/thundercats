@@ -13,76 +13,68 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 describe('Actions', function() {
+  describe('Class', function() {
+    let catActions;
 
-  describe('class', function() {
-    it('should create an instance of Action', function() {
-      let actions = new Actions();
-      actions.should.be.an.instanceOf(Actions);
+    beforeEach(function() {
+      class CatActions extends Actions {
+        constructor() {
+          super();
+        }
+
+        getInBox(value) {
+          return {
+            author: value,
+            result: 'disobey'
+          };
+        }
+        passThrough(value) {
+          return value;
+        }
+        errorMap() {
+          throw new Error('test');
+        }
+      }
+      catActions = new CatActions();
     });
 
-    describe('subclass', function() {
-      let catActions;
+    it('should be extend-able', function() {
+      catActions.should.be.an.instanceOf(Actions);
+      catActions.getInBox.should.exist;
+    });
 
-      beforeEach(function() {
-        class CatActions extends Actions {
-          constructor() {
-            super();
-          }
+    it('should produce observables for defined methods', function() {
+      catActions.getInBox.subscribe.should.be.a('function');
+    });
 
-          getInBox(value) {
-            return {
-              author: value,
-              result: 'disobey'
-            };
-          }
-          passThrough(value) {
-            return value;
-          }
-          errorMap() {
-            throw new Error('test');
-          }
-        }
-        catActions = new CatActions();
+    it('should respect original map function', function() {
+      catActions.getInBox.subscribe(function(value) {
+        value.should.be.an('object');
+        value.author.should.equal('human');
+        value.result.should.equal('disobey');
       });
+      catActions.getInBox('human');
+    });
 
-      it('should be extend-able', function() {
-        catActions.should.be.an.instanceOf(Actions);
-        catActions.getInBox.should.exist;
-      });
-
-      it('should produce observables for defined methods', function() {
-        catActions.getInBox.subscribe.should.be.a('function');
-      });
-
-      it('should respect original map function', function() {
-        catActions.getInBox.subscribe(function(value) {
-          value.should.be.an('object');
-          value.author.should.equal('human');
-          value.result.should.equal('disobey');
+    it(
+      'should notify passed value to subscribed observer when called',
+      function(done) {
+        catActions.passThrough.first().subscribe(function (val) {
+          val.should.equal(3);
+          done();
         });
-        catActions.getInBox('human');
-      });
+        catActions.passThrough(3);
+      }
+    );
 
-      it(
-        'should notify passed value to subscribed observer when called',
-        function(done) {
-          catActions.passThrough.first().subscribe(function (val) {
-            val.should.equal(3);
-            done();
-          });
-          catActions.passThrough(3);
-        }
-      );
-
-      it(
-        'should throw an error when an error is thrown in the map',
-        function() {
-          expect(function() {
-            catActions.errorMap();
-          }).to.throw();
-        }
-      );
-    });
+    it(
+      'should throw an error when an error is thrown in the map',
+      function() {
+        expect(function() {
+          catActions.errorMap();
+        }).to.throw();
+      }
+    );
   });
 
   describe('waitFor', function() {

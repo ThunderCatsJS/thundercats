@@ -161,7 +161,7 @@ describe('Store', function() {
             let store = new ExtendStore();
             store.subscribe(function() { });
           };
-          expect(fn).to.throw(/not a ThunderCats Actions/);
+          expect(fn).to.throw(/non ThunderCats Actions/);
         }
       );
 
