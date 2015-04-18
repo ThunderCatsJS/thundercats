@@ -24,6 +24,7 @@
   "globals": {
     "window": true
   },
+  "parser": "babel-eslint",
   "plugins": [
     "react"
   ],
@@ -231,7 +232,7 @@
     "no-bitwise": 1,
     "no-plusplus": 0,
 
-    "react/display-name": 0,
+    "react/display-name": 1,
     "react/jsx-boolean-value": 1,
     "react/jsx-quotes": [1, "single", "avoid-escape"],
     "react/jsx-no-undef": 1,

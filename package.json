@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "babel": "^5.0.12",
+    "babel-eslint": "^3.0.1",
     "babel-runtime": "^5.0.12",
     "babelify": "^6.0.2",
     "browserify": "^9.0.8",
@@ -61,7 +62,7 @@
     "chai-as-promised": "^4.3.0",
     "envify": "^3.4.0",
     "eslint": "^0.19.0",
-    "eslint-plugin-react": "^2.1.0",
+    "eslint-plugin-react": "^2.1.1",
     "istanbul": "^0.3.7",
     "istanbul-coveralls": "^1.0.2",
     "jsdom": "^4.0.4",
