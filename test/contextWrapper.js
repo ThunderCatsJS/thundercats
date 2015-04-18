@@ -4,6 +4,7 @@ import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
+require('./utils');
 import React from 'react/addons';
 import ContextWrapper from '../lib/ContextWrapper';
 import { Cat } from '../';
@@ -72,17 +73,19 @@ describe('ContextWrapper', function() {
         constructor(props) {
           super(props);
         }
+
         componentWillMount() {
-          console.log(this.context);
           spy(this.context.cat);
         }
+
         render() {
           return null;
         }
       }
 
       TestComp.contextTypes = {
-        cat: React.PropTypes.object.isRequired
+        cat: React.PropTypes.object.isRequired,
+        name: React.PropTypes.string
       };
 
       Burrito = ContextWrapper.wrap(React.createElement(TestComp), catApp);
