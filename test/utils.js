@@ -10,43 +10,57 @@ global.navigator = {
 
 console.debug = console.log;
 
+var assign = require('object.assign');
+var Actions = require('../').Actions;
 var React = require('react/addons');
 var TestUtils = React.addons.TestUtils;
 
 module.exports = {
-  createRenderSpecFunc: createRenderSpecFunc,
-  createRenderToStringSpecFunc: createRenderToStringSpecFunc,
+  createActions: createActions,
+  createClass: createClass,
   doc: doc,
+  React: React,
+  ReactTestUtils: TestUtils,
+  render: render,
   unmountComp: unmountComp
 };
 
-function createRenderSpecFunc(spec) {
-  return function() {
-    var FakeComp = React.createClass(spec);
-    var element = React.createElement(FakeComp);
-    var instance = TestUtils.renderIntoDocument(element);
-    return {
-      instance: instance,
-      element: element,
-      FakeComp: FakeComp
-    };
-  };
+function createActions(spy = function() {}, name = 'CatActions') {
+  class CatActions extends Actions {
+    constructor() {
+      super();
+    }
+    static displayName = name;
+    doAction(val) {
+      spy(val);
+      return val;
+    }
+  }
+  return CatActions;
 }
 
-function createRenderToStringSpecFunc(spec) {
-  return function() {
-    var FakeComp = React.createClass(spec);
-    var element = React.createElement(FakeComp);
-    var html = React.renderToString(element);
-    return {
-      instance: {},
-      html: html,
-      element: element,
-      FakeComp: FakeComp
-    };
+function createClass(spec) {
+  return React.createClass(assign(
+    {},
+    {
+      displayName: 'TestComp',
+      render() {
+        return React.createElement('div');
+      }
+    },
+    spec
+  ));
+}
+
+function render(Comp) {
+  var container = document.createElement('div');
+  var instance = React.render(Comp, container);
+  return {
+    instance: instance,
+    container: container
   };
 }
 
 function unmountComp(container) {
-  React.unmountComponentAtNode(container.getDOMNode().parent);
+  return React.unmountComponentAtNode(container);
 }

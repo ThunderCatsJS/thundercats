@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-expressions */
+// make sure window and document is added before any test is run
+require('./utils');
 const chai = require('chai');
 const expect = chai.expect;
 const chaiAsPromised = require('chai-as-promised');

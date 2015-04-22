@@ -2,6 +2,7 @@
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { createActions } from './utils';
 
 import { Cat, Store, Actions } from '../';
 
@@ -247,18 +248,4 @@ function createStore(initValue) {
   }
   CatStore.displayName = 'CatStore';
   return CatStore;
-}
-
-function createActions() {
-  class CatActions extends Actions {
-    constructor() {
-      super();
-    }
-
-    doAction(val) {
-      return val;
-    }
-  }
-  CatActions.displayName = 'CatActions';
-  return CatActions;
 }

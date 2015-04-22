@@ -4,12 +4,9 @@ import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
-require('./utils');
-import React from 'react/addons';
+import { React, ReactTestUtils } from './utils';
 import ContextWrapper from '../lib/ContextWrapper';
 import { Cat } from '../';
-
-const ReactTestUtils = React.addons.TestUtils;
 
 chai.should();
 chai.use(sinonChai);
@@ -70,6 +67,11 @@ describe('ContextWrapper', function() {
     it('should add context object to child component', function() {
       const spy = sinon.spy();
       class TestComp extends React.Component {
+        static displayName = 'TestComp'
+        static contextTypes = {
+          cat: React.PropTypes.object.isRequired,
+          name: React.PropTypes.string
+        }
         constructor(props) {
           super(props);
         }
@@ -83,18 +85,11 @@ describe('ContextWrapper', function() {
         }
       }
 
-      TestComp.contextTypes = {
-        cat: React.PropTypes.object.isRequired,
-        name: React.PropTypes.string
-      };
 
       Burrito = ContextWrapper.wrap(React.createElement(TestComp), catApp);
       ReactTestUtils.renderIntoDocument(Burrito);
       spy.should.have.been.calledOnce;
       spy.should.have.been.calledWith(catApp);
-    });
-
-    it('should render its children', function() {
     });
   });
 });
