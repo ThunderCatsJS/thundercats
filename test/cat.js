@@ -134,6 +134,7 @@ describe('Cat', function() {
 
   describe('getActions', function() {
     let cat, CatActions;
+
     beforeEach(function() {
       CatActions = createActions();
       class CatApp extends Cat {
@@ -144,6 +145,7 @@ describe('Cat', function() {
       }
       cat = new CatApp();
     });
+
     it('should return a Actions if it exists', function() {
       let catActions = cat.getActions('CatActions');
       expect(catActions).to.exist;
@@ -170,33 +172,42 @@ describe('Cat', function() {
       cat = new CatApp();
     });
 
-    it('should always return a string', function() {
+    it('should return an observable', function() {
       CatStore = createStore();
       cat.register(CatStore, cat);
-      let stringyState = cat.serialize();
-      expect(stringyState).to.exist;
-      stringyState.should.be.a('string');
+      let stringyStateObs = cat.serialize();
+      expect(stringyStateObs).to.exist;
+      stringyStateObs.should.be.an('object');
+      stringyStateObs.subscribe.should.be.a('function');
+      stringyStateObs.subscribe((stringyState) => {
+        expect(stringyState).to.exist;
+        stringyState.should.be.a('string');
+      });
     });
 
     it('should serialize store data', function() {
       storeVal = { bah: 'humbug' };
       CatStore = createStore(storeVal);
       cat.register(CatStore, cat);
-      let stringyState = cat.serialize();
-      stringyState.should.equal(JSON.stringify({ CatStore: storeVal }));
+      let stringyStateObs = cat.serialize();
+      stringyStateObs.subscribe((stringyState) => {
+        stringyState.should.equal(JSON.stringify({ CatStore: storeVal }));
+      });
     });
 
     it('should return an empty string if no stores have data', function() {
       CatStore = createStore();
       cat.register(CatStore, cat);
-      let stringyState = cat.serialize();
-      stringyState.should.equal('');
+      let stringyStateObs = cat.serialize();
+      stringyStateObs.subscribe((stringyState) => {
+        stringyState.should.equal('');
+      });
     });
   });
 
   describe('deserialize', function() {
     let CatStore, CatActions, cat;
-    beforeEach(function() {
+    beforeEach(() => {
       CatActions = createActions();
       class CatApp extends Cat {
         constructor() {
@@ -207,32 +218,48 @@ describe('Cat', function() {
       cat = new CatApp();
     });
 
-    it('should throw if given non strings', function() {
+    it('should return an observable', () => {
       CatStore = createStore();
       cat.register(CatStore, cat);
-      expect(() => {
-        cat.deserialize({ notA: 'String' });
-      }).to.throw(/deserialize expects a string/);
+      cat.deserialize().subscribe.should.be.a('function');
     });
 
-    it(
-      'should throw if stringy data does not parse into an object or null',
-      function() {
+    describe('observable', () => {
+      it('should error if given non strings', () => {
         CatStore = createStore();
         cat.register(CatStore, cat);
-        expect(() => {
-          cat.deserialize('1');
-        }).to.throw(/should be an object or null/);
-      }
-    );
+        cat.deserialize({ notA: 'String' }).subscribe(
+          () => { },
+          (err) => {
+            err.should.match(/deserialize expects a string/);
+          }
+        );
+      });
 
-    it('should hydrate store with correct data', function() {
-      let val = { foo: 'bar' };
-      CatStore = createStore();
-      cat.register(CatStore, cat);
-      let catStore = cat.getStore('CatStore');
-      cat.deserialize(JSON.stringify({ CatStore: val }));
-      catStore.__value.should.deep.equal(val);
+      it(
+        'should error if stringy data does not parse into an object or null',
+        () => {
+          CatStore = createStore();
+          cat.register(CatStore, cat);
+          cat.deserialize('1').subscribe(
+            () => { },
+            (err) => {
+              err.should.match(/should be an object or null/);
+            }
+          );
+        }
+      );
+
+      it('should hydrate store with correct data', () => {
+        let val = { foo: 'bar' };
+        CatStore = createStore();
+        cat.register(CatStore, cat);
+        let catStore = cat.getStore('CatStore');
+        cat.deserialize(JSON.stringify({ CatStore: val }))
+          .subscribeOnCompleted(() => {
+            catStore.__value.should.deep.equal(val);
+          });
+      });
     });
   });
 });
