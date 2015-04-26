@@ -36,19 +36,19 @@ describe('Cat', function() {
     it('should register an instance of actions class', function() {
       let cat = new CatApp();
       CatActions = createActions();
-      cat._actions.size.should.equal(0);
+      cat.actions.size.should.equal(0);
       cat.register(CatActions);
-      cat._actions.size.should.equal(1);
+      cat.actions.size.should.equal(1);
     });
 
     it('should register an instance of Store class', function() {
       let cat = new CatApp();
       CatActions = createActions();
       CatStore = createStore();
-      cat._stores.size.should.equal(0);
+      cat.stores.size.should.equal(0);
       cat.register(CatActions);
       cat.register(CatStore, cat);
-      cat._stores.size.should.equal(1);
+      cat.stores.size.should.equal(1);
     });
 
     it('should throw if given non ThunderCats Store/Actions', function() {
@@ -77,13 +77,13 @@ describe('Cat', function() {
       let CatActions = createActions();
       let CatStore = createStore();
       let cat = new CatApp();
-      cat._stores.size.should.equal(0);
+      cat.stores.size.should.equal(0);
       cat.register(CatActions);
       cat.register(CatStore, cat);
       let spy = sinon.spy(console, 'error');
-      cat._stores.size.should.equal(1);
+      cat.stores.size.should.equal(1);
       cat.register(CatStore);
-      cat._stores.size.should.equal(1);
+      cat.stores.size.should.equal(1);
       spy.restore();
       spy.should.have.been.calledOnce;
       spy.should.have.been.calledWith(sinon.match(/already exists/));
@@ -92,12 +92,12 @@ describe('Cat', function() {
     it('should warn if attempting to add an action twice', function() {
       let CatActions = createActions();
       let cat = new CatApp();
-      cat._actions.size.should.equal(0);
+      cat.actions.size.should.equal(0);
       cat.register(CatActions);
-      cat._actions.size.should.equal(1);
+      cat.actions.size.should.equal(1);
       let spy = sinon.spy(console, 'error');
       cat.register(CatActions);
-      cat._actions.size.should.equal(1);
+      cat.actions.size.should.equal(1);
       spy.restore();
       spy.should.have.been.calledOnce;
       spy.should.have.been.calledWith(sinon.match(/already exists/));
@@ -185,22 +185,24 @@ describe('Cat', function() {
       });
     });
 
-    it('should serialize store data', function() {
-      storeVal = { bah: 'humbug' };
-      CatStore = createStore(storeVal);
-      cat.register(CatStore, cat);
-      let stringyStateObs = cat.serialize();
-      stringyStateObs.subscribe((stringyState) => {
-        stringyState.should.equal(JSON.stringify({ CatStore: storeVal }));
+    describe('observable', () => {
+      it('should serialize store data', function() {
+        storeVal = { bah: 'humbug' };
+        CatStore = createStore(storeVal);
+        cat.register(CatStore, cat);
+        let stringyStateObs = cat.serialize();
+        stringyStateObs.subscribe((stringyState) => {
+          stringyState.should.equal(JSON.stringify({ CatStore: storeVal }));
+        });
       });
-    });
 
-    it('should return an empty string if no stores have data', function() {
-      CatStore = createStore();
-      cat.register(CatStore, cat);
-      let stringyStateObs = cat.serialize();
-      stringyStateObs.subscribe((stringyState) => {
-        stringyState.should.equal('');
+      it('should return an empty string if no stores have data', function() {
+        CatStore = createStore();
+        cat.register(CatStore, cat);
+        let stringyStateObs = cat.serialize();
+        stringyStateObs.subscribe((stringyState) => {
+          stringyState.should.equal('');
+        });
       });
     });
   });
@@ -254,6 +256,22 @@ describe('Cat', function() {
             catStore.__value.should.deep.equal(val);
           });
       });
+    });
+  });
+  describe('renderToString', () => {
+    it('should set current path');
+    it('should initiate fetcher registeration');
+    it('should start fetching process');
+    describe('fetching', () => {
+      it('should return early with no fetchers');
+      it('should return an observable');
+    });
+    it('should renderToString after fetch completion');
+    it('should return an observable');
+    describe('observable', () => {
+      it('should return markup and data');
+      it('should error on fetch errors');
+      it('should complete');
     });
   });
 });

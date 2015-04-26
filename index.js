@@ -1,5 +1,5 @@
 var Actions = require('./lib/Actions'),
-    Cat = require('./lib/Cat'),
+    Cat = require('./lib/Cat').default,
     Store = require('./lib/Store'),
     Container = require('./lib/Container'),
     waitFor = require('./lib/waitFor');

@@ -7,6 +7,7 @@ import sinonChai from 'sinon-chai';
 import utils from './utils';
 import ContextWrapper from '../lib/ContextWrapper';
 import { Store, Cat, Container } from '../';
+import { setPath } from '../lib/Cat';
 
 const {
   React, ReactTestUtils, render, createClass, unmountComp, createActions
@@ -264,11 +265,11 @@ describe('Container', function() {
       let CatActions = createActions();
       let CatStore = createStore(initValue);
       cat = new Cat();
-      fetcherSpy = sinon.spy(cat, '_registerFetcher');
+      fetcherSpy = sinon.spy(cat, 'registerFetcher');
       Comp = createClass();
       cat.register(CatActions);
       cat.register(CatStore, cat);
-      cat._setCurrentPath('/foo');
+      setPath(cat, '/foo');
     });
 
     afterEach(() => {
@@ -297,7 +298,7 @@ describe('Container', function() {
       const { container } = render(Burrito);
       cont = container;
       fetcherSpy.should.have.been.calledOnce;
-      const fetchCtx = cat._pathsMap.get('/foo').get(fetchAction);
+      const fetchCtx = cat.paths.get('/foo').get(fetchAction);
       expect(fetchCtx).to.not.be.undefined;
       fetchCtx.name.should.equal(fetchAction);
       fetchCtx.payload.should.deep.equal(fetchPayload);
