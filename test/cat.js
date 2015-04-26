@@ -228,12 +228,9 @@ describe('Cat', function() {
       it('should error if given non strings', () => {
         CatStore = createStore();
         cat.register(CatStore, cat);
-        cat.deserialize({ notA: 'String' }).subscribe(
-          () => { },
-          (err) => {
-            err.should.match(/deserialize expects a string/);
-          }
-        );
+        cat.deserialize({ notA: 'String' }).subscribeOnError((err) => {
+          err.should.match(/deserialize expects a string/);
+        });
       });
 
       it(
@@ -241,12 +238,9 @@ describe('Cat', function() {
         () => {
           CatStore = createStore();
           cat.register(CatStore, cat);
-          cat.deserialize('1').subscribe(
-            () => { },
-            (err) => {
-              err.should.match(/should be an object or null/);
-            }
-          );
+          cat.deserialize('1').subscribeOnError((err) => {
+            err.should.match(/should be an object or null/);
+          });
         }
       );
 
