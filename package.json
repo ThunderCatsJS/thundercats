@@ -65,7 +65,7 @@
     "eslint-plugin-react": "^2.1.1",
     "istanbul": "^0.3.7",
     "istanbul-coveralls": "^1.0.2",
-    "jsdom": "^4.0.4",
+    "jsdom": "^5.0.0",
     "minifyify": "^6.4.0",
     "mocha": "^2.2.1",
     "mocha-istanbul": "^0.2.0",
