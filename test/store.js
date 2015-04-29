@@ -22,7 +22,7 @@ describe('Store', function() {
         constructor() {
           super();
           this.__value = { name: 'Lion-O' };
-          this.registerAction(catActions.doAction);
+          this.registerActions(catActions);
         }
 
         opsOnError(err) {
@@ -68,7 +68,7 @@ describe('Store', function() {
 
     describe('registerAction(s)', function() {
 
-      it('should accept a single ThunderCats action', function() {
+      it('should accept a single observable action', function() {
         let fn = function() {
           class CatActions extends Actions {
             constructor() {
@@ -82,7 +82,10 @@ describe('Store', function() {
             constructor() {
               super();
               this.__value = {};
-              this.registerAction(catActions.doAction);
+              this.registerAction(
+                catActions.doAction.displayName,
+                catActions.doAction
+              );
             }
           }
           let store = new CatStore();
@@ -142,7 +145,7 @@ describe('Store', function() {
           let store = new ExtendStore();
           store.subscribe(function() { });
         };
-        expect(fn).to.throw(/attempted to register non ThunderCats action/);
+        expect(fn).to.throw(/should register observables/);
       });
 
       it(
@@ -212,7 +215,7 @@ describe('Store', function() {
         class CatStore extends Store {
           constructor() {
             super();
-            this.registerAction(catActions.doAction);
+            this.registerActions(catActions);
             this.__value = value;
           }
         }
