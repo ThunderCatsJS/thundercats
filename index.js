@@ -1,4 +1,4 @@
-var Actions = require('./lib/Actions'),
+var Actions = require('./lib/Actions').default,
     Cat = require('./lib/Cat').default,
     Store = require('./lib/Store').default,
     Container = require('./lib/Container'),
