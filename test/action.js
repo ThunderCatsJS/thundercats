@@ -1,16 +1,19 @@
 /* eslint-disable no-unused-expressions */
 // make sure window and document is added before any test is run
-require('./utils');
-const chai = require('chai');
-const expect = chai.expect;
-const chaiAsPromised = require('chai-as-promised');
-const sinon = require('sinon');
-const sinonChai = require('sinon-chai');
-chai.should();
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chaiAsPromised from 'chai-as-promised';
 
+/* eslint-disable no-unused-vars */
+import utils from './utils';
+/* eslint-enable no-unused-vars */
+
+const expect = chai.expect;
 const Rx = require('rx');
 const Actions = require('../').Actions;
 
+chai.should();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
@@ -97,37 +100,59 @@ describe('Actions', function() {
     });
 
 
-    it('should accept a single observable', function() {
+    it('should return on observable', () => {
       let waitForObservable = catActions.tryWaitFor.waitFor(observable1);
       waitForObservable.subscribe.should.to.be.a('function');
     });
 
-    it('should accept multiple observables', function() {
-      let waitForObservable =
-        catActions.tryWaitFor.waitFor(observable1, observable2);
-      waitForObservable.subscribe.should.to.be.a('function');
-    });
-
-    it(
-      'should not publish for observables that have an initial value',
-      function(done) {
-        let spy = sinon.spy(function(value) {
-          value.should.equal('meow');
+    describe('observable', () => {
+      it('should accept a single observable', function(done) {
+        let waitForObservable = catActions.tryWaitFor.waitFor(observable1);
+        waitForObservable.subscribe.should.to.be.a('function');
+        waitForObservable.subscribeOnNext(() => {
           done();
         });
-        let waitForObservable = catActions.tryWaitFor.waitFor(observable1);
-        waitForObservable.firstOrDefault().subscribe(spy);
-        spy.should.have.not.been.called;
-        catActions.tryWaitFor('meow');
+        catActions.tryWaitFor();
         observable1.onNext();
-        spy.should.have.been.calledOnce;
-      }
-    );
+      });
 
-    it('should throw if given non observable argument', function() {
-      expect(function() {
-        catActions.tryWaitFor.waitFor('not the momma');
-      }).to.throw(/takes only observables as arguments/);
+      it('should accept multiple observables', function(done) {
+        let waitForObservable =
+          catActions.tryWaitFor.waitFor(observable1, observable2);
+        waitForObservable.subscribe.should.to.be.a('function');
+        waitForObservable.subscribeOnNext(() => {
+          done();
+        });
+        catActions.tryWaitFor();
+        observable1.onNext();
+        observable2.onNext();
+      });
+
+      it(
+        'should not publish for observables that have an initial value',
+        function(done) {
+          let spy = sinon.spy(function(value) {
+            value.should.equal('meow');
+            done();
+          });
+          let waitForObservable = catActions.tryWaitFor.waitFor(observable1);
+          waitForObservable.firstOrDefault().subscribe(spy);
+          spy.should.have.not.been.called;
+          catActions.tryWaitFor('meow');
+          spy.should.have.not.been.called;
+          observable1.onNext();
+          spy.should.have.been.calledOnce;
+        }
+      );
+
+      it('should throw if given non observable argument', function(done) {
+        let waitForObservable = catActions.tryWaitFor.waitFor('not the momma');
+        waitForObservable.subscribeOnError((err) => {
+          err.should.be.an.instanceOf(Error);
+          done();
+        });
+        catActions.tryWaitFor();
+      });
     });
   });
 
@@ -147,6 +172,11 @@ describe('Actions', function() {
       }
       catActions = new CatActions();
       spy = sinon.spy();
+    });
+
+    it('should return a disposable of subscription', () => {
+      let subscription = catActions.doThis.subscribe(spy);
+      subscription.should.be.an.instanceOf(Rx.Disposable);
     });
 
     it('should call observer that isn\'t disposed', function() {
@@ -182,7 +212,7 @@ describe('Actions', function() {
     });
 
     it('should return true if the action as observers', function() {
-      disposable = catActions.doThis.subscribe(function () {});
+      catActions.doThis.subscribe(function () {});
       catActions.doThis.hasObservers().should.be.true;
     });
 
