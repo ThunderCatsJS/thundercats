@@ -2,9 +2,10 @@
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { createActions } from './utils';
+import { React, createActions, createClass } from './utils';
 
-import { Cat, Store, Actions } from '../';
+import { Cat, Store, Actions, Container } from '../';
+import { RenderToString } from '../lib/Cat';
 
 chai.should();
 chai.use(sinonChai);
@@ -258,16 +259,74 @@ describe('Cat', function() {
       });
     });
   });
-  describe('renderToString', () => {
-    it('should set current path');
-    it('should initiate fetcher registeration');
-    it('should start fetching process');
-    describe('fetching', () => {
-      it('should return early with no fetchers');
-      it('should return an observable');
+
+  describe('renderToString', function() {
+    let cat;
+    this.timeout(6000);
+    beforeEach(() => {
+      cat = new Cat();
     });
-    it('should renderToString after fetch completion');
-    it('should return an observable');
+
+    it('should return an observable', () => {
+      let TestComp = createClass({});
+      let TestElement = React.createElement(TestComp);
+      let renderObs = RenderToString(cat, TestElement, { path: '/foo' });
+      renderObs.subscribe.should.be.a('function');
+    });
+
+    it('should set current path', () => {
+      let TestComp = createClass({});
+      let TestElement = React.createElement(TestComp);
+      RenderToString(cat, TestElement, { path: '/foo' });
+      cat.paths.has('/foo').should.be.true;
+      cat.paths.get('/foo').should.be.an('object');
+      cat.paths.get('/foo').should.be.an.instanceOf(Map);
+    });
+
+    describe('fetching', () => {
+      let Comp, payload;
+      beforeEach(() => {
+        let CatActions = createActions();
+        let CatStore = createStore();
+        payload = { name: 'foo' };
+        let wrappedPayload = { value: payload };
+        let TestComp = createClass({});
+        cat.register(CatActions);
+        cat.register(CatStore, cat);
+        Comp = React.createElement(
+          Container,
+          {
+            store: 'CatStore',
+            fetchAction: 'catActions.doAction',
+            fetchPayload: wrappedPayload
+          },
+          React.createElement(TestComp)
+        );
+      });
+
+      it('should initiate fetcher registration', (done) => {
+        let registerSpy = sinon.spy(cat, 'registerFetcher');
+        RenderToString(cat, Comp, { path: '/foo' })
+          .subscribe(() => {
+            registerSpy.restore();
+            registerSpy.should.have.been.calledTwice;
+            registerSpy.should.have.been.deep.calledWith(
+              sinon.match.hasOwn('name').and(
+              sinon.match.hasOwn('store')).and(
+              sinon.match.hasOwn('action')).and(
+              sinon.match.hasOwn('payload'))
+            );
+            done();
+          });
+      });
+
+      it('should start fetching process', (done) => {
+        RenderToString(cat, Comp, { path: '/foo' })
+          .subscribe(() => {
+            done();
+          });
+      });
+    });
     describe('observable', () => {
       it('should return markup and data');
       it('should error on fetch errors');
@@ -276,13 +335,16 @@ describe('Cat', function() {
   });
 });
 
-function createStore(initValue) {
+function createStore(initValue = null) {
   class CatStore extends Store {
     constructor(cat) {
       super();
       this.__value = initValue;
       let catActions = cat.getActions('CatActions');
-      this.registerActions(catActions);
+      this.registerAction(
+        'doAction',
+        catActions.doAction.delay(500)
+      );
     }
   }
   CatStore.displayName = 'CatStore';
