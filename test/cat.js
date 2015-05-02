@@ -284,15 +284,18 @@ describe('Cat', function() {
     });
 
     describe('fetching', () => {
-      let Comp, payload;
+      let Comp, payload, wrappedPayload, TestComp;
       beforeEach(() => {
         let CatActions = createActions();
         let CatStore = createStore();
         payload = { name: 'foo' };
-        let wrappedPayload = { value: payload };
-        let TestComp = createClass({});
+        wrappedPayload = { value: payload };
+        TestComp = createClass({});
         cat.register(CatActions);
         cat.register(CatStore, cat);
+      });
+
+      it('should initiate fetcher registration', (done) => {
         Comp = React.createElement(
           Container,
           {
@@ -302,11 +305,8 @@ describe('Cat', function() {
           },
           React.createElement(TestComp)
         );
-      });
-
-      it('should initiate fetcher registration', (done) => {
         let registerSpy = sinon.spy(cat, 'registerFetcher');
-        RenderToString(cat, Comp, { path: '/foo' })
+        cat.renderToString(Comp, { path: '/foo' })
           .subscribe(() => {
             registerSpy.restore();
             registerSpy.should.have.been.calledTwice;
@@ -320,17 +320,103 @@ describe('Cat', function() {
           });
       });
 
-      it('should start fetching process', (done) => {
-        RenderToString(cat, Comp, { path: '/foo' })
+      it('should be ok with empty payload', (done) => {
+        Comp = React.createElement(
+          Container,
+          {
+            store: 'CatStore',
+            fetchAction: 'catActions.doAction'
+          },
+          React.createElement(TestComp)
+        );
+        let registerSpy = sinon.spy(cat, 'registerFetcher');
+        cat.renderToString(Comp, { path: '/foo' })
           .subscribe(() => {
+            registerSpy.restore();
+            registerSpy.should.have.been.calledTwice;
+            registerSpy.should.have.been.deep.calledWith(
+              sinon.match.hasOwn('name').and(
+              sinon.match.hasOwn('store')).and(
+              sinon.match.hasOwn('action')).and(
+              sinon.match.hasOwn('payload'))
+            );
+            done();
+          });
+      });
+
+      it('should unset current path', (done) => {
+        Comp = React.createElement(
+          Container,
+          {
+            store: 'CatStore',
+            fetchAction: 'catActions.doAction'
+          },
+          React.createElement(TestComp)
+        );
+        let setPathSpy = sinon.spy(cat.paths, 'set');
+        let unsetPathSpy = sinon.spy(cat.paths, 'delete');
+        cat.renderToString(Comp, { path: '/foo' })
+          .firstOrDefault()
+          .subscribe(() => {
+            setPathSpy.restore();
+            unsetPathSpy.restore();
+
+            setPathSpy.should.have.been.calledWith('/foo');
+            unsetPathSpy.should.have.been.calledOnce;
+            unsetPathSpy.should.have.been.calledWith('/foo');
             done();
           });
       });
     });
+
     describe('observable', () => {
-      it('should return markup and data');
-      it('should error on fetch errors');
-      it('should complete');
+      let Comp;
+      beforeEach(() => {
+        let CatActions = createActions();
+        let CatStore = createStore();
+        let TestComp = createClass({});
+        cat.register(CatActions);
+        cat.register(CatStore, cat);
+        Comp = React.createElement(
+          Container,
+          {
+            store: 'CatStore',
+            fetchAction: 'catActions.doAction'
+          },
+          React.createElement(TestComp)
+        );
+      });
+
+      it('should return markup, data', (done) => {
+        cat.renderToString(Comp, { path: '/foo' })
+          .subscribe(data => {
+            expect(data.markup).to.exist;
+            expect(data.data).to.exist;
+            data.markup.should.be.a.string;
+            data.data.should.be.an('object');
+            done();
+          });
+      });
+      it('should error on fetch errors', (done) => {
+        cat.renderToString('not the momma', { path: '/foo' })
+          .subscribe(
+            () => {},
+            err => {
+              expect(err).to.exist;
+              err.should.be.an.instanceOf(Error);
+              done();
+            }
+          );
+      });
+
+      it('should complete', (done) => {
+        cat.renderToString(Comp, { path: '/foo' })
+          .subscribe(
+            () => {},
+            () => {},
+            () => done()
+          );
+      });
     });
   });
 });
