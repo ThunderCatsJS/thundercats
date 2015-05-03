@@ -2,7 +2,7 @@
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { React, createActions, createClass } from './utils';
+import { React, createActions, createClass, ReactTestUtils } from './utils';
 
 import { Cat, Store, Actions, Container } from '../';
 import { RenderToString } from '../lib/Cat';
@@ -416,6 +416,67 @@ describe('Cat', function() {
             () => {},
             () => done()
           );
+      });
+    });
+  });
+
+  describe('render', function () {
+    let cat, Comp;
+    beforeEach(() => {
+      let CatActions = createActions();
+      let CatStore = createStore();
+      let TestComp = createClass({});
+      cat = new Cat();
+      cat.register(CatActions);
+      cat.register(CatStore, cat);
+      Comp = React.createElement(
+        Container,
+        {
+          store: 'CatStore',
+          fetchAction: 'catActions.doAction'
+        },
+        React.createElement(TestComp)
+      );
+    });
+
+    it('should return an observable', () => {
+      let divContainer = document.createElement('div');
+      let renderObserable = cat.render(Comp, divContainer, { path: '/foo' });
+      expect(renderObserable).to.exist;
+      renderObserable.subscribe.should.be.a('function');
+    });
+
+    describe('observable', () => {
+      let divContainer;
+      beforeEach(() => {
+        divContainer = document.createElement('div');
+      });
+
+      afterEach(() => {
+        React.unmountComponentAtNode(divContainer);
+      });
+
+      it('should return react instance', (done) => {
+        let renderObserable = cat.render(Comp, divContainer, { path: '/foo' });
+        expect(renderObserable).to.exist;
+        renderObserable
+          .firstOrDefault()
+          .subscribe(function(inst) {
+            expect(inst).to.exist;
+            ReactTestUtils.isCompositeComponent(inst).should.be.true;
+            done();
+          });
+      });
+
+      it('should return error', (done) => {
+        let renderObserable = cat.render('foo', divContainer, { path: '/foo' });
+        expect(renderObserable).to.exist;
+        renderObserable
+          .subscribeOnError(err => {
+            expect(err).to.exist;
+            err.should.be.an.instanceOf(Error);
+            done();
+          });
       });
     });
   });
