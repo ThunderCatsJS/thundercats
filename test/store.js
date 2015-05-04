@@ -367,12 +367,12 @@ describe('Store', function() {
       );
 
       it('should respect previous operations', function() {
-        let defer2 = Q.defer();
+        let defer2 = new Rx.Subject();
         catActions.doAction({
           value: {},
-          confirm: defer2.promise
+          confirm: defer2
         });
-        defer2.reject();
+        defer2.onError('boo');
       });
 
       it('should remove that entry on promise resolve', function(done) {
