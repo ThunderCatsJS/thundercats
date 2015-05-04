@@ -488,10 +488,7 @@ function createStore(initValue = null) {
       super();
       this.__value = initValue;
       let catActions = cat.getActions('CatActions');
-      this.registerAction(
-        'doAction',
-        catActions.doAction.delay(500)
-      );
+      this.register(catActions.doAction.delay(500));
     }
   }
   CatStore.displayName = 'CatStore';

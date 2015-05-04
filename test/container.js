@@ -180,7 +180,7 @@ describe('Container', function() {
         );
         let { container } = render(Burrito);
         let store = cat.getStore('CatStore');
-        store.__value = 'not the momma';
+        store.value = 'not the momma';
         store._notifyObservers();
         unmountComp(container).should.be.true;
       }).to.throw(/should get objects or null/);
@@ -312,7 +312,7 @@ function createStore(initValue = null) {
       super();
       this.__value = initValue;
       let catActions = cat.getActions('CatActions');
-      this.registerActions(catActions);
+      this.register(catActions);
     }
     static displayName = 'CatStore'
   }
