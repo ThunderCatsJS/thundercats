@@ -329,7 +329,7 @@ describe('Store', function() {
       });
     });
 
-    describe('confirming', function() {
+    describe('optimistic updates', function() {
 
       let value = {};
       let newValue = {};
@@ -355,12 +355,12 @@ describe('Store', function() {
       });
 
       it(
-        'should register a new entry in store history with confirm promise',
+        'should register a new entry in store history with optimistic promise',
         function() {
           store.history.size.should.equal(0);
           catActions.doAction({
             value: newValue,
-            confirm: defer.promise
+            optimistic: defer.promise
           });
           store.history.size.should.equal(1);
         }
@@ -370,7 +370,7 @@ describe('Store', function() {
         let defer2 = new Rx.Subject();
         catActions.doAction({
           value: {},
-          confirm: defer2
+          optimistic: defer2
         });
         defer2.onError('boo');
       });
@@ -384,7 +384,7 @@ describe('Store', function() {
       });
     });
 
-    describe('canceling', function () {
+    describe('reject', function () {
 
       let value = {};
       let newValue = {};
@@ -424,14 +424,14 @@ describe('Store', function() {
         function () {
           catActions.doAction({
             value: newValue,
-            confirm: defer.promise
+            optimistic: defer.promise
           });
           spy.should.have.been.calledWith(newValue);
         }
       );
 
       it(
-        'should have notified observers about the canceling',
+        'should have notified observers about the rejection',
         function(done) {
           defer.reject();
           defer.promise.catch(function() {
@@ -465,7 +465,7 @@ describe('Store', function() {
             transform: function (arr) {
               return arr.concat('foo');
             },
-            confirm: deferred1.promise
+            optimistic: deferred1.promise
           });
         });
 
@@ -485,7 +485,7 @@ describe('Store', function() {
               transform: function (arr) {
                 return arr.concat('bar');
               },
-              confirm: deferred2.promise
+              optimistic: deferred2.promise
             });
             spy.should.have.been.calledWith(['foo', 'bar']);
           }
