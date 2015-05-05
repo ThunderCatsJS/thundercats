@@ -270,17 +270,8 @@ describe('Cat', function() {
     it('should return an observable', () => {
       let TestComp = createClass({});
       let TestElement = React.createElement(TestComp);
-      let renderObs = RenderToString(cat, TestElement, { path: '/foo' });
+      let renderObs = RenderToString(cat, TestElement);
       renderObs.subscribe.should.be.a('function');
-    });
-
-    it('should set current path', () => {
-      let TestComp = createClass({});
-      let TestElement = React.createElement(TestComp);
-      RenderToString(cat, TestElement, { path: '/foo' });
-      cat.paths.has('/foo').should.be.true;
-      cat.paths.get('/foo').should.be.an('object');
-      cat.paths.get('/foo').should.be.an.instanceOf(Map);
     });
 
     describe('fetching', () => {
@@ -305,16 +296,18 @@ describe('Cat', function() {
           },
           React.createElement(TestComp)
         );
-        let registerSpy = sinon.spy(cat, 'registerFetcher');
-        cat.renderToString(Comp, { path: '/foo' })
-          .subscribe(() => {
-            registerSpy.restore();
-            registerSpy.should.have.been.calledTwice;
-            registerSpy.should.have.been.deep.calledWith(
-              sinon.match.hasOwn('name').and(
-              sinon.match.hasOwn('store')).and(
-              sinon.match.hasOwn('action')).and(
-              sinon.match.hasOwn('payload'))
+        cat.renderToString(Comp)
+          .subscribe(({ fetchMap }) => {
+            expect(fetchMap).to.exist;
+            fetchMap.size.should.equal(1);
+            const fetchContext = fetchMap.get('catActions.doAction');
+            expect(fetchContext).to.exist;
+            fetchContext.should.be.an('object');
+            fetchContext.should.include.keys(
+              'name',
+              'payload',
+              'action',
+              'store'
             );
             done();
           });
@@ -329,41 +322,17 @@ describe('Cat', function() {
           },
           React.createElement(TestComp)
         );
-        let registerSpy = sinon.spy(cat, 'registerFetcher');
-        cat.renderToString(Comp, { path: '/foo' })
-          .subscribe(() => {
-            registerSpy.restore();
-            registerSpy.should.have.been.calledTwice;
-            registerSpy.should.have.been.deep.calledWith(
-              sinon.match.hasOwn('name').and(
-              sinon.match.hasOwn('store')).and(
-              sinon.match.hasOwn('action')).and(
-              sinon.match.hasOwn('payload'))
+        cat.renderToString(Comp)
+          .subscribe(({ fetchMap }) => {
+            const fetchContext = fetchMap.get('catActions.doAction');
+            expect(fetchContext).to.exist;
+            fetchContext.should.include.keys(
+              'name',
+              'payload',
+              'action',
+              'store'
             );
-            done();
-          });
-      });
-
-      it('should unset current path', (done) => {
-        Comp = React.createElement(
-          Container,
-          {
-            store: 'CatStore',
-            fetchAction: 'catActions.doAction'
-          },
-          React.createElement(TestComp)
-        );
-        let setPathSpy = sinon.spy(cat.paths, 'set');
-        let unsetPathSpy = sinon.spy(cat.paths, 'delete');
-        cat.renderToString(Comp, { path: '/foo' })
-          .firstOrDefault()
-          .subscribe(() => {
-            setPathSpy.restore();
-            unsetPathSpy.restore();
-
-            setPathSpy.should.have.been.calledWith('/foo');
-            unsetPathSpy.should.have.been.calledOnce;
-            unsetPathSpy.should.have.been.calledWith('/foo');
+            fetchContext.payload.should.include.keys('transform');
             done();
           });
       });
@@ -388,7 +357,7 @@ describe('Cat', function() {
       });
 
       it('should return markup, data', (done) => {
-        cat.renderToString(Comp, { path: '/foo' })
+        cat.renderToString(Comp)
           .subscribe(data => {
             expect(data.markup).to.exist;
             expect(data.data).to.exist;
@@ -397,8 +366,9 @@ describe('Cat', function() {
             done();
           });
       });
+
       it('should error on fetch errors', (done) => {
-        cat.renderToString('not the momma', { path: '/foo' })
+        cat.renderToString('not the momma')
           .subscribe(
             () => {},
             err => {
@@ -410,7 +380,7 @@ describe('Cat', function() {
       });
 
       it('should complete', (done) => {
-        cat.renderToString(Comp, { path: '/foo' })
+        cat.renderToString(Comp)
           .subscribe(
             () => {},
             () => {},
@@ -441,7 +411,7 @@ describe('Cat', function() {
 
     it('should return an observable', () => {
       let divContainer = document.createElement('div');
-      let renderObserable = cat.render(Comp, divContainer, { path: '/foo' });
+      let renderObserable = cat.render(Comp, divContainer);
       expect(renderObserable).to.exist;
       renderObserable.subscribe.should.be.a('function');
     });
@@ -457,7 +427,7 @@ describe('Cat', function() {
       });
 
       it('should return react instance', (done) => {
-        let renderObserable = cat.render(Comp, divContainer, { path: '/foo' });
+        let renderObserable = cat.render(Comp, divContainer);
         expect(renderObserable).to.exist;
         renderObserable
           .firstOrDefault()
@@ -469,7 +439,7 @@ describe('Cat', function() {
       });
 
       it('should return error', (done) => {
-        let renderObserable = cat.render('foo', divContainer, { path: '/foo' });
+        let renderObserable = cat.render('foo', divContainer);
         expect(renderObserable).to.exist;
         renderObserable
           .subscribeOnError(err => {
