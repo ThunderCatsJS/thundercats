@@ -7,6 +7,7 @@ import sinonChai from 'sinon-chai';
 import utils from './utils';
 import ContextWrapper from '../lib/ContextWrapper';
 import { Store, Cat, Container } from '../';
+import { notifyObservers } from '../lib/Store';
 import { setPath } from '../lib/Cat';
 
 const {
@@ -14,7 +15,6 @@ const {
 } = utils;
 chai.should();
 chai.use(sinonChai);
-
 
 describe('Container', function() {
   describe('initialization', ()=> {
@@ -181,7 +181,7 @@ describe('Container', function() {
         let { container } = render(Burrito);
         let store = cat.getStore('CatStore');
         store.value = 'not the momma';
-        store._notifyObservers();
+        notifyObservers(store.value, store.observers);
         unmountComp(container).should.be.true;
       }).to.throw(/should get objects or null/);
     });
@@ -221,7 +221,7 @@ describe('Container', function() {
       it('should throw on errors', () => {
         expect(() => {
           let catStore = cat.getStore('CatStore');
-          catStore._observers.forEach((observer) => {
+          catStore.observers.forEach((observer) => {
             observer.onError('meow');
           });
         }).to.throw(/ThunderCats Store encountered an error/);
@@ -230,7 +230,7 @@ describe('Container', function() {
       it('should warn if completes', () => {
         let spy = sinon.spy(console, 'warn');
         let catStore = cat.getStore('CatStore');
-        catStore._observers.forEach((observer) => {
+        catStore.observers.forEach((observer) => {
           observer.onCompleted();
         });
         spy.restore();

@@ -357,12 +357,12 @@ describe('Store', function() {
       it(
         'should register a new entry in store history with confirm promise',
         function() {
-          store._history.size.should.equal(0);
+          store.history.size.should.equal(0);
           catActions.doAction({
             value: newValue,
             confirm: defer.promise
           });
-          store._history.size.should.equal(1);
+          store.history.size.should.equal(1);
         }
       );
 
@@ -378,7 +378,7 @@ describe('Store', function() {
       it('should remove that entry on promise resolve', function(done) {
         defer.resolve();
         defer.promise.then(function() {
-          store._history.size.should.equal(0);
+          store.history.size.should.equal(0);
           done();
         });
       });
@@ -637,15 +637,7 @@ describe('Store', function() {
 
     it(
       'should throw if an operation id is used that does not exist ' +
-      'within its history',
-      function() {
-        expect(
-          store._confirmOperation.bind(store, 'not an id')
-        ).to.throw(/an unknown operation id was used/);
-        expect(
-          store._cancelOperation.bind(store, 'not an id')
-        ).to.throw(/an unknown operation id was used/);
-      }
+      'within its history'
     );
   });
 });
