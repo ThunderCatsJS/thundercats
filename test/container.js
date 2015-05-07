@@ -7,7 +7,6 @@ import sinonChai from 'sinon-chai';
 import utils from './utils';
 import ContextWrapper from '../lib/ContextWrapper';
 import { Store, Cat, Container } from '../';
-import { notifyObservers } from '../lib/Store';
 
 const {
   React, ReactTestUtils, render, createClass, unmountComp, createActions
@@ -46,13 +45,21 @@ describe('Container', function() {
       let CatActions = createActions();
       let CatStore = createStore(ba);
       let cat = new Cat();
-      let Comp = createClass();
+
+      let Comp = createClass({
+        getThundercats() {
+          return {
+            store: 'catStore'
+          };
+        }
+      });
+
       cat.register(CatActions);
       cat.register(CatStore, cat);
       let Burrito = ContextWrapper.wrap(
         React.createElement(
           Container,
-          { store: 'CatStore' },
+          null,
           React.createElement(Comp)
         ),
         cat
@@ -65,63 +72,6 @@ describe('Container', function() {
     });
   });
 
-  describe('actions props', function() {
-    let FelineActions, CatActions, Comp, cat;
-    beforeEach(() => {
-      CatActions = createActions(null, 'CatActions');
-      FelineActions = createActions(null, 'FelineActions');
-      let CatStore = createStore();
-      cat = new Cat();
-      Comp = createClass();
-      cat.register(CatActions);
-      cat.register(FelineActions);
-      cat.register(CatStore, cat);
-    });
-
-    it('should add actions object to props', () => {
-      let Burrito = ContextWrapper.wrap(
-        React.createElement(
-          Container,
-          {
-            store: 'CatStore',
-            actions: 'CatActions'
-          },
-          React.createElement(Comp)
-        ),
-        cat
-      );
-      let { instance, container } = render(Burrito);
-      let comp = ReactTestUtils.findRenderedComponentWithType(instance, Comp);
-      expect(comp.props.catActions).to.exist;
-      comp.props.catActions.should.be.an.instanceOf(CatActions);
-      unmountComp(container).should.be.true;
-    });
-
-    it('should also add multiple actions objects to props', () => {
-      let Burrito = ContextWrapper.wrap(
-        React.createElement(
-          Container,
-          {
-            store: 'CatStore',
-            actions: [
-              'CatActions',
-              'FelineActions'
-            ]
-          },
-          React.createElement(Comp)
-        ),
-        cat
-      );
-      let { instance, container } = render(Burrito);
-      let comp = ReactTestUtils.findRenderedComponentWithType(instance, Comp);
-      expect(comp.props.catActions).to.exist;
-      expect(comp.props.felineActions).to.exist;
-      comp.props.catActions.should.be.an.instanceOf(CatActions);
-      comp.props.felineActions.should.be.an.instanceOf(FelineActions);
-      unmountComp(container);
-    });
-  });
-
   describe('store', function() {
     let cat, initValue, Comp;
     beforeEach(() => {
@@ -129,12 +79,17 @@ describe('Container', function() {
       let CatActions = createActions();
       let CatStore = createStore(initValue);
       cat = new Cat();
-      Comp = createClass();
       cat.register(CatActions);
       cat.register(CatStore, cat);
     });
 
-    it('should throw if not given a store name prop', () => {
+    it('should throw if not given a store name', () => {
+      Comp = createClass({
+        getThundercats() {
+          return {};
+        }
+      });
+
       expect(() => {
         let Burrito = ContextWrapper.wrap(
           React.createElement(
@@ -150,11 +105,18 @@ describe('Container', function() {
     });
 
     it('should throw if no store is found for store name prop', () => {
+      Comp = createClass({
+        getThundercats() {
+          return {
+            store: 'yo'
+          };
+        }
+      });
       expect(() => {
         let Burrito = ContextWrapper.wrap(
           React.createElement(
             Container,
-            { store: 'not the momma' },
+            null,
             React.createElement(Comp)
           ),
           cat
@@ -164,37 +126,22 @@ describe('Container', function() {
       }).to.throw(/should get at a store but found none/);
     });
 
-    it('should throw if given improper value to component', () => {
-      expect(() => {
-        let Burrito = ContextWrapper.wrap(
-          React.createElement(
-            Container,
-            {
-              store: 'CatStore',
-              actions: 'CatActions'
-            },
-            React.createElement(Comp)
-          ),
-          cat
-        );
-        let { container } = render(Burrito);
-        let store = cat.getStore('CatStore');
-        store.value = 'not the momma';
-        notifyObservers(store.value, store.observers);
-        unmountComp(container).should.be.true;
-      }).to.throw(/should get objects or null/);
-    });
-
     describe('observable', () => {
       let inst, cont, Burrito;
       beforeEach(() => {
+        Comp = createClass({
+          getThundercats() {
+            return {
+              store: 'CatStore',
+              actions: 'CatActions'
+            };
+          }
+        });
+
         Burrito = ContextWrapper.wrap(
           React.createElement(
             Container,
-            {
-              store: 'CatStore',
-              actions: 'CatActions'
-            },
+            null,
             React.createElement(Comp)
           ),
           cat
@@ -258,13 +205,25 @@ describe('Container', function() {
   });
 
   describe('fetching registration', function() {
-    let cat, cont, Comp;
+    let cat, cont, Comp, fetchAction, fetchPayload;
     beforeEach(() => {
       let initValue = { lick: 'furr' };
       let CatActions = createActions();
       let CatStore = createStore(initValue);
+
+      fetchAction = 'catActions.doAction';
+      fetchPayload = { only: 'A tribute' };
+      Comp = createClass({
+        getThundercats() {
+          return {
+            store: 'CatStore',
+            fetchAction: fetchAction,
+            payload: fetchPayload
+          };
+        }
+      });
+
       cat = new Cat();
-      Comp = createClass();
       cat.register(CatActions);
       cat.register(CatStore, cat);
       cat.fetchMap = new Map();
@@ -278,17 +237,10 @@ describe('Container', function() {
     });
 
     it('should register a fetch action for given fetch prop', () => {
-      const fetchAction = 'catActions.doAction';
-      const fetchPayload = { only: 'A tribute' };
       const Burrito = ContextWrapper.wrap(
         React.createElement(
           Container,
-          {
-            store: 'CatStore',
-            actions: 'CatActions',
-            fetchAction: fetchAction,
-            fetchPayload: fetchPayload
-          },
+          null,
           React.createElement(Comp)
         ),
         cat
@@ -307,7 +259,7 @@ function createStore(initValue = null) {
   class CatStore extends Store {
     constructor(cat) {
       super();
-      this.__value = initValue;
+      this.value = initValue;
       let catActions = cat.getActions('CatActions');
       this.register(catActions);
     }

@@ -30,13 +30,18 @@ describe('ContextWrapper', function() {
       let Burrito = ContextWrapper.wrap(React.createElement('div'), catApp);
       React.isValidElement(Burrito).should.be.true;
     });
-
   });
 
   describe('component', function() {
-    let catApp, Burrito;
+    let catApp, Burrito, spy;
     beforeEach(function() {
       catApp = new Cat();
+    });
+
+    afterEach(() => {
+      if (spy && spy.restore) {
+        spy.restore();
+      }
     });
 
     it('should throw if given more than one child', function() {
@@ -54,30 +59,26 @@ describe('ContextWrapper', function() {
       // This test is brittle
       // latest version of react use console.error this test may need to change
       // with next release
-      let spy = sinon.spy(console, 'warn');
+      spy = sinon.spy(console, 'warn');
       ReactTestUtils.renderIntoDocument(React.createElement(
         ContextWrapper,
         { cat: 'notTheMomma' },
         React.createElement('div')
       ));
-      spy.restore();
       spy.should.have.been.called;
     });
 
     it('should add context object to child component', function() {
-      const spy = sinon.spy();
+      spy = sinon.spy();
       class TestComp extends React.Component {
-        static displayName = 'TestComp'
-        static contextTypes = {
-          cat: React.PropTypes.object.isRequired,
-          name: React.PropTypes.string
-        }
-        constructor(props) {
-          super(props);
+        constructor(props, context) {
+          super(props, context);
+          spy(context.cat);
         }
 
-        componentWillMount() {
-          spy(this.context.cat);
+        static displayName = 'TestComp'
+        static contextTypes = {
+          cat: React.PropTypes.object.isRequired
         }
 
         render() {
@@ -85,8 +86,70 @@ describe('ContextWrapper', function() {
         }
       }
 
-
       Burrito = ContextWrapper.wrap(React.createElement(TestComp), catApp);
+      ReactTestUtils.renderIntoDocument(Burrito);
+      spy.should.have.been.calledOnce;
+      spy.should.have.been.calledWith(catApp);
+    });
+
+    it('should add context object to (great)grandchild component', function() {
+      const spy = sinon.spy();
+      class Child extends React.Component {
+        constructor(props, context) {
+          super(props, context);
+        }
+
+        static displayName = 'Child'
+        static contextTypes = {
+          cat: React.PropTypes.object.isRequired
+        }
+
+        render() {
+          return React.createElement(
+            'div',
+            null,
+            React.createElement(GrandChild)
+          );
+        }
+      }
+
+      class GrandChild extends React.Component {
+        constructor(props, context) {
+          super(props, context);
+        }
+
+        static displayName = 'GrandChild'
+        render() {
+          return React.createElement(
+            GreatGrandChild
+          );
+        }
+      }
+
+      class GreatGrandChild extends React.Component {
+        constructor(props, context) {
+          super(props, context);
+          spy(context.cat);
+        }
+
+        static displayName = 'GreatGrandChild'
+        static contextTypes = {
+          cat: React.PropTypes.object.isRequired
+        }
+
+        render() {
+          return React.createElement(
+            'h1',
+            null,
+            'hello thundorians!'
+          );
+        }
+      }
+
+      Burrito = ContextWrapper.wrap(
+        React.createElement(Child),
+        catApp
+      );
       ReactTestUtils.renderIntoDocument(Burrito);
       spy.should.have.been.calledOnce;
       spy.should.have.been.calledWith(catApp);

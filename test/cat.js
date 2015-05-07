@@ -192,7 +192,7 @@ describe('Cat', function() {
         CatStore = createStore(storeVal);
         cat.register(CatStore, cat);
         let stringyStateObs = cat.serialize();
-        stringyStateObs.subscribe((stringyState) => {
+        stringyStateObs.subscribe(stringyState => {
           stringyState.should.equal(JSON.stringify({ CatStore: storeVal }));
         });
       });
@@ -281,19 +281,23 @@ describe('Cat', function() {
         let CatStore = createStore();
         payload = { name: 'foo' };
         wrappedPayload = { value: payload };
-        TestComp = createClass({});
         cat.register(CatActions);
         cat.register(CatStore, cat);
       });
 
       it('should initiate fetcher registration', (done) => {
+        TestComp = createClass({
+          getThundercats() {
+            return {
+              store: 'CatStore',
+              fetchAction: 'catActions.doAction',
+              payload: wrappedPayload
+            };
+          }
+        });
         Comp = React.createElement(
           Container,
-          {
-            store: 'CatStore',
-            fetchAction: 'catActions.doAction',
-            fetchPayload: wrappedPayload
-          },
+          null,
           React.createElement(TestComp)
         );
         cat.renderToString(Comp)
@@ -314,12 +318,18 @@ describe('Cat', function() {
       });
 
       it('should be ok with empty payload', (done) => {
+        TestComp = createClass({
+          getThundercats() {
+            return {
+              store: 'CatStore',
+              fetchAction: 'catActions.doAction'
+            };
+          }
+        });
+
         Comp = React.createElement(
           Container,
-          {
-            store: 'CatStore',
-            fetchAction: 'catActions.doAction'
-          },
+          null,
           React.createElement(TestComp)
         );
         cat.renderToString(Comp)
@@ -332,7 +342,7 @@ describe('Cat', function() {
               'action',
               'store'
             );
-            fetchContext.payload.should.include.keys('transform');
+            fetchContext.payload.should.deep.equal({});
             done();
           });
       });
@@ -343,15 +353,19 @@ describe('Cat', function() {
       beforeEach(() => {
         let CatActions = createActions();
         let CatStore = createStore();
-        let TestComp = createClass({});
+        let TestComp = createClass({
+          getThundercats() {
+            return {
+              store: 'CatStore',
+              fetchAction: 'catActions.doAction'
+            };
+          }
+        });
         cat.register(CatActions);
         cat.register(CatStore, cat);
         Comp = React.createElement(
           Container,
-          {
-            store: 'CatStore',
-            fetchAction: 'catActions.doAction'
-          },
+          null,
           React.createElement(TestComp)
         );
       });
@@ -395,16 +409,20 @@ describe('Cat', function() {
     beforeEach(() => {
       let CatActions = createActions();
       let CatStore = createStore();
-      let TestComp = createClass({});
+      let TestComp = createClass({
+        getThundercats() {
+          return {
+            store: 'CatStore',
+            fetchAction: 'catActions.doAction'
+          };
+        }
+      });
       cat = new Cat();
       cat.register(CatActions);
       cat.register(CatStore, cat);
       Comp = React.createElement(
         Container,
-        {
-          store: 'CatStore',
-          fetchAction: 'catActions.doAction'
-        },
+        null,
         React.createElement(TestComp)
       );
     });
@@ -456,9 +474,12 @@ function createStore(initValue = null) {
   class CatStore extends Store {
     constructor(cat) {
       super();
-      this.__value = initValue;
+      this.value = initValue;
+      console.log(initValue);
       let catActions = cat.getActions('CatActions');
-      this.register(catActions.doAction.delay(500));
+      this.register(
+        catActions.doAction.delay(500).map(() => ({ value: {}}))
+      );
     }
   }
   CatStore.displayName = 'CatStore';

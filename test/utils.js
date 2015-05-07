@@ -45,7 +45,7 @@ function createClass(spec) {
     {
       displayName: 'TestComp',
       render() {
-        return React.createElement('div');
+        return React.createElement('h1', null, 'hello');
       }
     },
     spec
