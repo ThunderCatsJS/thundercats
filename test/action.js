@@ -24,7 +24,9 @@ describe('Actions', function() {
     beforeEach(function() {
       class CatActions extends Actions {
         constructor() {
-          super();
+          super([
+            'shortCut'
+          ]);
         }
 
         getInBox(value) {
@@ -51,6 +53,13 @@ describe('Actions', function() {
     it('should produce observables for defined methods', function() {
       catActions.getInBox.subscribe.should.be.a('function');
     });
+
+    it(
+      'should produce observables for array of strings passed to super',
+      function() {
+        catActions.shortCut.subscribe.should.be.a('function');
+      }
+    );
 
     it('should respect original map function', function() {
       catActions.getInBox.subscribe(function(value) {
