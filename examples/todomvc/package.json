@@ -1,0 +1,23 @@
+{
+  "name": "todomvc-flux",
+  "version": "1.0.0",
+  "description": "Example Flux architecture.",
+  "repository": "https://github.com/r3dm/thundercats",
+  "main": "js/app.jsx",
+  "dependencies": {
+    "director": "^1.2.7",
+    "react": "^0.13.2",
+    "rx": "^2.3.20"
+  },
+  "devDependencies": {
+    "babelify": "^6.0.2",
+    "browserify": "^10.1.0",
+    "envify": "^3.4.0",
+    "watchify": "^3.2.1"
+  },
+  "scripts": {
+    "start": "watchify js/app.jsx -t [ babelify --optional es7.classProperties ] -g envify -o js/bundle.js",
+    "build": "NODE_ENV=development browserify js/app.jsx -t [ babelify --optional es7.classProperties ] -g envify -o js/bundle.js"
+  },
+  "author": "berkeley martinez"
+}
