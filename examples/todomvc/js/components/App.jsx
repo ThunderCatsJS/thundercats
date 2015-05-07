@@ -8,9 +8,6 @@ import Main from './Main.jsx';
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.thundercats = {
-      store: 'todoStore'
-    };
   }
 
   static displayName = 'App'
@@ -18,6 +15,12 @@ export default class App extends React.Component {
     todosMap: PropTypes.array,
     currentRoute: PropTypes.string
   };
+
+  getThundercats() {
+    return {
+      store: 'todoStore'
+    };
+  }
 
   shouldComponentUpdate(props) {
     return this.props.todosMap !== props.todosMap ||
