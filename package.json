@@ -1,7 +1,7 @@
 {
   "name": "thundercats",
   "description": "How the thundercats would build Flux architecture",
-  "version": "1.5.0",
+  "version": "2.0.0-beta1",
   "keywords": [
     "thundercats",
     "react",
@@ -21,57 +21,57 @@
     "url": "https://github.com/r3dm/thundercats"
   },
   "scripts": {
+    "build-clean": "rm -rf build/global/* && rm -rf build/npm/*",
+    "build-global": "NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional runtime ] -t browserify-shim -g envify -o build/global/ThunderCats.js && NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional runtime ] -t browserify-shim -g envify -p [minifyify --no-map --uglify[--compress --mangle --dead_code]] -o build/global/ThunderCats.min.js",
+    "build-npm": "mkdir build/npm/lib && babel ./lib -d build/npm/lib && cp README.md build/npm && cp index.js build/npm && node -p 'p=require(\"./package\");p.main=\"lib\";p.scripts=p.devDependencies=p[\"browserify-shim\"]=undefined;JSON.stringify(p,null,2)' > build/npm/package.json",
+    "build": "npm run build-clean && npm run build-global && npm run build-npm",
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "mocha",
-    "coverAlls": "istanbul cover _mocha && istanbul-coveralls",
-    "cover": "istanbul cover _mocha"
+    "test": "mocha --compilers js:./registerWithOptions.js",
+    "coverAlls": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js && istanbul-coveralls",
+    "cover": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js"
+  },
+  "browserify-shim": {
+    "react": "global:React",
+    "rx": "global:Rx"
   },
   "author": {
     "name": "Berkeley Martinez",
     "email": "berkeley@r3dm.com",
     "url": "http://r3dm.com"
   },
-  "contributors": [
-    {
-      "name": "François de Campredon",
-      "email": "francois.de.campredon@gmail.com",
-      "url": "https://github.com/fdecampredon"
-    },
-    {
-      "Name": "Berkeley Martinez",
-      "email": "berkeley@r3dm.com",
-      "url": "http://r3dm.com"
-    },
-    {
-      "Name": "Nathan Leniz",
-      "email": "terakilobyte@gmail.com",
-      "url": "http://terakilobyte.com"
-    }
-  ],
   "license": "Apache Version 2",
   "dependencies": {
     "debug": "^2.1.3",
-    "es6-map": "^0.1.1",
     "invariant": "^2.0.0",
     "node-uuid": "^1.4.1",
-    "object.assign": "^1.1.1"
+    "object.assign": "^1.1.1",
+    "warning": "^1.0.1"
   },
   "peerDependencies": {
     "rx": "^2.3.14"
   },
   "devDependencies": {
+    "babel": "^5.0.12",
+    "babel-eslint": "^3.0.1",
+    "babel-runtime": "^5.0.12",
+    "babelify": "^6.0.2",
+    "browserify": "^9.0.8",
+    "browserify-shim": "^3.8.3",
     "chai": "^2.1.1",
     "chai-as-promised": "^4.3.0",
-    "eslint": "^0.17.1",
-    "eslint-plugin-react": "^1.6.0",
+    "envify": "^3.4.0",
+    "eslint": "^0.19.0",
+    "eslint-plugin-react": "^2.1.1",
     "istanbul": "^0.3.7",
     "istanbul-coveralls": "^1.0.2",
-    "jsdom": "^4.0.4",
+    "jsdom": "^5.0.0",
+    "minifyify": "^6.4.0",
     "mocha": "^2.2.1",
     "mocha-istanbul": "^0.2.0",
     "q": "^1.2.0",
     "react": "^0.13.1",
+    "rf-changelog": "^0.4.0",
     "rx": "^2.3.14",
     "sinon": "^1.11.1",
     "sinon-chai": "^2.7.0"

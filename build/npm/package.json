@@ -1,0 +1,39 @@
+{
+  "name": "thundercats",
+  "description": "How the thundercats would build Flux architecture",
+  "version": "2.0.0-beta1",
+  "keywords": [
+    "thundercats",
+    "react",
+    "reactjs",
+    "flux",
+    "dispatcher",
+    "isomorphic",
+    "rx",
+    "rxjs",
+    "frp",
+    "reactive"
+  ],
+  "main": "lib",
+  "bugs": "https://github.com/r3dm/thundercats/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/r3dm/thundercats"
+  },
+  "author": {
+    "name": "Berkeley Martinez",
+    "email": "berkeley@r3dm.com",
+    "url": "http://r3dm.com"
+  },
+  "license": "Apache Version 2",
+  "dependencies": {
+    "debug": "^2.1.3",
+    "invariant": "^2.0.0",
+    "node-uuid": "^1.4.1",
+    "object.assign": "^1.1.1",
+    "warning": "^1.0.1"
+  },
+  "peerDependencies": {
+    "rx": "^2.3.14"
+  }
+}

@@ -5,6 +5,9 @@
     "classes": true,
     "defaultParams": true,
     "destructuring": true,
+    "generators": true,
+    "modules": true,
+    "objectLiteralComputedProperties": true,
     "objectLiteralShorthandMethods": true,
     "objectLiteralShorthandProperties": true,
     "restParams": true,
@@ -21,6 +24,7 @@
   "globals": {
     "window": true
   },
+  "parser": "babel-eslint",
   "plugins": [
     "react"
   ],
@@ -52,7 +56,7 @@
     "valid-jsdoc": 2,
     "valid-typeof": 2,
 
-    "block-scoped-var": 2,
+    "block-scoped-var": 0,
     "complexity": 0,
     "consistent-return": 0,
     "curly": 2,
@@ -228,9 +232,11 @@
     "no-bitwise": 1,
     "no-plusplus": 0,
 
-    "react/display-name": 0,
+    "react/display-name": 1,
+    "react/jsx-boolean-value": 1,
     "react/jsx-quotes": [1, "single", "avoid-escape"],
     "react/jsx-no-undef": 1,
+    "react/jsx-sort-props": 1,
     "react/jsx-uses-react": 1,
     "react/jsx-uses-vars": 1,
     "react/no-did-mount-set-state": 2,

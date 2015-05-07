@@ -1,49 +1,39 @@
 /* eslint-disable no-unused-vars, no-undefined, no-unused-expressions */
-var mocha = require('mocha');
-var chai = require('chai');
-var expect = chai.expect;
-var should = chai.should();
-var sinon = require('sinon');
-var chaiAsPromised = require('chai-as-promised');
+import chai, { expect } from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chaiAsPromised from 'chai-as-promised';
 
-var Rx = require('rx');
-var Q = require('q');
-var Store = require('../').Store;
-var Mixin = require('../').ObservableStateMixin;
-var inherits = require('../utils').inherits;
+import Rx from 'rx';
+import Q from 'q';
+import { Store, Actions } from '../';
 
+chai.should();
 chai.use(chaiAsPromised);
-chai.use(require('sinon-chai'));
+chai.use(sinonChai);
 
 describe('Store', function() {
-  describe('construct', function() {
-    var store, observable;
+  describe('class', function() {
+    let store, CatStore, catActions;
 
     beforeEach(function() {
-      observable = new Rx.Subject();
-      function ExtendStore() {
-        Store.call(this);
+      catActions = createActions();
+      class CatStore extends Store {
+        constructor() {
+          super();
+          this.value = { name: 'Lion-O' };
+          this.register(catActions);
+        }
+
+        opsOnError(err) {
+          console.log('an error occurred in operations with ' + err);
+        }
+
+        opsOnCompleted() {
+          throw new Error('ops completed unexpectedly');
+        }
       }
-
-      inherits(ExtendStore, Store);
-
-      ExtendStore.prototype.getInitialValue = function() {
-        return { name: 'Lion-O' };
-      };
-
-      ExtendStore.prototype.getOperations = function() {
-        return observable;
-      };
-
-      ExtendStore.prototype.opsOnError = function(err) {
-        console.log('an error occurred in operations with ' + err);
-      };
-
-      ExtendStore.prototype.opsOnCompleted = function() {
-        throw new Error('ops completed unexpectedly');
-      };
-
-      store = new ExtendStore();
+      store = new CatStore();
     });
 
     it('should be an instance of ThunderCats Store', function() {
@@ -51,339 +41,162 @@ describe('Store', function() {
     });
 
     it('should be an observable', function() {
-      var spy = sinon.spy();
+      let spy = sinon.spy();
       store.subscribe.should.be.a('function');
       store.subscribe(spy);
-      observable.onNext({ value: { name: 'purr' }});
+      catActions.doAction({ value: { name: 'purr' }});
       spy.should.have.been.calledWith({ name: 'purr' });
     });
 
     it('should override built in operations onError handler', function() {
       expect(function() {
-        var spy = sinon.spy();
-        store.subscribe(spy);
-        observable.onError(new Error('Do not cross streams'));
+        store.subscribe(function() { });
+        catActions.doAction.onError(new Error('Do not cross streams'));
       }).to.not.throw();
     });
 
     it('should override built in operations onComplete handler', function() {
       expect(function() {
-        var spy = sinon.spy();
+        let spy = sinon.spy();
         store.subscribe(spy);
-        observable.onCompleted("I ain't got nothing left");
+        catActions.doAction.onCompleted("I ain't got nothing left");
       }).to.throw(/ops completed/);
-    });
-
-    it(
-      'should throw an error if in getInitialValue is not provided',
-      function() {
-        expect(function() {
-          store = new Store();
-          store.subscribe(function() { });
-        }).to.throw(/getInitialValue not implemented/);
-      }
-    );
-
-    it(
-      'should throw an error if in getOperations is not provided',
-      function() {
-        expect(function() {
-          function ExtendStore() {
-            Store.call(this);
-          }
-          inherits(ExtendStore, Store);
-          ExtendStore.prototype.getInitialValue = function() {
-            return { name: 'Lion-O' };
-          };
-          store = new ExtendStore();
-          store.subscribe(function() { });
-        }).to.throw(/getOperations not implemented/);
-      }
-    );
-  });
-
-  describe('create', function() {
-
-    it('should be an observable', function() {
-      var store = Store.create({
-        getInitialValue: function() { }
-      });
-      store.should.be.an.instanceOf(Store);
-      store.subscribe.should.be.a('function');
-    });
-
-    it('should throw an error if argument passed is not an object', function() {
-      Store.create.bind(this, 5)
-        .should
-        .throw(/expects an object as argument/);
-    });
-
-  });
-
-  describe('getInitialValue:', function() {
-
-    it('should publish null if getInitialValue returns null', function() {
-      var store = Store.create({
-        getInitialValue: function () {}
-      });
-
-      store.subscribe(function(val) {
-        expect(val).to.be.undefined;
-      });
-    });
-
-    it(
-      'should return a value on initial subscription if `getInitialValue` ' +
-      'returns a value',
-      function() {
-        var store = Store.create({
-          getInitialValue: function () {
-            return 5;
-          }
-        });
-
-        store.subscribe(function(val) {
-          expect(val).to.be.a('number');
-        });
-      }
-    );
-
-    it('should throw an error if getInitialValue is not defined', function() {
-      Store.create.bind(this, {})
-        .should
-        .throw(/getInitialValue should be a function/);
-    });
-
-    it(
-      'should throw an error if getInitialValue is not a function',
-      function() {
-        var fn = function() {
-          Store.create({
-            getInitialValue: 'Not the momma',
-
-            getOperations: function () {
-              return Rx.Observable.of(5);
-            }
-          });
-        };
-        expect(fn).to.throw(/getInitialValue should be a function/);
-      }
-    );
-
-    describe('with promises and observables', function() {
-      var store, value;
-
-      it(
-        'should resolve and publish a value if getInitialValue returns ' +
-        ' and resolves a Promise',
-        function () {
-          value = { name: 'Lion-O' };
-          store = Store.create({
-            getInitialValue: function () {
-              return Q.resolve(value);
-            }
-          });
-
-          store.subscribe(function(val) {
-            val.should.equal(value);
-          });
-        }
-      );
-
-      it(
-        'should notify observers if get initial value promise is rejected',
-        function(done) {
-          value = { name: 'Lion-O' };
-          var spy = sinon.spy();
-          store = Store.create({
-            name: 'Bob',
-            getInitialValue: function () {
-              return Q.reject(value);
-            }
-          });
-
-          store.subscribe(spy, function(val) {
-            spy.should.not.have.been.called;
-            val.should.equal(value);
-            done();
-          });
-        }
-      );
-
-      it(
-        'should publish the observable\'s resolve value if getInitialValue ' +
-        'returns an observable',
-        function() {
-          value = 2;
-
-          store = Store.create({
-            getInitialValue: function () {
-              return Rx.Observable.of(value);
-            }
-          });
-
-          store.subscribe(function(val) {
-            val.should.equal(value);
-          });
-        }
-      );
-
-      it(
-        'should notify observers if get initial value observable errors',
-        function() {
-          store = Store.create({
-            getInitialValue: function () {
-              return Rx.Observable.throw('snarf?');
-            }
-          });
-
-          store.subscribe(function() { }, function(err) {
-            err.should.be.instanceOf(Error);
-          });
-        }
-      );
     });
   });
 
   describe('operations', function() {
 
-    describe('getOperations', function() {
+    describe('register', function() {
 
-      it('should accept a single observable', function() {
-        var fn = function() {
-          var store = Store.create({
-            getInitialValue: function() {
-              return {};
-            },
-            getOperations: function() {
-              return Rx.Observable.of({
-                value: 'pi'
-              });
+      it('should accept a single observable action', function() {
+        let fn = function() {
+          class CatActions extends Actions {
+            constructor() {
+              super();
             }
-          });
+            doAction() {
+            }
+          }
+          let catActions = new CatActions();
+          class CatStore extends Store {
+            constructor() {
+              super();
+              this.value = {};
+              this.register(catActions.doAction);
+            }
+          }
+          let store = new CatStore();
           store.subscribe(function() { });
         };
         expect(fn).not.to.throw();
       });
 
-      it('should accept an array of observables', function() {
-        var fn = function() {
-          var store = Store.create({
-            getInitialValue: function() {
-              return {};
-            },
-            getOperations: function() {
-              return [
-                Rx.Observable.of({
-                  value: 'pi'
-                }),
-                Rx.Observable.of({
-                  value: 'i'
-                }),
-                Rx.Observable.of({
-                  value: 'ro'
-                })
-              ];
+      it('should register actions class instance', function() {
+        let fn = function() {
+          class CatActions extends Actions {
+            constructor() {
+              super();
             }
-          });
+            doAction() {
+            }
+            doAnother() {
+            }
+          }
+          let catActions = new CatActions();
+          class CatStore extends Store {
+            constructor() {
+              super();
+              this.value = {};
+              this.register(catActions);
+            }
+          }
+          let store = new CatStore();
           store.subscribe(function() { });
         };
-
         expect(fn).not.to.throw();
       });
 
-      it(
-        'should throw an error if getOperations is not a function',
-        function() {
-          var fn = function() {
-            Store.create({
-              getInitialValue: function () {
-                return {};
-              },
-              getOperations: 'Not the momma'
-            });
-          };
-          expect(fn).to.throw();
-        }
-      );
-
-      it(
-        'should throw if it does not return an observable',
-        function() {
-          var fn = function() {
-            var store = Store.create({
-              getInitialValue: function () {
-                return {};
-              },
-
-              getOperations: function() {
-                return 'not the momma';
+      it('should throw if no actions are registered', function() {
+          expect(function() {
+            class ExtendStore extends Store {
+              constructor() {
+                super();
+                this.value = { name: 'Lion-O' };
               }
-            });
-            store.subscribe(function() { });
-          };
-          expect(fn).to.throw();
-        }
-      );
-
-      it(
-        'should throw if it return an array with a non-observable',
-        function() {
-          var fn = function() {
-            var store = Store.create({
-              getInitialValue: function () {
-                return {};
-              },
-
-              getOperations: function() {
-                return [
-                  Rx.Observable.from('is the momma'),
-                  'not the momma'
-                ];
-              }
-            });
-            store.subscribe(function() { });
-          };
-          expect(fn).to.throw();
-        }
-      );
-
-      it('should throw if operations observable errors', function() {
-        var observable = new Rx.Subject();
-        var fn = function() {
-          var store = Store.create({
-            getInitialValue: function () {
-              return {};
-            },
-            getOperations: function() {
-              return observable;
             }
-          });
+            let store = new ExtendStore();
+            store.subscribe(function() { });
+          }).to.throw(/must have at least one action/);
+        }
+      );
+
+      it('should throw when registering non observables', function() {
+        let fn = function() {
+          class ExtendStore extends Store {
+            constructor() {
+              super();
+              this.value = { name: 'Lion-O' };
+              this.register('not the momma');
+            }
+          }
+          let store = new ExtendStore();
           store.subscribe(function() { });
-          observable.onError(new Error('catastrophy'));
+        };
+        expect(fn).to.throw(/should register observables/);
+      });
+
+      it('should throw if an action errors', function() {
+        let fn = function() {
+          let catActions = createActions();
+          class ExtendStore extends Store {
+            constructor() {
+              super();
+              this.value = { name: 'Lion-O' };
+              this.register(catActions);
+            }
+          }
+          let store = new ExtendStore();
+          store.subscribe(function() { });
+          catActions.doAction.onError('catastrophy');
         };
         expect(fn).to.throw(/catastrophy/);
       });
+
+      it('should complain when action completes', function() {
+        let catActions = createActions();
+        class ExtendStore extends Store {
+          constructor() {
+            super();
+            this.value = { name: 'Lion-O' };
+            this.register(catActions);
+          }
+        }
+        let store = new ExtendStore();
+        let onCompletedSpy = sinon.spy(store, 'opsOnCompleted');
+        store.subscribe(function() {});
+        catActions.doAction.onCompleted();
+        onCompletedSpy.should.have.been.calledOnce;
+      });
     });
 
-    describe('set value', function() {
+    describe('value', function() {
 
-      var value = { hello: 'world' };
-      var newValue = { foo: 'bar' };
-      var operations = new Rx.Subject();
-      var spy = sinon.spy();
-      var store;
+      let value = { hello: 'world' };
+      let newValue = { foo: 'bar' };
+      let spy = sinon.spy();
+      let catActions;
+      let store;
 
       before(function() {
-        store = Store.create({
-          getInitialValue: function () {
-            return value;
-          },
-
-          getOperations: function () {
-            return operations;
+        catActions = createActions();
+        class CatStore extends Store {
+          constructor() {
+            super();
+            this.register(catActions);
+            this.value = value;
           }
-        });
+        }
+        store = new CatStore();
         store.subscribe(spy);
       });
 
@@ -395,30 +208,91 @@ describe('Store', function() {
       );
 
       it('should have notified observers with the new value', function() {
-        operations.onNext({value: newValue});
+        catActions.doAction.onNext({ value: newValue });
         spy.should.have.been.calledWith(newValue);
         spy.should.have.been.calledTwice;
       });
+
+      it('should not throw if value is null', function() {
+        expect(() => {
+          catActions.doAction({ value: null });
+        }).to.not.throw();
+      });
+
+      it('should throw if value is not an object', function() {
+        expect(() => {
+          catActions.doAction({ value: 'not the momma' });
+        }).to.throw(/invalid operation/);
+      });
     });
 
-    describe('transforms', function() {
-
-      var value = { hello: 'world' };
-      var newValue = { foo: 'bar' };
-      var operations = new Rx.Subject();
-      var spy = sinon.spy();
-      var store;
+    describe('set', function() {
+      let value = { hello: 'world' };
+      let newValue = { foo: 'bar' };
+      let spy = sinon.spy();
+      let CatStore;
+      let catActions;
+      let store;
 
       before(function() {
-        store = Store.create({
-          getInitialValue: function () {
-            return value;
-          },
-
-          getOperations: function () {
-            return operations;
+        catActions = createActions();
+        class CatStore extends Store {
+          constructor() {
+            super();
+            this.register(catActions);
+            this.value = value;
           }
-        });
+        }
+        store = new CatStore();
+        store.subscribe(spy);
+      });
+
+      it('should assign new values to store value', function() {
+        spy.should.have.not.been.calledWith(
+          sinon.match({ hello: 'world', foo: 'bar' })
+        );
+        catActions.doAction({ set: newValue });
+        spy.lastCall.should.have.been.calledWith(
+          sinon.match({ hello: 'world', foo: 'bar' })
+        );
+      });
+
+      it('should not throw if set is null', function() {
+        expect(() => {
+          catActions.doAction({
+            set: null
+          });
+        }).to.not.throw();
+      });
+
+      it('should throw if set is not an object or null', function() {
+        expect(() => {
+          catActions.doAction({
+            set: 'yo yo yo'
+          });
+        }).to.throw(/invalid operation/);
+      });
+    });
+
+    describe('transform', function() {
+
+      let value = { hello: 'world' };
+      let newValue = { foo: 'bar' };
+      let spy = sinon.spy();
+      let CatStore;
+      let catActions;
+      let store;
+
+      before(function() {
+        catActions = createActions();
+        class CatStore extends Store {
+          constructor() {
+            super();
+            this.register(catActions);
+            this.value = value;
+          }
+        }
+        store = new CatStore();
         store.subscribe(spy);
       });
 
@@ -434,7 +308,7 @@ describe('Store', function() {
         'transform',
         function() {
           spy.should.have.not.been.calledWith(newValue);
-          operations.onNext({
+          catActions.doAction({
             transform: function(val) {
               val.should.equal(value);
               return newValue;
@@ -447,84 +321,92 @@ describe('Store', function() {
         spy.should.have.been.calledWith(newValue);
         spy.should.have.been.calledTwice;
       });
+
+      it('should throw if not a function', function() {
+        expect(() => {
+          catActions.doAction({ transform: 'not the momma' });
+        }).to.throw(/invalid operation/);
+      });
     });
 
-    describe('confirming', function() {
+    describe('optimistic updates', function() {
 
-      var value = {};
-      var newValue = {};
-      var operations;
-      var spy;
-      var defer;
-      var store;
+      let value = {};
+      let newValue = {};
+      let spy;
+      let defer;
+      let store;
+      let catActions;
 
       before(function() {
-        operations = new Rx.Subject();
         spy = sinon.spy();
         defer = Q.defer();
-        store = Store.create({
-          getInitialValue: function() {
-            return value;
-          },
-          getOperations: function() {
-            return operations;
+        catActions = createActions();
+        class CatStore extends Store {
+          constructor() {
+            super();
+            this.register(catActions);
+            this.value = value;
           }
-        });
+        }
+        CatStore.displayName = 'CatStore';
+        store = new CatStore();
         store.subscribe(spy);
       });
 
       it(
-        'should register a new entry in store history with confirm promise',
+        'should register a new entry in store history with optimistic promise',
         function() {
-          store._history.size.should.equal(0);
-          operations.onNext({
+          store.history.size.should.equal(0);
+          catActions.doAction({
             value: newValue,
-            confirm: defer.promise
+            optimistic: defer.promise
           });
-          store._history.size.should.equal(1);
+          store.history.size.should.equal(1);
         }
       );
 
       it('should respect previous operations', function() {
-        var defer2 = Q.defer();
-        operations.onNext({
+        let defer2 = new Rx.Subject();
+        catActions.doAction({
           value: {},
-          confirm: defer2.promise
+          optimistic: defer2
         });
-        defer2.reject();
+        defer2.onError('boo');
       });
 
       it('should remove that entry on promise resolve', function(done) {
         defer.resolve();
         defer.promise.then(function() {
-          store._history.size.should.equal(0);
+          store.history.size.should.equal(0);
           done();
         });
       });
     });
 
-    describe('canceling', function () {
+    describe('reject', function () {
 
-      var value = {};
-      var newValue = {};
-      var operations;
-      var spy;
-      var defer;
-      var defer2;
-      var store;
+      let value = {};
+      let newValue = {};
+      let spy;
+      let defer;
+      let defer2;
+      let store;
+      let catActions;
 
       before(function() {
-        operations = new Rx.Subject();
         spy = sinon.spy();
         defer = Q.defer();
-        store = Store.create({
-          getInitialValue: function() {
-            return {};
-          },
-          getOperations: function() {
-            return operations;
+        catActions = createActions();
+        class CatStore extends Store {
+          constructor() {
+            super();
+            this.register(catActions);
+            this.value = value;
           }
-        });
+        }
+        CatStore.prototype.displayName = 'CatStore';
+        store = new CatStore();
         store.subscribe(spy);
       });
 
@@ -533,23 +415,23 @@ describe('Store', function() {
         function () {
           spy.should.have.been.calledOnce;
           spy.should.have.been.calledWith(value);
-          operations.onNext({ value: value });
+          catActions.doAction({ value: value });
         }
       );
 
       it(
         'should have notified observers with the new value',
         function () {
-          operations.onNext({
+          catActions.doAction({
             value: newValue,
-            confirm: defer.promise
+            optimistic: defer.promise
           });
           spy.should.have.been.calledWith(newValue);
         }
       );
 
       it(
-        'should have notified observers about the canceling',
+        'should have notified observers about the rejection',
         function(done) {
           defer.reject();
           defer.promise.catch(function() {
@@ -561,28 +443,29 @@ describe('Store', function() {
 
       describe('with nesting', function() {
 
-        var operations = new Rx.Subject();
-        var spy = sinon.spy();
-        var deferred1 = Q.defer();
-        var deferred2 = Q.defer();
-        var store;
+        let spy = sinon.spy();
+        let deferred1 = Q.defer();
+        let deferred2 = Q.defer();
+        let catActions;
+        let store;
 
         before(function() {
-          store = Store.create({
-            getInitialValue: function() {
-              return [];
-            },
-            getOperations: function() {
-              return operations;
+          catActions = createActions();
+          class CatStore extends Store {
+            constructor() {
+              super();
+              this.register(catActions);
+              this.value = [];
             }
-          });
+          }
+          store = new CatStore();
           store.subscribe(spy);
 
-          operations.onNext({
+          catActions.doAction({
             transform: function (arr) {
               return arr.concat('foo');
             },
-            confirm: deferred1.promise
+            optimistic: deferred1.promise
           });
         });
 
@@ -598,11 +481,11 @@ describe('Store', function() {
           'should notify observers with the transformed value ' +
           'after the second operation has been applied',
           function() {
-            operations.onNext({
+            catActions.doAction({
               transform: function (arr) {
                 return arr.concat('bar');
               },
-              confirm: deferred2.promise
+              optimistic: deferred2.promise
             });
             spy.should.have.been.calledWith(['foo', 'bar']);
           }
@@ -638,127 +521,138 @@ describe('Store', function() {
 
   describe('lifecycle', function() {
 
-    var initialValue;
-    var initialValueSpy;
-    var operations;
-    var operationsSpy;
-    var store, disposable;
+    let operationsSpy;
+    let catActions;
+    let store, disposable;
 
     beforeEach(function() {
-      initialValue = new Rx.Subject();
-      initialValueSpy = sinon.spy(function () {
-        return initialValue;
-      });
 
-      operations = new Rx.Subject();
-      operationsSpy = sinon.spy(function () {
-        return operations;
-      });
-
-      store = Store.create({
-        getInitialValue: initialValueSpy,
-        getOperations: operationsSpy
-      });
+      operationsSpy = sinon.spy();
+      catActions = createActions(operationsSpy);
+      class CatStore extends Store {
+        constructor() {
+          super();
+          this.register(catActions);
+        }
+      }
+      store = new CatStore();
     });
 
     it(
-      'should not have called getInitialValue and getOperatons' +
-      'before a subscription',
-      function() {
-        initialValueSpy.should.not.have.been.called;
-        operationsSpy.should.not.have.been.called;
-      }
-    );
-
-    it(
-      'should subscribe to operations observable on initial subscription',
+      'should subscribe to actions on initial subscription',
       function () {
         store.subscribe(function () { });
-        initialValue.hasObservers().should.be.true;
-        initialValueSpy.should.have.been.calledOne;
+        catActions.doAction.hasObservers().should.be.true;
       }
     );
 
     it(
-      'should not subscribe to operations until initial value observable ' +
-      'publishes first value',
-      function () {
-        store.subscribe(function(value) {
-          value.should.equal('snarf');
-        });
-        operationsSpy.should.not.have.been.called;
-        initialValue.onNext('snarf');
-        operationsSpy.should.have.been.calledOnce;
-        operations.hasObservers().should.be.true;
-      }
-    );
-
-    it(
-      'should dispose subscriptions to observable and initial value ' +
-      'observable when store disposes last observer',
+      'should dispose subscriptions to actions when store disposes ' +
+      'last observer',
       function() {
-        var disposable = store.subscribe(function() { });
-        initialValue.hasObservers().should.be.true;
-        initialValue.onNext(true);
-        operations.hasObservers().should.be.true;
+        let disposable = store.subscribe(function() { });
+        catActions.doAction.hasObservers().should.be.true;
         disposable.dispose();
-        initialValue.hasObservers().should.be.false;
-        operations.hasObservers().should.be.false;
+        catActions.doAction.hasObservers().should.be.false;
       }
     );
 
     it(
       'should resubscribe to observables when store is resubscribed',
       function() {
-        var disposable = store.subscribe(function() { });
-        initialValue.onNext(true);
-        operations.hasObservers().should.be.true;
+        let disposable = store.subscribe(function() { });
+        catActions.doAction.hasObservers().should.be.true;
         disposable.dispose();
-        initialValue.hasObservers().should.be.false;
-        operations.hasObservers().should.be.false;
+        catActions.doAction.hasObservers().should.be.false;
         store.subscribe(function() {});
-        initialValue.onNext(true);
-        initialValue.hasObservers().should.be.true;
-        operations.hasObservers().should.be.true;
+        catActions.doAction.hasObservers().should.be.true;
+      }
+    );
+  });
+
+  describe('serialize', function() {
+    it('should produce a string with the correct data', function() {
+      let catActions = createActions();
+      class CatStore extends Store {
+        constructor() {
+          super();
+          this.register(catActions);
+          this.value = { cats: 'meow' };
+        }
+      }
+      let store = new CatStore();
+      let dats = store.serialize();
+      dats.should.be.a.string;
+      dats.should.equal(JSON.stringify({ cats: 'meow' }));
+    });
+  });
+
+  describe('deserialize', function() {
+    let value, stringyValue, store, catActions;
+    beforeEach(function() {
+      value = { cats: 'meow' };
+      stringyValue = JSON.stringify(value);
+      catActions = createActions();
+      class CatStore extends Store {
+        constructor() {
+          super();
+          this.register(catActions);
+          this.value = null;
+        }
+      }
+      store = new CatStore();
+    });
+
+    it('should update store data', function() {
+      expect(store.value).to.be.null;
+      store.deserialize(stringyValue);
+      expect(store.value).to.not.be.null;
+      store.value.should.deep.equal(value);
+    });
+
+    it(
+      'should throw if data deserializes to non object or non null',
+      function() {
+        expect(store.value).to.be.null;
+        expect(() => {
+          store.deserialize('true');
+        }).to.throw(/deserialize must return an object or null/);
       }
     );
   });
 
   describe('outliers', function() {
-    var initialValue;
-    var initialValueSpy;
-    var operations;
-    var operationsSpy;
-    var store, disposable;
+    let store, catActions;
 
     beforeEach(function() {
-      initialValue = new Rx.Subject();
-      initialValueSpy = sinon.spy(function () {
-        return initialValue;
-      });
-
-      operations = new Rx.Subject();
-      operationsSpy = sinon.spy(function () {
-        return operations;
-      });
-
-      store = Store.create({
-        getInitialValue: initialValueSpy,
-        getOperations: operationsSpy
-      });
+      catActions = createActions();
+      class CatStore extends Store {
+        constructor() {
+          super();
+          this.register(catActions);
+        }
+      }
+      store = new CatStore();
     });
 
     it(
       'should throw if an operation id is used that does not exist ' +
-      'within its history',
-      function() {
-        expect(
-          store._confirmOperation.bind(store, 'not an id')
-        ).to.throw(/an unknown operation id was used/);
-        expect(
-          store._cancelOperation.bind(store, 'not an id')
-        ).to.throw(/an unknown operation id was used/);
-      }
+      'within its history'
     );
   });
 });
+
+function createActions(spy) {
+  spy = spy || function(val) { return val; };
+  class CatActions extends Actions {
+    constructor() {
+      super();
+    }
+
+    doAction(val) {
+      spy(val);
+      return val;
+    }
+  }
+  return new CatActions();
+}
