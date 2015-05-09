@@ -10,75 +10,77 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var Store = require('thundercats').Store;
-var assign = require('object-assign');
-var ChatActions = require('../actions/ChatActions');
-var ChatMessageUtils = require('../utils/ChatMessageUtils');
+import { Store } from 'thundercats';
+import assign from 'object-assign';
+import ChatMessageUtils from '../utils/ChatMessageUtils';
 
-function ThreadStore() {
-  Store.call(this);
-}
+export default class ThreadStore extends Store {
+  constructor(cat) {
+    super();
+    const chatActions = cat.getActions('chatActions');
+    const {
+      clickThread,
+      receiveRawMessages
+    } = chatActions;
 
-ThreadStore.prototype = Object.create(Store.prototype);
-
-assign(ThreadStore.prototype, {
-  constructor: ThreadStore,
-  init: function () {
-    var store = this;
-    this.setValue({
+    this.value = {
       threads: {},
       currentID: null
-    });
+    };
 
-    store.observe(ChatActions.clickThread, function (threadID) {
-      store.applyOperation(function (data) {
-        var threads = Object.keys(data.threads).reduce(function (result, id) {
-          var thread = data.threads[id];
-          if (id === threadID) {
-            var lastMessage = assign({}, thread.lastMessage, { isRead: true });
-            result[id] = assign({}, thread, {lastMessage: lastMessage});
+    this.register(clickThread.map(threadID => ({
+      transform: ({ threads })=> {
+        const newThreads = Object.keys(threads).reduce((result, id) => {
+          const thread = threads[id];
+          if (threadID === id) {
+            const lastMessage = assign(
+              {},
+              thread.lastMessage,
+              { isRead: true }
+            );
+            result[id] = assign({}, thread, { lastMessage });
           } else {
             result[id] = thread;
           }
           return result;
         }, {});
-        return {threads: threads, currentID: threadID};
-      }, true);
-    });
 
-    store.observe(ChatActions.receiveRawMessages, function (rawMessages) {
-      store.applyOperation(function (data) {
-        var threads = assign({}, data.threads);
-        var currentID = data.currentID;
+        return {
+          newThreads,
+          currentID: threadID
+        };
+      }
+    })));
 
-        rawMessages.forEach(function(message) {
-          var threadID = message.threadID;
-          var thread = threads[threadID];
+    this.register(receiveRawMessages.map(rawMessages => ({
+      transform: ({ threads, currentID }) => {
+        const newThreads = assign({}, threads);
+
+        rawMessages.forEach(message => {
+          const threadID = message.threadID;
+          const thread = newThreads[threadID];
           if (thread && thread.lastTimestamp > message.timestamp) {
             return;
           }
-          threads[threadID] = {
+          newThreads[threadID] = {
             id: threadID,
             name: message.threadName,
             lastMessage: ChatMessageUtils.convertRawMessage(message, currentID)
           };
-        }, this);
+        });
 
         if (!currentID) {
-          var allChrono = ChatMessageUtils.getAllChrono(threads);
+          const allChrono = ChatMessageUtils.getAllChrono(newThreads);
           currentID = allChrono[allChrono.length - 1].id;
         }
 
-        threads[currentID].lastMessage.isRead = true;
+        newThreads[currentID].lastMessage.isRead = true;
 
         return {
-          threads: threads,
-          currentID: currentID
+          currentID,
+          threads: newThreads
         };
-
-      }, true);
-    });
+      }
+    })));
   }
-});
-
-module.exports = ThreadStore;
+}

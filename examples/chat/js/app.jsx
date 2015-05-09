@@ -10,31 +10,28 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+import React from 'react';
+import { Cat } from 'thundercats';
+import ChatApp from './components/ChatApp';
+import ExampleData from './ChatExampleData';
+import ChatActions from './actions/ChatActions';
+import ThreadStore from './stores/ThreadStore';
+import MessageStore from './stores/MessageStore';
+
+ExampleData.init();
+
 // This file bootstraps the entire application.
+class Chat extends Cat {
+  constructor() {
+    this.register(ChatActions);
+    this.register(ThreadStore);
+    this.register(MessageStore);
+  }
+}
 
-var ChatApp = require('./components/ChatApp.react');
-var ChatExampleData = require('./ChatExampleData');
-var ChatWebAPIUtils = require('./utils/ChatWebAPIUtils');
-var ThreadStore = require('./stores/ThreadStore');
-var MessageStore = require('./stores/MessageStore');
-var React = require('react');
+const chat = new Chat();
 
-var threadStore = new ThreadStore();
-var messageStore = new MessageStore(threadStore);
-
-// export for http://fb.me/react-devtools
-window.React = React;
-
-React.withContext({
-  threadStore: threadStore,
-  messageStore: messageStore
-}, function () {
-  React.render(
-    <ChatApp />,
-    document.getElementById('react')
-  );
-});
-
-// load example data into localstorage
-ChatExampleData.init();
-ChatWebAPIUtils.getAllMessages();
+chat.render(
+  <ChatApp />,
+  document.getElementById('react')
+);

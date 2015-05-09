@@ -10,9 +10,8 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-module.exports = {
-
-  convertRawMessage: function(rawMessage, currentThreadID) {
+export default {
+  convertRawMessage(rawMessage, currentThreadID) {
     return {
       id: rawMessage.id,
       threadID: rawMessage.threadID,
@@ -23,11 +22,11 @@ module.exports = {
     };
   },
 
-  getAllChrono: function (threads) {
-    var orderedThreads = [];
+  getAllChrono(threads) {
+    const orderedThreads = [];
 
     Object.keys(threads).map(function(id) {
-      var thread = threads[id];
+      const thread = threads[id];
       orderedThreads.push(thread);
     });
 
@@ -41,5 +40,4 @@ module.exports = {
     });
     return orderedThreads;
   }
-
 };

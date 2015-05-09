@@ -9,18 +9,9 @@
  * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-var Store = require('thundercats').Store;
-var assign = require('object-assign');
-var ChatActions = require('../actions/ChatActions');
-var ChatMessageUtils = require('../utils/ChatMessageUtils');
-
-function MessageStore(threadStore) {
-  Store.call(this);
-  this.threadStore = threadStore;
-}
-
-MessageStore.prototype = Object.create(Store.prototype);
+import Store from 'thundercats';
+import assign from 'object-assign';
+import ChatMessageUtils from '../utils/ChatMessageUtils';
 
 function markAllInThreadRead(messages, threadID) {
   return Object.keys(messages).reduce(function (result, id) {
@@ -32,68 +23,64 @@ function markAllInThreadRead(messages, threadID) {
   }, {});
 }
 
+export default class MessageStore extends Store {
+  costructor(cat) {
+    super();
+    const chatActions = cat.getActions('catActions');
+    const threadStore = cat.getStore('threadStore');
 
-assign(MessageStore.prototype, {
-  constructor: MessageStore,
-  init: function () {
+    const {
+      clickThread,
+      createMessage,
+      receiveRawMessages
+    } = chatActions;
 
-    this.setValue({});
+    this.value = {};
 
-    var store = this;
-    var threadStore = this.threadStore;
-
-    store.observe(
-      ChatActions.clickThread
-      .waitFor(threadStore, function (action, threadStoreData) {
-        return threadStoreData.currentID;
-      }),
-
-      function (currentID) {
-        store.applyOperation(function (messages) {
-          return markAllInThreadRead(messages, currentID);
-        }, true);
-      }
+    this.register(
+      clickThread.withLatestFrom(
+        threadStore,
+        (e, { currentId }) => currentId
+      )
+      .map(currentID => ({
+        transform: messages => markAllInThreadRead(messages, currentID)
+      }))
     );
 
-    store.observe(
-      ChatActions.createMessage,
-      function (action) {
-        var message = action.message;
-        store.applyOperation(function (messages) {
-          var result = assign({}, messages);
-          result[message.id] = message;
-          return result;
-        }, action.promise);
-      }
-    );
+    this.register(createMessage.map(({ message, observable }) => {
+      return {
+        transform: messages => {
+          const newMessages = assign({}, messages);
+          newMessages[message.id] = message;
+          return newMessages;
+        },
+        optimistic: observable
+      };
+    }));
 
+    this.register(
+      receiveRawMessages
+        .withLatestFrom(threadStore, (rawMessages, { currentID }) => ({
+          rawMessages,
+          currentID
+        }))
+        .map(({ rawMessages, currentID }) => ({
+          transform: messages => {
+            const newMessages = assign({}, messages);
 
-    store.observe(
-      ChatActions.receiveRawMessages
-      .waitFor(threadStore, function (rawMessages, threadStoreData) {
-        return {
-          rawMessages: rawMessages,
-          currentID: threadStoreData.currentID
-        };
-      }),
-      function (data) {
-        var currentID = data.currentID;
-        var rawMessages = data.rawMessages;
-        store.applyOperation(function (messages) {
-          messages = assign({}, messages);
-          rawMessages.forEach(function(message) {
-            if (!messages[message.id]) {
-              messages[message.id] = ChatMessageUtils.convertRawMessage(
-                message,
-                currentID
-              );
-            }
-          });
-          return markAllInThreadRead(messages, currentID);
-        }, true);
-      }
+            rawMessages.forEach(message => {
+              if (!newMessages[message.id]) {
+                newMessages[message.id] =
+                  ChatMessageUtils.convertRawMessage(
+                    message,
+                    currentID
+                );
+              }
+            });
+
+            return markAllInThreadRead(newMessages, currentID);
+          }
+        }))
     );
   }
-});
-
-module.exports = MessageStore;
+}

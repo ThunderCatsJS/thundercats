@@ -10,32 +10,32 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var ChatActions = require('../actions/ChatActions');
-var Prom = typeof Promise === 'undefined' ? require('bluebird') : Promise;
-
+import Rx from 'rx';
 // !!! Please Note !!!
 // We are using localStorage as an example, but in a real-world scenario, this
 // would involve XMLHttpRequest, or perhaps a newer client-server protocol.
 // The function signatures below might be similar to what you would build, but
 // the contents of the functions are just trying to simulate client-server
 // communication and server-side processing.
-module.exports = {
 
+const NAMESPACE = 'thundercats-chat';
+
+export default {
   getAllMessages: function() {
     // simulate retrieving data from a database
-    var rawMessages = JSON.parse(localStorage.getItem('messages'));
+    const rawMessages = JSON.parse(localStorage.getItem(NAMESPACE));
 
     // simulate success callback
-    ChatActions.receiveRawMessages(rawMessages);
+    return Rx.Observable.from(rawMessages).delay(50);
   },
 
   createMessage: function(message, threadName) {
     // simulate writing to a database
-    var rawMessages = JSON.parse(localStorage.getItem('messages'));
-    var timestamp = Date.now();
-    var id = 'm_' + timestamp;
-    var threadID = message.threadID || ('t_' + Date.now());
-    var createdMessage = {
+    const rawMessages = JSON.parse(localStorage.getItem(NAMESPACE));
+    const timestamp = Date.now();
+    const id = 'm_' + timestamp;
+    const threadID = message.threadID || ('t_' + Date.now());
+    const createdMessage = {
       id: id,
       threadID: threadID,
       threadName: threadName,
@@ -44,9 +44,8 @@ module.exports = {
       timestamp: timestamp
     };
     rawMessages.push(createdMessage);
-    localStorage.setItem('messages', JSON.stringify(rawMessages));
+    localStorage.setItem(NAMESPACE, JSON.stringify(rawMessages));
 
-    return Prom.resolve(createdMessage);
+    return Rx.Observable.from(createdMessage).delay(50);
   }
-
 };

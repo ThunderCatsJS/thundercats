@@ -1,29 +1,25 @@
 {
-  "name": "flux-chat",
-  "version": "0.0.2",
-  "description": "Example Flux chat application primarily intended to explain the use of Dispatcher.waitFor().",
-  "repository": "https://github.com/facebook/flux",
-  "main": "js/app.js",
+  "name": "thundercats-chat",
+  "version": "0.0.3",
+  "description": "Example Flux chat application primarily intended to explain the use of thundercats.js.",
+  "repository": "https://github.com/r3dm/thundercats",
+  "main": "js/app.jsx",
   "dependencies": {
-    "bluebird": "^2.3.11",
+    "classnames": "^2.1.1",
     "object-assign": "^1.0.0",
-    "react": "^0.12.0",
-    "rx": "^2.3.22",
-    "thundercats": "^1.5.0",
-    "rx-react": "^0.1.0"
+    "react": "^0.13.3",
+    "rx": "^2.5.2",
+    "thundercats": "^2.0.0"
   },
   "devDependencies": {
-    "browserify": "^6.2.0",
-    "envify": "^3.0.0",
-    "jest-cli": "~0.1.17",
-    "reactify": "^0.15.2",
-    "uglify-js": "~2.4.15",
-    "watchify": "^2.1.1"
+    "babelify": "^6.0.2",
+    "browserify": "^10.1.3",
+    "envify": "^3.4.0",
+    "watchify": "^3.2.1"
   },
   "scripts": {
-    "start": "watchify -o js/bundle.js -v -d .",
-    "build": "NODE_ENV=production browserify . | uglifyjs -cm > js/bundle.min.js",
-    "test": "jest"
+    "start": "watchify js/app.jsx -t [ babelify --optional es7.classProperties ] -g envify -o js/bundle.js",
+    "build": "NODE_ENV=development browserify js/app.jsx -t [ babelify --optional es7.classProperties ] -g envify -o js/bundle.js"
   },
   "author": "Bill Fisher",
   "browserify": {
