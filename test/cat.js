@@ -289,7 +289,7 @@ describe('Cat', function() {
         TestComp = createClass({
           getThundercats() {
             return {
-              store: 'CatStore',
+              store: 'catStore',
               fetchAction: 'catActions.doAction',
               payload: wrappedPayload
             };
@@ -475,7 +475,6 @@ function createStore(initValue = null) {
     constructor(cat) {
       super();
       this.value = initValue;
-      console.log(initValue);
       let catActions = cat.getActions('CatActions');
       this.register(
         catActions.doAction.delay(500).map(() => ({ value: {}}))
