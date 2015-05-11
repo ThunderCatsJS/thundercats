@@ -24,8 +24,10 @@ your application.
 
 ## Install
 
+This is a pre-release 2.0.0 verion and is currently unstable.
+
 ```
-npm install thundercats
+npm install thundercats@2.0.0-alpha1
 ```
 Thundecats makes heavy use of es6 Map object. While avaible in the latest versions of Node.js, io.js and all modern browsers, a great many older browsers will need a polyfill inorder to work with Thundercats. 
 
