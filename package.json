@@ -1,7 +1,7 @@
 {
   "name": "thundercats",
-  "description": "How the thundercats would build Flux architecture",
-  "version": "2.0.0-beta1",
+  "description": "How the Thundercats would build Flux architecture",
+  "version": "2.0.0-alpha1",
   "keywords": [
     "thundercats",
     "react",
@@ -21,10 +21,12 @@
     "url": "https://github.com/r3dm/thundercats"
   },
   "scripts": {
-    "build-clean": "rm -rf build/global/* && rm -rf build/npm/*",
-    "build-global": "NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional runtime ] -t browserify-shim -g envify -o build/global/ThunderCats.js && NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional runtime ] -t browserify-shim -g envify -p [minifyify --no-map --uglify[--compress --mangle --dead_code]] -o build/global/ThunderCats.min.js",
-    "build-npm": "mkdir build/npm/lib && babel ./lib -d build/npm/lib && cp README.md build/npm && cp index.js build/npm && node -p 'p=require(\"./package\");p.main=\"lib\";p.scripts=p.devDependencies=p[\"browserify-shim\"]=undefined;JSON.stringify(p,null,2)' > build/npm/package.json",
     "build": "npm run build-clean && npm run build-global && npm run build-npm",
+    "build-clean": "rm -rf build/global/* && rm -rf build/npm/*",
+    "build-global": "NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional es7.classProperties ] -t browserify-shim -g envify -o build/global/ThunderCats.js",
+    "build-global-min": "NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional es7.classProperties ] -t browserify-shim -g envify -p [ minifyify --no-map --uglify [--compress --mangle --dead_code]] -o build/global/ThunderCats.min.js",
+    "build-npm": "mkdir build/npm/lib && babel --optional es7.classProperties ./lib -d build/npm/lib && cp README.md build/npm && cp index.js build/npm && npm run build-package-json",
+    "build-package-json": "node -p 'p=require(\"./package\");p.main=\"lib\";p.scripts=p.devDependencies=p[\"browserify-shim\"]=undefined;JSON.stringify(p,null,2)' > build/npm/package.json",
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "mocha --compilers js:./registerWithOptions.js",
@@ -49,6 +51,7 @@
     "warning": "^1.0.1"
   },
   "peerDependencies": {
+    "react": "^0.13.1",
     "rx": "^2.3.14"
   },
   "devDependencies": {

@@ -1,139 +1,139 @@
 'use strict';
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports.getActionNames = getActionNames;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-// # ThunderCats Action
-//
-// A ThunderCats Action is an Observable that can be called like a function!
-var Rx = require('rx'),
-    invariant = require('invariant'),
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-// warning = require('warning'),
-assign = require('object.assign'),
-    areObservable = require('../utils').areObservable,
-    slice = Array.prototype.slice;
+var _rx = require('rx');
 
-var Actions = (function () {
-  function Actions() {
-    var _this = this;
+var _rx2 = _interopRequireDefault(_rx);
 
-    _classCallCheck(this, Actions);
+var _invariant = require('invariant');
 
-    var actionDefs = this.__getActionNames(this).map(function (name) {
-      return {
-        name: name,
-        map: _this[name]
-      };
-    });
+var _invariant2 = _interopRequireDefault(_invariant);
 
-    Actions._createActions(actionDefs, this);
-  }
+var _objectAssign = require('object.assign');
 
-  _createClass(Actions, [{
-    key: '__getActionNames',
-    value: function __getActionNames(ctx) {
-      invariant(ctx instanceof Actions, 'internal method `getActionNames` called outside of Actions instance');
+var _objectAssign2 = _interopRequireDefault(_objectAssign);
 
-      return Object.getOwnPropertyNames(ctx.constructor.prototype).filter(function (name) {
-        return name !== 'constructor' && name.indexOf('__') === -1 && typeof ctx[name] === 'function';
-      });
-    }
-  }], [{
-    key: '_create',
-    value: function _create(map) {
-      var observers = [];
+var _debug = require('debug');
 
-      var actionStart = new Rx.Subject();
-      var actionEnd = new Rx.Subject();
+var _debug2 = _interopRequireDefault(_debug);
 
-      function action(value) {
-        if (typeof map === 'function') {
-          value = map(value);
-        }
+var _waitFor = require('./waitFor');
 
-        actionStart.onNext(value);
-        var os = observers.slice(0);
-        for (var i = 0, len = os.length; i < len; i++) {
-          os[i].onNext(value);
-        }
-        actionEnd.onNext();
+var _waitFor2 = _interopRequireDefault(_waitFor);
 
-        return value;
+var debug = _debug2['default']('thundercats:actions');
+
+function getActionNames(ctx) {
+  return Object.getOwnPropertyNames(ctx.constructor.prototype).filter(function (name) {
+    return name !== 'constructor' && name.indexOf('_') === -1 && typeof ctx[name] === 'function';
+  });
+}
+
+var ActionCreator = {
+  create: function create(name, map) {
+    var observers = [];
+    var actionStart = new _rx2['default'].Subject();
+
+    function action(value) {
+      /* istanbul ignore else */
+      if (typeof map === 'function') {
+        value = map(value);
       }
 
-      assign(action, Rx.Observable.prototype, Rx.Subject.prototype);
-
-      Rx.Observable.call(action, function (observer) {
-        observers.push(observer);
-        return {
-          dispose: function dispose() {
-            observers.splice(observers.indexOf(observer), 1);
-          }
-        };
+      actionStart.onNext(value);
+      observers.forEach(function (observer) {
+        observer.onNext(value);
       });
 
-      // ### Has Observers
-      //
-      // returns the current number of observers for this action
-      action.hasObservers = function hasObservers() {
-        return observers.length > 0 || actionStart.hasObservers() || actionEnd.hasObservers();
-      };
+      return value;
+    }
 
-      // ### Wait For
-      //
-      // takes observables as arguments and will
-      // wait for each observable to publish a new value
-      // before notifying its observers.
-      //
-      // NOTE: if any of the observables never publishes a new value
-      // this observable will not either.
-      action.waitFor = function (observables) {
-        observables = slice.call(arguments);
+    action.displayName = name;
+    action.observers = observers;
+    _objectAssign2['default'](action, _rx2['default'].Observable.prototype, _rx2['default'].Subject.prototype);
 
-        invariant(areObservable(observables), 'action.waitFor takes only observables as arguments');
+    action.hasObservers = function hasObservers() {
+      return observers.length > 0 || actionStart.hasObservers();
+    };
 
-        return actionStart.flatMap(function (value) {
-          return Rx.Observable.combineLatest(observables.map(function (observable) {
-            observable = observable.publish();
-            observable.connect();
-            return observable;
-          }), function () {
-            return value;
-          });
+    action.waitFor = function () {
+      var _arguments = arguments;
+
+      return actionStart.flatMap(function (payload) {
+        return _waitFor2['default'].apply(undefined, _arguments).map(function () {
+          return payload;
         });
-      };
+      });
+    };
 
-      return action;
-    }
-  }, {
-    key: '_createActions',
-    value: function _createActions(actions, ctx) {
-      ctx = ctx || {};
-      invariant(typeof ctx === 'object', 'thisArg supplied to createActions must be an object but got %s', ctx);
+    _rx2['default'].Observable.call(action, function (observer) {
+      observers.push(observer);
+      return new _rx2['default'].Disposable(function () {
+        observers.splice(observers.indexOf(observer), 1);
+      });
+    });
 
-      invariant(Array.isArray(actions), 'createActions requires an array of objects but got %s', actions);
+    debug('action %s created', action.displayName);
+    return action;
+  },
 
-      return actions.reduce(function (ctx, action) {
-        invariant(typeof action === 'object', 'createActions requires items in array to be either strings ' + 'or objects but was supplied with %s', action);
+  createManyOn: function createManyOn(ctx, actions) {
+    _invariant2['default'](typeof ctx === 'object', 'thisArg supplied to createActions must be an object but got %s', ctx);
 
-        invariant(typeof action.name === 'string', 'createActions requires objects to have a name key, but got %s', action.name);
+    _invariant2['default'](Array.isArray(actions), 'createActions requires an array of objects but got %s', actions);
 
-        if (action.map) {
-          invariant(typeof action.map === 'function', 'createActions requires objects with map field to be a function ' + 'but was given %s', action.map);
-        }
+    var actionsBag = actions.reduce(function (ctx, action) {
+      _invariant2['default'](typeof action === 'object', 'createActions requires items in array to be either strings ' + 'or objects but was supplied with %s', action);
 
-        ctx[action.name] = Actions._create(action.map);
-        ctx[action.name].displayName = action.name;
-        return ctx;
-      }, ctx);
-    }
-  }]);
+      _invariant2['default'](typeof action.name === 'string', 'createActions requires objects to have a name key, but got %s', action.name);
 
-  return Actions;
-})();
+      /* istanbul ignore else */
+      if (action.map) {
+        _invariant2['default'](typeof action.map === 'function', 'createActions requires objects with map field to be a function ' + 'but was given %s', action.map);
+      }
 
-Actions.prototype.displayName = 'BaseActions';
+      ctx[action.name] = ActionCreator.create(action.name, action.map);
+      return ctx;
+    }, {});
 
-module.exports = Actions;
+    return _objectAssign2['default'](ctx, actionsBag);
+  }
+};
+
+exports.ActionCreator = ActionCreator;
+
+var Actions = function Actions(actionNames) {
+  var _this = this;
+
+  _classCallCheck(this, Actions);
+
+  this.displayName = this.displayName || this.constructor.displayName;
+  if (actionNames) {
+    _invariant2['default'](Array.isArray(actionNames) && actionNames.every(function (actionName) {
+      return typeof actionName === 'string';
+    }), '%s should get an array of strings but got %s', actionNames);
+  }
+  var actionDefs = getActionNames(this).map(function (name) {
+    return { name: name, map: _this[name] };
+  });
+
+  if (actionNames) {
+    actionDefs = actionDefs.concat(actionNames.map(function (name) {
+      return { name: name };
+    }));
+  }
+
+  _invariant2['default'](actionDefs.length, 'Actions Class %s instantiated without any actions defined!', this.displayName);
+
+  ActionCreator.createManyOn(this, actionDefs);
+};
+
+exports['default'] = Actions;

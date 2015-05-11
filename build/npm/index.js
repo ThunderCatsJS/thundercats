@@ -1,13 +1,13 @@
-var Actions = require('./lib/Actions'),
-    Cat = require('./lib/Cat'),
-    setStateUtil = require('./lib/setStateUtil'),
-    Store = require('./lib/Store'),
+var Actions = require('./lib/Actions').default,
+    Cat = require('./lib/Cat').default,
+    Store = require('./lib/Store').default,
+    Container = require('./lib/Container'),
     waitFor = require('./lib/waitFor');
 
 module.exports = {
   Actions: Actions,
   Cat: Cat,
-  setStateUtil: setStateUtil,
+  Container: Container,
   Store: Store,
   waitFor: waitFor
 };

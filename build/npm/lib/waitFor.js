@@ -1,46 +1,53 @@
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports['default'] = waitFor;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
 // # Wait For Utility
 //
 // Takes observables for arguments,
 // converts them to hot observables
 // then waits for each one to publish a value
 //
-// It can also take an optional timeout (milliseconds)
-// as the first argument. By default this timeout is 3 seconds.
-//
-// If the timeout is exceeded, the observers will be notified
-// on the onError observer. If no onError observer is supplied
-// the timeout throws the Error
-//
 // returns an observable.
 //
 // *Note:* it's good practice to use a firstOrDefault
 // observable if you just want a short lived subscription
-'use strict';
+// and a timeout if you don't want to wait forever!
 
-var Rx = require('rx'),
-    utils = require('../utils'),
-    invariant = require('invariant'),
-    areObservable = utils.areObservable,
-    debug = require('debug')('thundercats:waitFor');
+var _rx = require('rx');
 
-module.exports = waitFor;
+var _rx2 = _interopRequireDefault(_rx);
 
-function waitFor(timeout, observables) {
-  observables = [].slice.call(arguments);
-  if (typeof timeout === 'number') {
-    observables = observables.slice(1);
-  } else {
-    timeout = 3000;
-  }
-  invariant(areObservable(observables), 'waitFor takes only observables with optional number as the ' + 'first agruments');
-  debug('setting waitFor with timeout %s', timeout);
-  return Rx.Observable.combineLatest(observables.map(function (obs) {
-    var published = obs.publish();
-    published.connect();
-    return published;
-  }), function (values) {
-    values = [].slice.call(arguments);
-    debug('waitFor complete');
-    return values;
-  }).timeout(timeout);
+var _debug = require('debug');
+
+var _debug2 = _interopRequireDefault(_debug);
+
+var _utils = require('./utils');
+
+var debug = _debug2['default']('thundercats:waitFor');
+var slice = Array.prototype.slice;
+
+function waitFor(observables) {
+  return _rx2['default'].Observable.from(arguments).tapOnNext(function (observable) {
+    return _utils.isObservable(observable) ? true : new Error('waitFor only take observables but got %s', observable);
+  }).map(function (observable) {
+    return observable.publish();
+  }).tapOnNext(function (observable) {
+    return observable.connect();
+  }).toArray().tap(function () {
+    return debug('starting waitFor');
+  }).flatMap(function (arrayOfObservables) {
+    return _rx2['default'].Observable.combineLatest(arrayOfObservables, function () {
+      return slice.call(arguments);
+    });
+  }).doOnNext(function () {
+    return debug('waitFor onNext!');
+  });
 }
+
+module.exports = exports['default'];

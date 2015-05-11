@@ -1,1011 +1,1050 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.ThunderCats = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';
-
-var Actions = require('./lib/Actions'),
-    Cat = require('./lib/Cat'),
-    setStateUtil = require('./lib/setStateUtil'),
-    Store = require('./lib/Store'),
-    waitFor = require('./lib/waitFor');
-
-module.exports = {
-  Actions: Actions,
-  Cat: Cat,
-  setStateUtil: setStateUtil,
-  Store: Store,
-  waitFor: waitFor
-};
-
-},{"./lib/Actions":2,"./lib/Cat":3,"./lib/Store":5,"./lib/setStateUtil":6,"./lib/waitFor":8}],2:[function(require,module,exports){
 (function (global){
 'use strict';
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports.getActionNames = getActionNames;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-// # ThunderCats Action
-//
-// A ThunderCats Action is an Observable that can be called like a function!
-var Rx = (typeof window !== "undefined" ? window.Rx : typeof global !== "undefined" ? global.Rx : null),
-    invariant = require('invariant'),
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-// warning = require('warning'),
-assign = require('object.assign'),
-    areObservable = require('../utils').areObservable,
-    slice = Array.prototype.slice;
+var _rx = (typeof window !== "undefined" ? window.Rx : typeof global !== "undefined" ? global.Rx : null);
 
-var Actions = (function () {
-  function Actions() {
-    var _this = this;
+var _rx2 = _interopRequireDefault(_rx);
 
-    _classCallCheck(this, Actions);
+var _invariant = require('invariant');
 
-    var actionDefs = this.__getActionNames(this).map(function (name) {
-      return {
-        name: name,
-        map: _this[name]
-      };
-    });
+var _invariant2 = _interopRequireDefault(_invariant);
 
-    Actions._createActions(actionDefs, this);
-  }
+var _objectAssign = require('object.assign');
 
-  _createClass(Actions, [{
-    key: '__getActionNames',
-    value: function __getActionNames(ctx) {
-      invariant(ctx instanceof Actions, 'internal method `getActionNames` called outside of Actions instance');
+var _objectAssign2 = _interopRequireDefault(_objectAssign);
 
-      return Object.getOwnPropertyNames(ctx.constructor.prototype).filter(function (name) {
-        return name !== 'constructor' && name.indexOf('__') === -1 && typeof ctx[name] === 'function';
-      });
-    }
-  }], [{
-    key: '_create',
-    value: function _create(map) {
-      var observers = [];
+var _debug = require('debug');
 
-      var actionStart = new Rx.Subject();
-      var actionEnd = new Rx.Subject();
+var _debug2 = _interopRequireDefault(_debug);
 
-      function action(value) {
-        if (typeof map === 'function') {
-          value = map(value);
-        }
+var _waitFor = require('./waitFor');
 
-        actionStart.onNext(value);
-        var os = observers.slice(0);
-        for (var i = 0, len = os.length; i < len; i++) {
-          os[i].onNext(value);
-        }
-        actionEnd.onNext();
+var _waitFor2 = _interopRequireDefault(_waitFor);
 
-        return value;
+var debug = _debug2['default']('thundercats:actions');
+
+function getActionNames(ctx) {
+  return Object.getOwnPropertyNames(ctx.constructor.prototype).filter(function (name) {
+    return name !== 'constructor' && name.indexOf('_') === -1 && typeof ctx[name] === 'function';
+  });
+}
+
+var ActionCreator = {
+  create: function create(name, map) {
+    var observers = [];
+    var actionStart = new _rx2['default'].Subject();
+
+    function action(value) {
+      /* istanbul ignore else */
+      if (typeof map === 'function') {
+        value = map(value);
       }
 
-      assign(action, Rx.Observable.prototype, Rx.Subject.prototype);
-
-      Rx.Observable.call(action, function (observer) {
-        observers.push(observer);
-        return {
-          dispose: function dispose() {
-            observers.splice(observers.indexOf(observer), 1);
-          }
-        };
+      actionStart.onNext(value);
+      observers.forEach(function (observer) {
+        observer.onNext(value);
       });
 
-      // ### Has Observers
-      //
-      // returns the current number of observers for this action
-      action.hasObservers = function hasObservers() {
-        return observers.length > 0 || actionStart.hasObservers() || actionEnd.hasObservers();
-      };
+      return value;
+    }
 
-      // ### Wait For
-      //
-      // takes observables as arguments and will
-      // wait for each observable to publish a new value
-      // before notifying its observers.
-      //
-      // NOTE: if any of the observables never publishes a new value
-      // this observable will not either.
-      action.waitFor = function (observables) {
-        observables = slice.call(arguments);
+    action.displayName = name;
+    action.observers = observers;
+    _objectAssign2['default'](action, _rx2['default'].Observable.prototype, _rx2['default'].Subject.prototype);
 
-        invariant(areObservable(observables), 'action.waitFor takes only observables as arguments');
+    action.hasObservers = function hasObservers() {
+      return observers.length > 0 || actionStart.hasObservers();
+    };
 
-        return actionStart.flatMap(function (value) {
-          return Rx.Observable.combineLatest(observables.map(function (observable) {
-            observable = observable.publish();
-            observable.connect();
-            return observable;
-          }), function () {
-            return value;
-          });
+    action.waitFor = function () {
+      var _arguments = arguments;
+
+      return actionStart.flatMap(function (payload) {
+        return _waitFor2['default'].apply(undefined, _arguments).map(function () {
+          return payload;
         });
-      };
+      });
+    };
 
-      return action;
-    }
-  }, {
-    key: '_createActions',
-    value: function _createActions(actions, ctx) {
-      ctx = ctx || {};
-      invariant(typeof ctx === 'object', 'thisArg supplied to createActions must be an object but got %s', ctx);
+    _rx2['default'].Observable.call(action, function (observer) {
+      observers.push(observer);
+      return new _rx2['default'].Disposable(function () {
+        observers.splice(observers.indexOf(observer), 1);
+      });
+    });
 
-      invariant(Array.isArray(actions), 'createActions requires an array of objects but got %s', actions);
+    debug('action %s created', action.displayName);
+    return action;
+  },
 
-      return actions.reduce(function (ctx, action) {
-        invariant(typeof action === 'object', 'createActions requires items in array to be either strings ' + 'or objects but was supplied with %s', action);
+  createManyOn: function createManyOn(ctx, actions) {
+    _invariant2['default'](typeof ctx === 'object', 'thisArg supplied to createActions must be an object but got %s', ctx);
 
-        invariant(typeof action.name === 'string', 'createActions requires objects to have a name key, but got %s', action.name);
+    _invariant2['default'](Array.isArray(actions), 'createActions requires an array of objects but got %s', actions);
 
-        if (action.map) {
-          invariant(typeof action.map === 'function', 'createActions requires objects with map field to be a function ' + 'but was given %s', action.map);
-        }
+    var actionsBag = actions.reduce(function (ctx, action) {
+      _invariant2['default'](typeof action === 'object', 'createActions requires items in array to be either strings ' + 'or objects but was supplied with %s', action);
 
-        ctx[action.name] = Actions._create(action.map);
-        ctx[action.name].displayName = action.name;
-        return ctx;
-      }, ctx);
-    }
-  }]);
+      _invariant2['default'](typeof action.name === 'string', 'createActions requires objects to have a name key, but got %s', action.name);
 
-  return Actions;
-})();
+      /* istanbul ignore else */
+      if (action.map) {
+        _invariant2['default'](typeof action.map === 'function', 'createActions requires objects with map field to be a function ' + 'but was given %s', action.map);
+      }
 
-Actions.prototype.displayName = 'BaseActions';
+      ctx[action.name] = ActionCreator.create(action.name, action.map);
+      return ctx;
+    }, {});
 
-module.exports = Actions;
+    return _objectAssign2['default'](ctx, actionsBag);
+  }
+};
+
+exports.ActionCreator = ActionCreator;
+
+var Actions = function Actions(actionNames) {
+  var _this = this;
+
+  _classCallCheck(this, Actions);
+
+  this.displayName = this.displayName || this.constructor.displayName;
+  if (actionNames) {
+    _invariant2['default'](Array.isArray(actionNames) && actionNames.every(function (actionName) {
+      return typeof actionName === 'string';
+    }), '%s should get an array of strings but got %s', actionNames);
+  }
+  var actionDefs = getActionNames(this).map(function (name) {
+    return { name: name, map: _this[name] };
+  });
+
+  if (actionNames) {
+    actionDefs = actionDefs.concat(actionNames.map(function (name) {
+      return { name: name };
+    }));
+  }
+
+  _invariant2['default'](actionDefs.length, 'Actions Class %s instantiated without any actions defined!', this.displayName);
+
+  ActionCreator.createManyOn(this, actionDefs);
+};
+
+exports['default'] = Actions;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../utils":19,"invariant":13,"object.assign":15}],3:[function(require,module,exports){
+},{"./waitFor":7,"debug":9,"invariant":12,"object.assign":14}],2:[function(require,module,exports){
 (function (global){
 'use strict';
 
-var _defineProperty = function (obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: key == null || typeof Symbol == 'undefined' || key.constructor !== Symbol, configurable: true, writable: true }); };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-// # The Cat
-//
-var Rx = (typeof window !== "undefined" ? window.Rx : typeof global !== "undefined" ? global.Rx : null);
-var React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
-var assign = require('object.assign');
-var invariant = require('invariant');
-var warning = require('warning');
-var debug = require('debug')('thundercats:cat');
-var ContextWrapper = require('./ContextWrapper');
-var Store = require('./store');
-var waitFor = require('./waitFor');
-var _require = require('../utils');
+exports.RenderToObs = RenderToObs;
+exports.Render = Render;
+exports.RenderToString = RenderToString;
+exports.fetch = fetch;
 
-var isActions = _require.isActions;
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
+
+function _defineProperty(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _rx = (typeof window !== "undefined" ? window.Rx : typeof global !== "undefined" ? global.Rx : null);
+
+var _rx2 = _interopRequireDefault(_rx);
+
+var _react = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _objectAssign = require('object.assign');
+
+var _objectAssign2 = _interopRequireDefault(_objectAssign);
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _warning = require('warning');
+
+var _warning2 = _interopRequireDefault(_warning);
+
+var _debug = require('debug');
+
+var _debug2 = _interopRequireDefault(_debug);
+
+var _ContextWrapper = require('./ContextWrapper');
+
+var _ContextWrapper2 = _interopRequireDefault(_ContextWrapper);
+
+var _Store = require('./Store');
+
+var _Store2 = _interopRequireDefault(_Store);
+
+var _Actions = require('./Actions');
+
+var _Actions2 = _interopRequireDefault(_Actions);
+
+var _waitFor = require('./waitFor');
+
+var _waitFor2 = _interopRequireDefault(_waitFor);
+
+var debug = _debug2['default']('thundercats:cat');
+
+function RenderToObs(Comp, DOMContainer) {
+  return new _rx2['default'].AnonymousObservable(function (observer) {
+    var instance = null;
+    instance = _react2['default'].render(Comp, DOMContainer, function (err) {
+      /* istanbul ignore else */
+      if (err) {
+        return observer.onError(err);
+      }
+      /* istanbul ignore else */
+      if (instance) {
+        observer.onNext(instance);
+      }
+    });
+    observer.onNext(instance);
+  });
+}
+
+function Render(cat, Component, DOMContainer) {
+  return _rx2['default'].Observable.just(Component).map(function (Comp) {
+    return _ContextWrapper2['default'].wrap(Comp, cat);
+  }).flatMap(function (Burrito) {
+    return RenderToObs(Burrito, DOMContainer);
+  }, function (Burrito, inst) {
+    return inst;
+  });
+}
+
+function RenderToString(cat, Component) {
+  var stores = cat.stores;
+
+  var fetchMap = new Map();
+  cat.fetchMap = fetchMap;
+  return _rx2['default'].Observable.just(Component).map(function (Comp) {
+    return _ContextWrapper2['default'].wrap(Comp, cat);
+  }).doOnNext(function (Burrito) {
+    debug('initiation fetcher registration');
+    _react2['default'].renderToStaticMarkup(Burrito);
+    debug('fetcher registration complete');
+  }).flatMap(function () {
+    return fetch(fetchMap, stores);
+  }, function (Burrito, _ref2) {
+    var data = _ref2.data;
+    var fetchMap = _ref2.fetchMap;
+
+    return {
+      Burrito: Burrito,
+      data: data,
+      fetchMap: fetchMap
+    };
+  }).map(function (_ref3) {
+    var Burrito = _ref3.Burrito;
+    var data = _ref3.data;
+    var fetchMap = _ref3.fetchMap;
+
+    var markup = _react2['default'].renderToString(Burrito);
+    return {
+      markup: markup,
+      data: data,
+      fetchMap: fetchMap
+    };
+  }).firstOrDefault().tapOnNext(function () {
+    return cat.fetchMap = null;
+  });
+}
+
+var Register = {
+  store: function store(stores, Store, args) {
+    var name = Store.displayName;
+    if (stores.has(name.toLowerCase())) {
+      return _warning2['default'](false, 'Attempted to add a Store class, %s, that already exists in the Cat', name);
+    }
+    var store = new (Function.prototype.bind.apply(Store, args))();
+    debug('registering store %s', name);
+    stores.set(name.toLowerCase(), store);
+    return store;
+  },
+
+  actions: function actions(actionsMap, Actions, args) {
+    var name = Actions.displayName;
+    if (actionsMap.has(name.toLowerCase())) {
+      return _warning2['default'](false, 'Attempted to add an Actions class, %s, that already exists in the Cat', name);
+    }
+    var _actions = new (Function.prototype.bind.apply(Actions, args))();
+    debug('registering actions %s', name);
+    actionsMap.set(name.toLowerCase(), _actions);
+    return _actions;
+  }
+};
+
+exports.Register = Register;
+var Translate = {
+  serialize: function serialize(stores) {
+    return _rx2['default'].Observable.from(stores.values()).filter(function (store) {
+      return !!store.displayName;
+    }).filter(function (store) {
+      return !!store.value;
+    }).map(function (store) {
+      return _defineProperty({}, store.displayName, store.value);
+    }).reduce(function (allDats, storeDats) {
+      return _objectAssign2['default'](allDats, storeDats);
+    }, Object.create(null)).map(function (allDats) {
+      if (Object.keys(allDats).length === 0) {
+        return;
+      }
+      return allDats;
+    }).map(function (allDats) {
+      return JSON.stringify(allDats);
+    }).map(function (allDats) {
+      return typeof allDats === 'string' ? allDats : '';
+    }).tapOnError(function (err) {
+      debug('an error occurred while stringifing stores', err);
+    });
+  },
+
+  deserialize: function deserialize(stores, stringyCatState) {
+    var stateMapObservable = _rx2['default'].Observable.of(stringyCatState).tap(function (stringyCatState) {
+      _invariant2['default'](typeof stringyCatState === 'string', 'deserialize expects a string but got %s', stringyCatState);
+    }).map(function (stringyCatState) {
+      return JSON.parse(stringyCatState);
+    }).tap(function (catState) {
+      _invariant2['default'](typeof catState === 'object', 'parsed value of deserialize argument should be an object or ' + 'null but got %s', catState);
+    });
+
+    return _rx2['default'].Observable.combineLatest([_rx2['default'].Observable.from(stores.values()), stateMapObservable], function (store, stateMap) {
+      return {
+        store: store,
+        data: stateMap[store.displayName]
+      };
+    }).tapOnNext(function (_ref4) {
+      var store = _ref4.store;
+      var data = _ref4.data;
+
+      if (typeof data === 'object') {
+        return;
+      }
+      debug('deserialize for %s state was not an object but %s', store.displayName, data);
+    }).map(function (_ref5) {
+      var store = _ref5.store;
+      var data = _ref5.data;
+      return store.__value = data;
+    }).lastOrDefault().map(function () {
+      return true;
+    })['do'](null, function (err) {
+      return debug('deserialize encountered a err', err);
+    }, function () {
+      return debug('deserialize completed');
+    });
+  }
+};
+
+exports.Translate = Translate;
+
+function fetch(fetchMap, stores) {
+  if (!fetchMap || fetchMap.size === 0) {
+    debug('cat found empty fetch map');
+    return _rx2['default'].Observable['return']({
+      data: null,
+      fetchMap: fetchMap
+    });
+  }
+
+  var fetchCtx = _rx2['default'].Observable.from(fetchMap.values()).shareReplay();
+
+  var waitForStores = fetchCtx.pluck('store').toArray().tap(function (arrayOfStores) {
+    return debug('waiting for %s stores', arrayOfStores.length);
+  }).map(function (arrayOfStores) {
+    return _waitFor2['default'].apply(undefined, _toConsumableArray(arrayOfStores)).firstOrDefault().shareReplay();
+  }).tap(function (waitForStores) {
+    return waitForStores.subscribe();
+  });
+
+  var fetchObs = fetchCtx.map(function (_ref6) {
+    var action = _ref6.action;
+    var payload = _ref6.payload;
+    return { action: action, payload: payload };
+  }).tapOnNext(function () {
+    return debug('init individual fetchers');
+  }).tapOnNext(function (_ref7) {
+    var action = _ref7.action;
+    var payload = _ref7.payload;
+
+    action(payload);
+  }).tapOnCompleted(function () {
+    return debug('fetchers activated');
+  }).toArray();
+
+  return _rx2['default'].Observable.combineLatest(waitForStores, fetchObs.delaySubscription(50), function (data) {
+    return { data: data, fetchMap: fetchMap };
+  });
+}
 
 var Cat = (function () {
   function Cat() {
     _classCallCheck(this, Cat);
 
-    this._stores = new Map();
-    this._actions = new Map();
-    this._pathsMap = new Map();
-    this._render = Rx.Observable.fromNodeCallback(React.render, React);
+    this.stores = new Map();
+    this.actions = new Map();
   }
 
   _createClass(Cat, [{
-    key: 'setStore',
+    key: 'register',
+    value: function register(StoreOrActions) {
+      _invariant2['default'](_Store2['default'].isPrototypeOf(StoreOrActions) || _Actions2['default'].isPrototypeOf(StoreOrActions), 'Attempted to add a class that is not a ThunderCats Store or Action');
 
-    // ### add a store to Cat.
-    //
-    // This takes as the first argument a Store with ThunderCats
-    // Store as its base.
-    // The rest of the arguments are used to instantiate the store.
-    // The Cat then takes this store and instantiates it with the arguments
-    // provided and adds it to its list of stores.
-    //
-    value: function setStore(_Store) {
-      invariant(Store.prototype.isPrototypeOf(_Store), 'Attempted to add a store that does not have A ThunderCats ' + 'store as its base');
+      var name = StoreOrActions.displayName;
 
-      var name = _Store.name || _Store.prototype.name;
+      _invariant2['default'](typeof name === 'string', 'Attempted to add a Store/Actions that does not have a displayName');
 
-      invariant(name, 'Attempted to add a store that does not have name, stores must have names\n      Either add a static property to your Store class\n      MyStore.name = \'MyStore\', or as a prototype property\n      MyStore.prototype.name = \'MyStore\'');
+      var isStore = _Store2['default'].isPrototypeOf(StoreOrActions);
+      var args = [].slice.call(arguments);
 
-      if (this._stores.has(name)) {
-        return warning(false, 'Attempted to add a store, %s, that already exists in the Cat', name);
-      }
-      // Some wizardry. Create a new instance of 'MyStore' with a variable number
-      // of arguments provided by the user
-      var storeIns = new (Function.prototype.bind.apply(_Store, arguments))();
-      this._stores.add(name, storeIns);
+      return isStore ? Register.store(this.stores, StoreOrActions, args) : Register.actions(this.actions, StoreOrActions, args);
     }
   }, {
     key: 'getStore',
-
-    // ### get store
-    //
-    // returns a store instance if found
-    // otherwise returns undefined
     value: function getStore(store) {
-      return this._stores.get(store);
+      return this.stores.get(('' + store).toLowerCase());
     }
   }, {
-    key: 'setAction',
-
-    // ### set action
-    //
-    // Takes an actions class as a first argument
-    // and the rest of the arguments are passed to the constructor of the action
-    // class.
-    value: function setAction(Actions) {
-      invariant(isActions(Actions), 'attempted to add an action object that is does not have a ' + 'ThunderCats Action class as its base.');
-
-      var name = Actions.name || Actions.constructor.name;
-
-      invariant(name, 'attempted to add an Action class with no name, Actions must have ' + 'names to use them with the Cat');
-
-      if (this._actions.has(name)) {
-        return warning(false, 'attempted to add an Action, %s, to the Cat that it already exists');
-      }
-
-      var actions = new (Function.prototype.bind.apply(Actions, arguments))();
-      this._actions.add(name, actions);
-    }
-  }, {
-    key: 'getAction',
-
-    // ### Get Actions
-    //
-    // returns the instance of actions class if it exist
-    // otherwise returns undefined;
-    value: function getAction(action) {
-      return this._actions.get(action);
+    key: 'getActions',
+    value: function getActions(action) {
+      return this.actions.get(('' + action).toLowerCase());
     }
   }, {
     key: 'serialize',
-
-    // ### serialize
-    //
-    // Get the state of all the stores in string.
-    // returns a string
     value: function serialize() {
-      return Rx.Observable.from(this._stores.values()).filter(function (store) {
-        return !!store.displayName;
-      }).map(function (store) {
-        return _defineProperty({}, store.displayName, store.__value);
-      }).reduce(function (allDats, storeDats) {
-        return assign(allDats, storeDats);
-      }, Object.create(null)).map(function (allDats) {
-        return JSON.stringify(allDats);
-      }).doOnError(function (err) {
-        debug('an error occured while stringifing stores', err);
-      }).toArray().pop();
+      return Translate.serialize(this.stores);
     }
   }, {
     key: 'deserialize',
     value: function deserialize(stringyCatState) {
-      invariant(typeof stringyCatState === 'string', 'deserialize expects a string but got %s', stringyCatState);
-
-      var catState = JSON.parse(stringyCatState);
-      invariant(typeof catState === 'object', 'parsed value of deserialize argument should be an object or ' + 'null but got %s', catState);
-
-      Rx.Observable.from(this._stores.values()).map(function (store) {
-        var newStoreState = catState[store.displayName];
-        if (typeof newStoreState === 'object') {
-          store.__value = newStoreState;
-        } else {
-          debug('deserialize found a store state that is not an object', newStoreState);
-        }
-        return true;
-      }).doOnError(function (err) {
-        debug('deserialize encountered a err', err);
-      }).subscribe(function () {}, null, function () {
-        debug('deserialize completed');
-      });
-    }
-  }, {
-    key: '_setCurrentPath',
-
-    // ### set current path
-    //
-    // register current path
-    // This can be any string but should be a string that uniquely identifies the
-    // current component being rendered
-    value: function _setCurrentPath(path) {
-      this._activePath = path;
-      this._setPath(path);
-    }
-  }, {
-    key: '_setPath',
-
-    // ### set path
-    //
-    // Adds path to the map!
-    value: function _setPath(path) {
-      if (!this._pathsMap.has(path)) {
-        this._pathsMap.set(path, new Map());
-      }
-    }
-  }, {
-    key: '_registerFetcher',
-
-    // ### register a fetcher
-    //
-    // adds the fetcher and its intended payload with the current active path
-    // along with the store that listens for the response from the fetch
-    value: function _registerFetcher(fetchAction, ctx) {
-      var fetchMap = this._pathsMap.get(this._activePath);
-      fetchMap.add(ctx.fetchName, {
-        fetchName: ctx.fetchName,
-        fetcher: fetchAction,
-        fetchPayload: ctx.fetchPayload,
-        store: ctx.storeName
-      });
-    }
-  }, {
-    key: '_doFetch',
-
-    // ### do fetch
-    //
-    // activates each fetcher and then waits for the response from the stores
-    // returns an observable that responds with the value of the stores in
-    // question once they have responded. If stores haven't responded within 3
-    // seconds the observable throws.
-    value: function _doFetch(ctx) {
-      var fetchMap = this._pathsMap.get(ctx.path);
-      var ctxValues = Rx.Observable.from(fetchMap.values());
-      var fetchValues = ctxValues.map(function (ctx) {
-        return {
-          fetcher: ctx.fetcher,
-          payload: ctx.fetchPayload
-        };
-      });
-
-      var stores = ctxValues.map(function (ctx) {
-        return ctx.storeName;
-      }).map(this._getStore.bind(this)).filter(function (store) {
-        // check for positive values
-        return !!store;
-      }).toArray();
-
-      debug('init individual fetchers');
-      fetchValues.subscription(function (_ref2) {
-        var fetcher = _ref2.fetcher;
-        var _ref2$payload = _ref2.payload;
-        var payload = _ref2$payload === undefined ? {} : _ref2$payload;
-
-        fetcher(payload);
-      });
-      debug('init complete');
-      return waitFor(stores);
+      return Translate.deserialize(this.stores, stringyCatState);
     }
   }, {
     key: 'render',
-
-    // ### render
-    //
-    // Wraps the component being rendered and sets this cat instance on the
-    // context object.
-    // calls React.render and returns an observable that responds with the
-    // instance of the component.
-    value: function render(Component, DOMContainer, ctx) {
-      var Burrito = this._wrap(Component);
-      this._setCurrentPath(ctx.path);
-      return this._render(Burrito, DOMContainer);
+    value: function render(Component, DOMContainer) {
+      return Render(this, Component, DOMContainer);
     }
   }, {
     key: 'renderToString',
-
-    // ### renderToString
-    //
-    // Wrap component in and sets this cat instance on the context, same as above,
-    // but will also initiate data fetchers for the current path.
-    // returns an observable that reponds with the data for this path and the
-    // markup
-    value: function renderToString(Component, ctx) {
-      var render = Rx.Observable.fromNodeCallback(React.render, React);
-
-      // Set current path
-      this._setCurrentPath(ctx.path);
-
-      // wrap component in contextWrapper
-      var Burrito = this._wrap(Component);
-
-      // set active stores and fetchers
-      React.renderToStaticMarkup(Burrito);
-      // initial render populated stores and fetch actions to call
-      return this._doFetch(ctx).flatMap(function () {
-        return render(Burrito);
-      }, function (data, markup) {
-        return {
-          markup: markup,
-          data: data
-        };
-      });
-    }
-  }, {
-    key: '_wrap',
-
-    // ### wrap
-    //
-    // Adds this instance of the Cat on the context object
-    value: function _wrap(Component) {
-      invariant(React.isValidElement(Component), 'cat.renderToString and render expects a valid React element');
-      return React.createElement(ContextWrapper, { cat: this }, Component);
+    value: function renderToString(Component) {
+      return RenderToString(this, Component);
     }
   }]);
 
   return Cat;
 })();
 
-module.exports = Cat;
+exports['default'] = Cat;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../utils":19,"./ContextWrapper":4,"./store":7,"./waitFor":8,"debug":10,"invariant":13,"object.assign":15,"warning":18}],4:[function(require,module,exports){
+},{"./Actions":1,"./ContextWrapper":4,"./Store":5,"./waitFor":7,"debug":9,"invariant":12,"object.assign":14,"warning":19}],3:[function(require,module,exports){
+(function (global){
 'use strict';
 
-var React = require('react/addons');
-
-var ContextWrapper = React.createClass({
-  displayName: 'ThunderCatsContextWrapper',
-
-  propTypes: {
-    cat: React.PropTypes.object,
-    children: React.PropTypes.element
-  },
-
-  childContextTypes: {
-    cat: React.PropTypes.object
-  },
-
-  getChildContext: function getChildContext() {
-    return {
-      cat: this.props.cat
-    };
-  },
-
-  render: function render() {
-    return this.props.children;
-  }
+Object.defineProperty(exports, '__esModule', {
+  value: true
 });
 
-module.exports = ContextWrapper;
-
-},{"react/addons":9}],5:[function(require,module,exports){
-(function (global){
-'use strict';
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
-
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { desc = parent = getter = undefined; _again = false; var object = _x,
+    property = _x2,
+    receiver = _x3; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-// # Store
-//
-// A Thundercats Store is an observable. It can update itself
-// according to observables it listens to passed in through
-// the `getOperations` method
-var Rx = (typeof window !== "undefined" ? window.Rx : typeof global !== "undefined" ? global.Rx : null);
-var uuid = require('node-uuid');
-var invariant = require('invariant');
-var warning = require('warning');
-var _require = require('../utils');
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
 
-var areObservable = _require.areObservable;
-var isAction = _require.isAction;
-var isObservable = _require.isObservable;
-var isPromise = _require.isPromise;
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-// ## Create
-//
-// Takes a spec object and returns an Rx Observable Thundercats store
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-var Store = (function (_Rx$Observable) {
-  function Store(initialValue) {
-    _classCallCheck(this, Store);
+var _rx = (typeof window !== "undefined" ? window.Rx : typeof global !== "undefined" ? global.Rx : null);
 
-    // bug in eslint not recognizing super
-    /*eslint-disable block-scoped-var */
-    _get(Object.getPrototypeOf(Store.prototype), 'constructor', this).call(this, this._subscribe);
-    /*eslint-enable block-scoped-var */
+var _rx2 = _interopRequireDefault(_rx);
 
-    this.__value = initialValue || {};
-    this._operationsSubscription = null;
-    this._actions = new Map();
-    this._observers = new Map();
-    this._history = new Map();
-  }
+var _react = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
 
-  _inherits(Store, _Rx$Observable);
+var _react2 = _interopRequireDefault(_react);
 
-  _createClass(Store, [{
-    key: 'registerAction',
-    value: function registerAction(action) {
-      invariant(typeof action === 'function' && isObservable(action), '%s attempted to register non ThunderCats action', this.displayName);
+var _reactLibCloneWithProps = require('react/lib/cloneWithProps');
 
-      warning(!this._actions.has(action.displayName), '%s attempted to register an action that already exists', this.displayName);
+var _reactLibCloneWithProps2 = _interopRequireDefault(_reactLibCloneWithProps);
 
-      this._actions.set(action.displayName, action);
-    }
-  }, {
-    key: 'registerActions',
-    value: function registerActions(Actions) {
-      var _this = this;
+var _reactLibInstantiateReactComponent = require('react/lib/instantiateReactComponent');
 
-      invariant(isAction(Actions), '%s attempted to add an Actions object that is not a ThunderCats Action', this.displayName);
-      var actionNames = Actions.__getActionNames();
-      actionNames.map(function (actionName) {
-        _this.registerAction(Actions[actionName]);
-      });
-    }
-  }, {
-    key: 'hasObservers',
+var _reactLibInstantiateReactComponent2 = _interopRequireDefault(_reactLibInstantiateReactComponent);
 
-    // ### Has Observers
-    //
-    // returns the number of observers watching this store
-    value: function hasObservers() {
-      return !!this._observers.size;
-    }
-  }, {
-    key: '_init',
+var _invariant = require('invariant');
 
-    // ### Set Value
-    //
-    // overrides the current value held by the store
-    value: function _init() {
-      this._initOperations();
-      this._notifyObservers();
-    }
-  }, {
-    key: '_initOperations',
-    value: function _initOperations() {
-      this._disposeOperations();
+var _invariant2 = _interopRequireDefault(_invariant);
 
-      invariant(this._actions.length, 'Store must have at least on action to listen to but has %s', this._actions.length);
+var _objectAssign = require('object.assign');
 
-      var operations = [];
+var _objectAssign2 = _interopRequireDefault(_objectAssign);
 
-      this._actions.forEach(function (val) {
-        operations.push(val);
-      });
+var _debug = require('debug');
 
-      invariant(areObservable(operations), '"%s" actions should be an array of observables', this.displayName);
+var _debug2 = _interopRequireDefault(_debug);
 
-      operations = Rx.Observable.merge(operations);
+var _utils = require('./utils');
 
-      this._operationsSubscription = operations.subscribe(this._opsOnNext.bind(this), this.opsOnError.bind(this), this.opsOnCompleted.bind(this));
-    }
-  }, {
-    key: '_notifyObservers',
+var __DEV__ = "production" !== 'production';
+var debug = _debug2['default']('thundercats:container');
 
-    // ### NotifyObservers
-    //
-    // sends the current value held by the store to its observers
-    value: function _notifyObservers(error) {
-      var _this2 = this;
-
-      this._observers.forEach(function (observer) {
-        if (error) {
-          return observer.onError(error);
-        }
-        observer.onNext(_this2.__value);
-      });
-    }
-  }, {
-    key: '_applyOperation',
-
-    // ### applyOperation
-    //
-    // If an operation returns a proper object, this method is called.
-    // It checks to see if a property `value` exists and returns that, else
-    // it applies the `transform` method of the operation on the current value
-    // held by the store.
-    //
-    // NOTE: If `value` property is supplied, then the `transform` method is
-    // simply ignored
-    value: function _applyOperation(value, operation) {
-      return 'value' in operation ? operation.value : operation.transform(value);
-    }
-  }, {
-    key: '_opsOnNext',
-
-    // ### Operation Observer
-    //
-    // This is the observer that observes the stores operation observable
-    // operations must return an object with at least the property `value`
-    // or a method `transform`. It may also have the additional property `confirm`
-    // which must be a promise. This is used to undo the value held by the store
-    value: function _opsOnNext(operation) {
-      var _this3 = this;
-
-      invariant(operation && typeof operation === 'object', 'invalid operation, operations should be an object, given : %s', operation);
-
-      invariant(operation.value || operation.transform && typeof operation.transform === 'function', 'invalid operation, ' + 'operations should have a value or a transform property');
-
-      var oldValue = this.__value;
-      this.__value = this._applyOperation(this.__value, operation);
-      this._notifyObservers();
-
-      var uid = uuid.v1();
-
-      this._history.set(uid, {
-        operation: operation,
-        oldValue: oldValue
-      });
-
-      if ('confirm' in operation) {
-        invariant(isPromise(operation.confirm), 'invalid operation, confirm should be a promise, given : %s', operation.confirm);
-
-        operation.confirm.then(function () {
-          _this3._confirmOperation(uid);
-        }, function () {
-          _this3._cancelOperation(uid);
-        });
-      } else {
-        this._confirmOperation(uid);
-      }
-    }
-  }, {
-    key: 'opsOnError',
-    value: function opsOnError(err) {
-      throw new Error('An error has occurred in the operations observer: ' + err);
-    }
-  }, {
-    key: 'opsOnCompleted',
-    value: function opsOnCompleted() {
-      console.warn('operations observable has terminated without error');
-    }
-  }, {
-    key: '_confirmOperation',
-
-    // ### Confirm Operation
-    //
-    // This method activates when the promise tied to an operation is resolved.
-    value: function _confirmOperation(uid) {
-      var _this4 = this;
-
-      this._checkId(uid);
-      this._history.get(uid).confirmed = true;
-      this._history.forEach(function (operation, uid) {
-        /* istanbul ignore else */
-        if (operation.confirmed) {
-          _this4._history['delete'](uid);
-        }
-      });
-    }
-  }, {
-    key: '_cancelOperation',
-
-    // ### Cancel Operations
-    //
-    // If the promise in `confirm` is rejected, this method reverts the changes
-    // made by the operation tied to this promise.
-    value: function _cancelOperation(uid) {
-      var _this5 = this;
-
-      this._checkId(uid);
-      var _history = this._history;
-      // initial value
-      var value = _history.get(uid).oldValue;
-      var found = false;
-      _history.forEach(function (descriptor, _uid) {
-        if (uid === _uid) {
-          found = true;
-          return;
-        }
-        if (!found) {
-          return;
-        }
-        descriptor.oldValue = value;
-        value = _this5._applyOperation(value, descriptor.operation);
-      });
-
-      this.__value = value;
-      _history['delete'](uid);
-      this._notifyObservers();
-    }
-  }, {
-    key: '_checkId',
-    value: function _checkId(id) {
-      invariant(this._history.has(id), 'an unknown operation id was used that is not within its history.' + 'it may have been called outside of context');
-    }
-  }, {
-    key: '_dispose',
-
-    // ### dispose
-    //
-    // Disposes the subscription to initial value observable if any
-    // and calls `disposeOperations`
-    value: function _dispose() {
-      this._disposeOperations();
-      this.__value = null;
-    }
-  }, {
-    key: '_disposeOperations',
-
-    // ### disposeOperations
-    //
-    // Disposes all the stores current subscriptions
-    // and clear operations history
-    value: function _disposeOperations() {
-      if (this._operationsSubscription) {
-        this._operationsSubscription.dispose();
-      }
-      this._operationsSubscription = null;
-      this._history.clear();
-    }
-  }, {
-    key: '_subscribe',
-
-    // ### Subscribe
-    //
-    // This is the main entry for observers of this **ThunderCats** Store
-    // This method will track all observers and initiate the store.
-    value: function _subscribe(observer) {
-      var _this6 = this;
-
-      var uid = uuid.v1();
-
-      /* istanbul ignore else */
-      if (!this.hasObservers()) {
-        this._init();
-      }
-
-      this._observers.set(uid, observer);
-
-      observer.onNext(this.__value);
-
-      return Rx.Disposable.create(function () {
-        _this6._observers['delete'](uid);
-        /* istanbul ignore else */
-        if (!_this6.hasObservers()) {
-          _this6._dispose();
-        }
-      });
-    }
-  }, {
-    key: 'serialize',
-    value: function serialize() {
-      return JSON.stringify(this.__value);
-    }
-  }, {
-    key: 'deserialize',
-    value: function deserialize(stringyData) {
-      var data = JSON.parse(stringyData);
-      invariant(typeof data === 'object', '%s deserialize must return an object or null but got: %s', this.displayName, data);
-      this.__value = data;
-    }
-  }, {
-    key: '__getValue',
-    value: function __getValue() {
-      return this.__value;
-    }
-  }]);
-
-  return Store;
-})(Rx.Observable);
-
-// TODO: fix this when es class properties is stage 2
-Store.prototype.displayName = 'BaseStore';
-
-module.exports = Store;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../utils":19,"invariant":13,"node-uuid":14,"warning":18}],6:[function(require,module,exports){
-// # Set State utility
-//
-// A helper function to pass as an argument to Rx.Observable.map;
-// If your Observable passes an object, this will assign the properties of
-// that object to the current value held in the store.
-//
-// ```js
-// var newMappedObservable = someAction
-//   .map(function(newData) {
-//     return { 'someCoolKey': newData };
-//   })
-//   .map(setStateUtil);
-// ```
-//
-// now this `newMappedObservable` can be passed into your Thundercats
-// `Stores.getOperations` spec definition
-'use strict';
-
-var invariant = require('invariant'),
-    assign = Object.assign || require('object.assign');
-
-module.exports = setStateUtil;
-
-function setStateUtil(newStateToSet) {
-  invariant(newStateToSet || typeof newStateToSet === 'object', 'setStateUtil expects an object, but got %s', newStateToSet);
-  return {
-    transform: function transform(oldState) {
-      var newState = {};
-      assign(newState, oldState, newStateToSet);
-      return newState;
-    }
-  };
+function storeOnError(err) {
+  throw new Error('ThunderCats Store encountered an error: ' + err);
 }
 
-},{"invariant":13,"object.assign":15}],7:[function(require,module,exports){
+function storeOnCompleted() {
+  console.warn('Store has shutdown without error');
+}
+
+function verifyStore(displayName, storeName, store) {
+  /* istanbul ignore else */
+  if (__DEV__) {
+    _invariant2['default'](_utils.isObservable(store) && typeof store.value === 'object', '%s should get at a store with a value but got %s for %s ' + 'with value %s', displayName, store, storeName, store && store.value);
+  }
+}
+
+var Container = (function (_React$Component) {
+  function Container(props, context) {
+    var _this2 = this;
+
+    _classCallCheck(this, Container);
+
+    _get(Object.getPrototypeOf(Container.prototype), 'constructor', this).call(this, props, context);
+
+    /* istanbul ignore else */
+    if (__DEV__) {
+      _invariant2['default'](props.children && !Array.isArray(props.children), 'Container expects a single child but got %s', props.children);
+
+      _invariant2['default'](context.cat, 'Container expects an instance of the Cat on the container but got %s', context.cat);
+    }
+
+    var cat = context.cat;
+    var element = props.children;
+    var Component = element.type;
+    this.displayName = Component.displayName + ' Container';
+
+    /* istanbul ignore else */
+    if (__DEV__) {
+      _invariant2['default'](typeof Component === 'function', 'Container child should be a React Component but got %s', Component);
+    }
+
+    // instantiate the child component and call getThundercats to retrieve
+    // config info
+    var instance = _reactLibInstantiateReactComponent2['default'](element);
+    var publicProps = instance._processProps(instance._currentElement.props);
+
+    var publicContext = instance._processContext(instance._currentElement._context);
+
+    var inst = new Component(publicProps, publicContext);
+    var getThundercats = typeof inst.getThundercats === 'function' ? inst.getThundercats : function () {
+      return {};
+    };
+
+    var val = {};
+    var thundercats = this.thundercats = getThundercats(inst.props, inst.state);
+
+    // set up observable state. This can be a single store or a combination of
+    // multiple stores
+    if (thundercats.store) {
+      this.observableState = cat.getStore(thundercats.store);
+      verifyStore(this.displayName, thundercats.store, this.observableState);
+      if (typeof thundercats.map === 'function') {
+        val = thundercats.map(this.observableState.value);
+        this.observableState = this.observableState.map(thundercats.map);
+      } else {
+        val = this.observableState.value;
+      }
+    } else if (thundercats.stores) {
+      var _Rx$Observable;
+
+      (function () {
+        var storeNames = [].slice.call(thundercats.stores);
+        var combineLatest = storeNames.pop();
+
+        /* istanbul ignore else */
+        if (__DEV__) {
+          _invariant2['default'](typeof combineLatest === 'function', '%s should get a function for the last argument for ' + 'thundercats.stores but got %s', _this2.displayName, combineLatest);
+        }
+
+        var stores = [];
+        var values = [];
+        storeNames.forEach(function (storeName) {
+          var store = cat.getStore(storeName);
+          verifyStore(_this2.displayName, storeName, store);
+          stores.push(store);
+          values.push(store.value);
+        });
+
+        var args = [].slice.call(stores);
+        args.push(combineLatest);
+        _this2.observableState = (_Rx$Observable = _rx2['default'].Observable).combineLatest.apply(_Rx$Observable, _toConsumableArray(args));
+
+        val = combineLatest.apply(undefined, values);
+      })();
+    }
+
+    /* istanbul ignore else */
+    if (__DEV__ && (thundercats.store || thundercats.stores)) {
+      _invariant2['default'](_utils.isObservable(this.observableState), '%s should get at a store but found none for %s', this.displayName, thundercats.store || thundercats.stores);
+    }
+
+    this.state = _objectAssign2['default']({}, val);
+
+    // set up actions on state. These will be passed down as props to child
+    if (thundercats.actions) {
+      var actionsClassNames = Array.isArray(thundercats.actions) ? thundercats.actions : [thundercats.actions];
+
+      actionsClassNames.forEach(function (name) {
+        _this2.state[name] = cat.getActions(name);
+      });
+    }
+  }
+
+  _inherits(Container, _React$Component);
+
+  _createClass(Container, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      var cat = this.context.cat;
+      var props = this.props;
+      var thundercats = this.thundercats;
+
+      if (thundercats.fetchAction && cat.fetchMap) {
+        /* istanbul ignore else */
+        if (__DEV__) {
+          _invariant2['default'](thundercats.fetchAction.split('.').length === 2, '%s fetch action should be in the form of ' + '`actionsClass.actionMethod` but was given %s', props.fetchAction);
+
+          _invariant2['default'](typeof thundercats.store === 'string' || typeof thundercats.fetchWaitFor === 'string', '%s requires a store to wait for after fetch but was given %s', thundercats.store || thundercats.fetchWaitFor);
+        }
+
+        var fetchActionsName = thundercats.fetchAction.split('.')[0];
+        var fetchMethodName = thundercats.fetchAction.split('.')[1];
+        var fetchActionsInst = cat.getActions(fetchActionsName);
+        var fetchStore = cat.getStore(thundercats.store || thundercats.fetchWaitFor);
+
+        /* istanbul ignore else */
+        if (__DEV__) {
+          _invariant2['default'](fetchActionsInst && fetchActionsInst[fetchMethodName], '%s expected to find actions class for %s, but found %s', this.displayName, thundercats.fetchAction, fetchActionsInst);
+
+          _invariant2['default'](_utils.isObservable(fetchStore), '%s should get an observable but got %s for %s', this.displayName, fetchStore, thundercats.fetchWaitFor);
+        }
+
+        debug('cat returned %s for %s', fetchActionsInst.displayName, fetchActionsName);
+
+        var fetchContext = {
+          name: thundercats.fetchAction,
+          payload: thundercats.payload || {},
+          store: fetchStore,
+          action: fetchActionsInst[fetchMethodName]
+        };
+        cat.fetchMap.set(fetchContext.name, fetchContext);
+      }
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      /* istanbul ignore else */
+      if (this.observableState) {
+        // Now that the component has mounted, we will use a long lived
+        // subscription
+        this.stateSubscription = this.observableState['catch'](this.thundercats.onError || storeOnError).subscribe(this.storeOnNext.bind(this), storeOnError, this.thundercats.onCompleted || storeOnCompleted);
+      }
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      /* istanbul ignore else */
+      if (this.stateSubscription) {
+        debug('disposing store subscription');
+        this.stateSubscription.dispose();
+        this.stateSubscription = null;
+      }
+    }
+  }, {
+    key: 'storeOnNext',
+    value: function storeOnNext(val) {
+      debug('%s value updating', this.displayName, val);
+      this.setState(val);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _reactLibCloneWithProps2['default'](this.props.children, _objectAssign2['default']({}, this.state));
+    }
+  }], [{
+    key: 'displayName',
+    value: 'ThunderCatainer',
+    enumerable: true
+  }, {
+    key: 'propTypes',
+    value: { children: _react.PropTypes.element.isRequired },
+    enumerable: true
+  }, {
+    key: 'contextTypes',
+    value: { cat: _react.PropTypes.object.isRequired },
+    enumerable: true
+  }]);
+
+  return Container;
+})(_react2['default'].Component);
+
+exports['default'] = Container;
+module.exports = exports['default'];
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./utils":6,"debug":9,"invariant":12,"object.assign":14,"react/lib/cloneWithProps":8,"react/lib/instantiateReactComponent":8}],4:[function(require,module,exports){
 (function (global){
 'use strict';
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { desc = parent = getter = undefined; _again = false; var object = _x,
+    property = _x2,
+    receiver = _x3; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
-var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-// # Store
-//
-// A Thundercats Store is an observable. It can update itself
-// according to observables it listens to passed in through
-// the `getOperations` method
-var Rx = (typeof window !== "undefined" ? window.Rx : typeof global !== "undefined" ? global.Rx : null);
-var uuid = require('node-uuid');
-var invariant = require('invariant');
-var warning = require('warning');
-var _require = require('../utils');
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-var areObservable = _require.areObservable;
-var isAction = _require.isAction;
-var isObservable = _require.isObservable;
-var isPromise = _require.isPromise;
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
 
-// ## Create
-//
-// Takes a spec object and returns an Rx Observable Thundercats store
+var _react = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactLibCloneWithProps = require('react/lib/cloneWithProps');
+
+var _reactLibCloneWithProps2 = _interopRequireDefault(_reactLibCloneWithProps);
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var ContextWrapper = (function (_React$Component) {
+  function ContextWrapper(props) {
+    _classCallCheck(this, ContextWrapper);
+
+    _get(Object.getPrototypeOf(ContextWrapper.prototype), 'constructor', this).call(this, props);
+  }
+
+  _inherits(ContextWrapper, _React$Component);
+
+  _createClass(ContextWrapper, [{
+    key: 'getChildContext',
+    value: function getChildContext() {
+      return {
+        cat: this.props.cat
+      };
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _reactLibCloneWithProps2['default'](this.props.children);
+    }
+  }], [{
+    key: 'displayName',
+    value: 'ThunderCatsContextWrapper',
+    enumerable: true
+  }, {
+    key: 'propTypes',
+    value: {
+      cat: _react2['default'].PropTypes.object.isRequired,
+      children: _react2['default'].PropTypes.element.isRequired
+    },
+    enumerable: true
+  }, {
+    key: 'childContextTypes',
+    value: {
+      cat: _react2['default'].PropTypes.object.isRequired
+    },
+    enumerable: true
+  }, {
+    key: 'wrap',
+
+    // wrap a component in this context wrapper
+    value: function wrap(Component, cat) {
+      _invariant2['default'](_react2['default'].isValidElement(Component), 'ContextWrapper wrap expects a valid React element');
+
+      _invariant2['default'](typeof cat === 'object', 'ContextWrapper expects an instance of Cat');
+
+      return _react2['default'].createElement(ContextWrapper, { cat: cat }, Component);
+    }
+  }]);
+
+  return ContextWrapper;
+})(_react2['default'].Component);
+
+exports['default'] = ContextWrapper;
+module.exports = exports['default'];
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"invariant":12,"react/lib/cloneWithProps":8}],5:[function(require,module,exports){
+(function (global){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { desc = parent = getter = undefined; _again = false; var object = _x,
+    property = _x2,
+    receiver = _x3; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+exports.applyOperation = applyOperation;
+exports.notifyObservers = notifyObservers;
+exports.dispose = dispose;
+exports.checkId = checkId;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; }
+
+var _rx = (typeof window !== "undefined" ? window.Rx : typeof global !== "undefined" ? global.Rx : null);
+
+var _rx2 = _interopRequireDefault(_rx);
+
+var _nodeUuid = require('node-uuid');
+
+var _nodeUuid2 = _interopRequireDefault(_nodeUuid);
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _debug = require('debug');
+
+var _debug2 = _interopRequireDefault(_debug);
+
+var _objectAssign = require('object.assign');
+
+var _objectAssign2 = _interopRequireDefault(_objectAssign);
+
+var _Actions = require('./Actions');
+
+var _Actions2 = _interopRequireDefault(_Actions);
+
+var _utils = require('./utils');
+
+var debug = _debug2['default']('thundercats:store');
+
+var Register = {
+  observable: function observable(obs, actionsArr, storeName) {
+    _invariant2['default'](_utils.isObservable(obs), '%s should register observables but got %s for %s', storeName, obs);
+
+    debug('%s registering action', storeName);
+
+    actionsArr.push(obs);
+    return actionsArr;
+  },
+
+  actions: function actions(actionsInst, actionsArr, storeName) {
+    var actionNames = _Actions.getActionNames(actionsInst);
+
+    debug('%s register actions class %s', storeName, actionsInst.displayName);
+
+    actionNames.map(function (name) {
+      Register.observable(actionsInst[name], actionsArr, storeName);
+    });
+
+    return actionsArr;
+  }
+};
+
+exports.Register = Register;
+var Optimism = {
+  confirm: function confirm(uid, history) {
+    checkId(uid, history);
+    history.get(uid).confirmed = true;
+    history.forEach(function (operation, uid) {
+      /* istanbul ignore else */
+      if (operation.confirmed) {
+        history['delete'](uid);
+      }
+    });
+    return history;
+  },
+  revert: function revert(uid, history) {
+    checkId(uid, history);
+    // initial value
+    var value = history.get(uid).oldValue;
+    var found = false;
+    history.forEach(function (descriptor, _uid) {
+      if (uid === _uid) {
+        found = true;
+        return;
+      }
+      if (!found) {
+        return;
+      }
+      descriptor.oldValue = value;
+      value = applyOperation(value, descriptor.operation);
+    });
+
+    history['delete'](uid);
+    return {
+      history: history,
+      value: value
+    };
+  }
+};
+
+exports.Optimism = Optimism;
+
+function applyOperation(oldValue, operation) {
+  if (operation.value) {
+    return operation.value;
+  } else if (typeof operation.transform === 'function') {
+    return operation.transform(oldValue);
+  } else {
+    return _objectAssign2['default']({}, oldValue, operation.set);
+  }
+}
+
+function notifyObservers(value, observers) {
+  debug('starting notify cycle');
+  observers.forEach(function (observer, uid) {
+    debug('notifying %s', uid);
+    observer.onNext(value);
+  });
+}
+
+function dispose(subscription, history) {
+  if (subscription) {
+    subscription.dispose();
+  }
+  return new Map();
+}
+
+function checkId(id, history) {
+  _invariant2['default'](history.has(id), 'an unknown operation id was used that is not within its history.' + 'it may have been called outside of context');
+}
 
 var Store = (function (_Rx$Observable) {
-  function Store(initialValue) {
+  function Store() {
     _classCallCheck(this, Store);
 
-    // bug in eslint not recognizing super
-    /*eslint-disable block-scoped-var */
-    _get(Object.getPrototypeOf(Store.prototype), 'constructor', this).call(this, this._subscribe);
-    /*eslint-enable block-scoped-var */
+    _get(Object.getPrototypeOf(Store.prototype), 'constructor', this).call(this, Store.prototype._subscribe);
 
-    this.__value = initialValue || {};
+    this.value = {};
     this._operationsSubscription = null;
-    this._actions = new Map();
-    this._observers = new Map();
-    this._history = new Map();
+    this.actions = [];
+    this.observers = new Map();
+    this.history = new Map();
+    this.displayName = this.constructor.displayName || 'BaseStore';
   }
 
   _inherits(Store, _Rx$Observable);
 
   _createClass(Store, [{
-    key: 'registerAction',
-    value: function registerAction(action) {
-      invariant(typeof action === 'function' && isObservable(action), '%s attempted to register non ThunderCats action', this.displayName);
-
-      warning(!this._actions.has(action.displayName), '%s attempted to register an action that already exists', this.displayName);
-
-      this._actions.set(action.displayName, action);
-    }
-  }, {
-    key: 'registerActions',
-    value: function registerActions(Actions) {
-      var _this = this;
-
-      invariant(isAction(Actions), '%s attempted to add an Actions object that is not a ThunderCats Action', this.displayName);
-      var actionNames = Actions.__getActionNames();
-      actionNames.map(function (actionName) {
-        _this.registerAction(Actions[actionName]);
-      });
+    key: 'register',
+    value: function register(observableOrActionsInstance) {
+      if (observableOrActionsInstance instanceof _Actions2['default']) {
+        return Register.actions(observableOrActionsInstance, this.actions, this.displayName);
+      }
+      return Register.observable(observableOrActionsInstance, this.actions, this.displayName);
     }
   }, {
     key: 'hasObservers',
-
-    // ### Has Observers
-    //
-    // returns the number of observers watching this store
     value: function hasObservers() {
-      return !!this._observers.size;
+      return !!this.observers.size;
     }
   }, {
     key: '_init',
-
-    // ### Set Value
-    //
-    // overrides the current value held by the store
     value: function _init() {
-      this._initOperations();
-      this._notifyObservers();
-    }
-  }, {
-    key: '_initOperations',
-    value: function _initOperations() {
-      this._disposeOperations();
+      debug('initiating %s', this.displayName);
+      this.history = dispose(this._operationsSubscription, this.history);
 
-      invariant(this._actions.length, 'Store must have at least on action to listen to but has %s', this._actions.length);
+      _invariant2['default'](this.actions.length, '%s must have at least one action to listen to but has %s', this.displayName, this.actions.length);
 
       var operations = [];
-
-      this._actions.forEach(function (val) {
-        operations.push(val);
+      this.actions.forEach(function (observable) {
+        operations.push(observable);
       });
 
-      invariant(areObservable(operations), '"%s" actions should be an array of observables', this.displayName);
+      _invariant2['default'](_utils.areObservable(operations), '"%s" actions should be an array of observables', this.displayName);
 
-      operations = Rx.Observable.merge(operations);
+      this._operationsSubscription = _rx2['default'].Observable.merge(operations).filter(function (operation) {
+        return typeof operation.value === 'object' ? !!operation.value : true;
+      }).filter(function (operation) {
+        return typeof operation.set === 'object' ? !!operation.set : true;
+      }).doOnNext(function (operation) {
+        _invariant2['default'](typeof operation === 'object', 'invalid operation, operations should be an object, given : %s', operation);
 
-      this._operationsSubscription = operations.subscribe(this._opsOnNext.bind(this), this.opsOnError.bind(this), this.opsOnCompleted.bind(this));
-    }
-  }, {
-    key: '_notifyObservers',
+        _invariant2['default'](typeof operation.value === 'object' || typeof operation.transform === 'function' || typeof operation.set === 'object', 'invalid operation, ' + 'operations should have a value(an object), ' + 'transform(a function), or set(an object) property');
 
-    // ### NotifyObservers
-    //
-    // sends the current value held by the store to its observers
-    value: function _notifyObservers(error) {
-      var _this2 = this;
-
-      this._observers.forEach(function (observer) {
-        if (error) {
-          return observer.onError(error);
+        if ('optimistic' in operation) {
+          _invariant2['default'](_utils.isPromise(operation.optimistic) || _utils.isObservable(operation.optimistic), 'invalid operation, optimistic should be a promise or observable,' + 'given : %s', operation.optimistic);
         }
-        observer.onNext(_this2.__value);
-      });
-    }
-  }, {
-    key: '_applyOperation',
-
-    // ### applyOperation
-    //
-    // If an operation returns a proper object, this method is called.
-    // It checks to see if a property `value` exists and returns that, else
-    // it applies the `transform` method of the operation on the current value
-    // held by the store.
-    //
-    // NOTE: If `value` property is supplied, then the `transform` method is
-    // simply ignored
-    value: function _applyOperation(value, operation) {
-      return 'value' in operation ? operation.value : operation.transform(value);
+      }).subscribe(this._opsOnNext.bind(this), this.opsOnError.bind(this), this.opsOnCompleted.bind(this));
     }
   }, {
     key: '_opsOnNext',
-
-    // ### Operation Observer
-    //
-    // This is the observer that observes the stores operation observable
-    // operations must return an object with at least the property `value`
-    // or a method `transform`. It may also have the additional property `confirm`
-    // which must be a promise. This is used to undo the value held by the store
     value: function _opsOnNext(operation) {
-      var _this3 = this;
+      var _this6 = this;
 
-      invariant(operation && typeof operation === 'object', 'invalid operation, operations should be an object, given : %s', operation);
+      var ops = _objectAssign2['default']({}, operation);
 
-      invariant(operation.value || operation.transform && typeof operation.transform === 'function', 'invalid operation, ' + 'operations should have a value or a transform property');
+      debug('on next called');
+      var oldValue = this.value;
+      this.value = applyOperation(this.value, ops);
+      notifyObservers(this.value, this.observers);
 
-      var oldValue = this.__value;
-      this.__value = this._applyOperation(this.__value, operation);
-      this._notifyObservers();
+      var uid = _nodeUuid2['default'].v1();
 
-      var uid = uuid.v1();
-
-      this._history.set(uid, {
-        operation: operation,
+      this.history.set(uid, {
+        operation: ops,
         oldValue: oldValue
       });
 
-      if ('confirm' in operation) {
-        invariant(isPromise(operation.confirm), 'invalid operation, confirm should be a promise, given : %s', operation.confirm);
+      if ('optimistic' in ops) {
+        var optimisticObs = _utils.isPromise(ops.optimistic) ? _rx2['default'].Observable.fromPromise(ops.optimistic) : ops.optimistic;
 
-        operation.confirm.then(function () {
-          _this3._confirmOperation(uid);
+        optimisticObs.firstOrDefault().subscribe(function () {}, function () {
+          var _Optimism$revert = Optimism.revert(uid, _this6.history);
+
+          var value = _Optimism$revert.value;
+          var history = _Optimism$revert.history;
+
+          _this6.history = history;
+          _this6.value = value;
+          notifyObservers(value, _this6.observers);
         }, function () {
-          _this3._cancelOperation(uid);
+          return _this6.history = Optimism.confirm(uid, _this6.history);
         });
       } else {
-        this._confirmOperation(uid);
+        Optimism.confirm(uid, this.history);
       }
     }
   }, {
@@ -1019,194 +1058,140 @@ var Store = (function (_Rx$Observable) {
       console.warn('operations observable has terminated without error');
     }
   }, {
-    key: '_confirmOperation',
-
-    // ### Confirm Operation
-    //
-    // This method activates when the promise tied to an operation is resolved.
-    value: function _confirmOperation(uid) {
-      var _this4 = this;
-
-      this._checkId(uid);
-      this._history.get(uid).confirmed = true;
-      this._history.forEach(function (operation, uid) {
-        /* istanbul ignore else */
-        if (operation.confirmed) {
-          _this4._history['delete'](uid);
-        }
-      });
-    }
-  }, {
-    key: '_cancelOperation',
-
-    // ### Cancel Operations
-    //
-    // If the promise in `confirm` is rejected, this method reverts the changes
-    // made by the operation tied to this promise.
-    value: function _cancelOperation(uid) {
-      var _this5 = this;
-
-      this._checkId(uid);
-      var _history = this._history;
-      // initial value
-      var value = _history.get(uid).oldValue;
-      var found = false;
-      _history.forEach(function (descriptor, _uid) {
-        if (uid === _uid) {
-          found = true;
-          return;
-        }
-        if (!found) {
-          return;
-        }
-        descriptor.oldValue = value;
-        value = _this5._applyOperation(value, descriptor.operation);
-      });
-
-      this.__value = value;
-      _history['delete'](uid);
-      this._notifyObservers();
-    }
-  }, {
-    key: '_checkId',
-    value: function _checkId(id) {
-      invariant(this._history.has(id), 'an unknown operation id was used that is not within its history.' + 'it may have been called outside of context');
-    }
-  }, {
-    key: '_dispose',
-
-    // ### dispose
-    //
-    // Disposes the subscription to initial value observable if any
-    // and calls `disposeOperations`
-    value: function _dispose() {
-      this._disposeOperations();
-      this.__value = null;
-    }
-  }, {
-    key: '_disposeOperations',
-
-    // ### disposeOperations
-    //
-    // Disposes all the stores current subscriptions
-    // and clear operations history
-    value: function _disposeOperations() {
-      if (this._operationsSubscription) {
-        this._operationsSubscription.dispose();
-      }
-      this._operationsSubscription = null;
-      this._history.clear();
-    }
-  }, {
     key: '_subscribe',
-
-    // ### Subscribe
-    //
-    // This is the main entry for observers of this **ThunderCats** Store
-    // This method will track all observers and initiate the store.
     value: function _subscribe(observer) {
-      var _this6 = this;
+      var _this7 = this;
 
-      var uid = uuid.v1();
+      var uid = _nodeUuid2['default'].v1();
 
       /* istanbul ignore else */
       if (!this.hasObservers()) {
         this._init();
       }
 
-      this._observers.set(uid, observer);
+      debug('adding observer %s', uid);
+      this.observers.set(uid, observer);
 
-      observer.onNext(this.__value);
+      observer.onNext(this.value);
 
-      return Rx.Disposable.create(function () {
-        _this6._observers['delete'](uid);
+      return _rx2['default'].Disposable.create(function () {
+        debug('Disposing obserable %s', uid);
+        _this7.observers['delete'](uid);
         /* istanbul ignore else */
-        if (!_this6.hasObservers()) {
-          _this6._dispose();
+        if (!_this7.hasObservers()) {
+          debug('All observers disposed, disposing operations observer');
+          _this7.history = dispose(_this7._operationsSubscription, _this7.history);
         }
       });
     }
   }, {
     key: 'serialize',
     value: function serialize() {
-      return JSON.stringify(this.__value);
+      return this.value ? JSON.stringify(this.value) : '';
     }
   }, {
     key: 'deserialize',
     value: function deserialize(stringyData) {
       var data = JSON.parse(stringyData);
-      invariant(typeof data === 'object', '%s deserialize must return an object or null but got: %s', this.displayName, data);
-      this.__value = data;
-    }
-  }, {
-    key: '__getValue',
-    value: function __getValue() {
-      return this.__value;
+      _invariant2['default'](data && typeof data === 'object', '%s deserialize must return an object but got: %s', this.displayName, data);
+      this.value = data;
+      return this.value;
     }
   }]);
 
   return Store;
-})(Rx.Observable);
+})(_rx2['default'].Observable);
 
-// TODO: fix this when es class properties is stage 2
-Store.prototype.displayName = 'BaseStore';
-
-module.exports = Store;
+exports['default'] = Store;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../utils":19,"invariant":13,"node-uuid":14,"warning":18}],8:[function(require,module,exports){
+},{"./Actions":1,"./utils":6,"debug":9,"invariant":12,"node-uuid":13,"object.assign":14}],6:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports['default'] = {
+  areObservable: areObservable,
+  isObservable: isObservable,
+  isPromise: isPromise
+};
+
+function areObservable(observables) {
+  return Array.isArray(observables) && observables.length > 0 && observables.reduce(function (bool, observable) {
+    return bool && isObservable(observable);
+  }, true);
+}
+
+function isObservable(observable) {
+  return observable && typeof observable.subscribe === 'function';
+}
+
+function isPromise(promise) {
+  return promise && typeof promise.then === 'function';
+}
+module.exports = exports['default'];
+
+},{}],7:[function(require,module,exports){
 (function (global){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports['default'] = waitFor;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
 // # Wait For Utility
 //
 // Takes observables for arguments,
 // converts them to hot observables
 // then waits for each one to publish a value
 //
-// It can also take an optional timeout (milliseconds)
-// as the first argument. By default this timeout is 3 seconds.
-//
-// If the timeout is exceeded, the observers will be notified
-// on the onError observer. If no onError observer is supplied
-// the timeout throws the Error
-//
 // returns an observable.
 //
 // *Note:* it's good practice to use a firstOrDefault
 // observable if you just want a short lived subscription
-'use strict';
+// and a timeout if you don't want to wait forever!
 
-var Rx = (typeof window !== "undefined" ? window.Rx : typeof global !== "undefined" ? global.Rx : null),
-    utils = require('../utils'),
-    invariant = require('invariant'),
-    areObservable = utils.areObservable,
-    debug = require('debug')('thundercats:waitFor');
+var _rx = (typeof window !== "undefined" ? window.Rx : typeof global !== "undefined" ? global.Rx : null);
 
-module.exports = waitFor;
+var _rx2 = _interopRequireDefault(_rx);
 
-function waitFor(timeout, observables) {
-  observables = [].slice.call(arguments);
-  if (typeof timeout === 'number') {
-    observables = observables.slice(1);
-  } else {
-    timeout = 3000;
-  }
-  invariant(areObservable(observables), 'waitFor takes only observables with optional number as the ' + 'first agruments');
-  debug('setting waitFor with timeout %s', timeout);
-  return Rx.Observable.combineLatest(observables.map(function (obs) {
-    var published = obs.publish();
-    published.connect();
-    return published;
-  }), function (values) {
-    values = [].slice.call(arguments);
-    debug('waitFor complete');
-    return values;
-  }).timeout(timeout);
+var _debug = require('debug');
+
+var _debug2 = _interopRequireDefault(_debug);
+
+var _utils = require('./utils');
+
+var debug = _debug2['default']('thundercats:waitFor');
+var slice = Array.prototype.slice;
+
+function waitFor(observables) {
+  return _rx2['default'].Observable.from(arguments).tapOnNext(function (observable) {
+    return _utils.isObservable(observable) ? true : new Error('waitFor only take observables but got %s', observable);
+  }).map(function (observable) {
+    return observable.publish();
+  }).tapOnNext(function (observable) {
+    return observable.connect();
+  }).toArray().tap(function () {
+    return debug('starting waitFor');
+  }).flatMap(function (arrayOfObservables) {
+    return _rx2['default'].Observable.combineLatest(arrayOfObservables, function () {
+      return slice.call(arguments);
+    });
+  }).doOnNext(function () {
+    return debug('waitFor onNext!');
+  });
 }
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../utils":19,"debug":10,"invariant":13}],9:[function(require,module,exports){
+module.exports = exports['default'];
 
-},{}],10:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./utils":6,"debug":9}],8:[function(require,module,exports){
+
+},{}],9:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -1220,17 +1205,10 @@ exports.formatArgs = formatArgs;
 exports.save = save;
 exports.load = load;
 exports.useColors = useColors;
-
-/**
- * Use chrome.storage.local if we are in an app
- */
-
-var storage;
-
-if (typeof chrome !== 'undefined' && typeof chrome.storage !== 'undefined')
-  storage = chrome.storage.local;
-else
-  storage = localstorage();
+exports.storage = 'undefined' != typeof chrome
+               && 'undefined' != typeof chrome.storage
+                  ? chrome.storage.local
+                  : localstorage();
 
 /**
  * Colors.
@@ -1338,9 +1316,9 @@ function log() {
 function save(namespaces) {
   try {
     if (null == namespaces) {
-      storage.removeItem('debug');
+      exports.storage.removeItem('debug');
     } else {
-      storage.debug = namespaces;
+      exports.storage.debug = namespaces;
     }
   } catch(e) {}
 }
@@ -1355,7 +1333,7 @@ function save(namespaces) {
 function load() {
   var r;
   try {
-    r = storage.debug;
+    r = exports.storage.debug;
   } catch(e) {}
   return r;
 }
@@ -1383,7 +1361,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":11}],11:[function(require,module,exports){
+},{"./debug":10}],10:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -1582,7 +1560,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":12}],12:[function(require,module,exports){
+},{"ms":11}],11:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -1623,6 +1601,8 @@ module.exports = function(val, options){
  */
 
 function parse(str) {
+  str = '' + str;
+  if (str.length > 10000) return;
   var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
   if (!match) return;
   var n = parseFloat(match[1]);
@@ -1707,7 +1687,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -1762,7 +1742,7 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
 
 module.exports = invariant;
 
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -2011,13 +1991,21 @@ module.exports = invariant;
   }
 }).call(this);
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 // modified from https://github.com/es-shims/es6-shim
 var keys = require('object-keys');
 var canBeObject = function (obj) {
 	return typeof obj !== 'undefined' && obj !== null;
+};
+var hasSymbols = typeof Symbol === 'function' && typeof Symbol() === 'symbol';
+var defineProperties = require('define-properties');
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+var isEnumerableOn = function (obj) {
+	return function isEnumerable(prop) {
+		return propIsEnumerable.call(obj, prop);
+	};
 };
 
 var assignShim = function assign(target, source1) {
@@ -2027,6 +2015,9 @@ var assignShim = function assign(target, source1) {
 	for (s = 1; s < arguments.length; ++s) {
 		source = Object(arguments[s]);
 		props = keys(source);
+		if (hasSymbols && Object.getOwnPropertySymbols) {
+			props.push.apply(props, Object.getOwnPropertySymbols(source).filter(isEnumerableOn(source)));
+		}
 		for (i = 0; i < props.length; ++i) {
 			objTarget[props[i]] = source[props[i]];
 		}
@@ -2035,8 +2026,25 @@ var assignShim = function assign(target, source1) {
 };
 
 assignShim.shim = function shimObjectAssign() {
+	if (Object.assign && Object.preventExtensions) {
+		var assignHasPendingExceptions = (function () {
+			// Firefox 37 still has "pending exception" logic in its Object.assign implementation,
+			// which is 72% slower than our shim, and Firefox 40's native implementation.
+			var thrower = Object.preventExtensions({ 1: 2 });
+			try {
+				Object.assign(thrower, 'xy');
+			} catch (e) {
+				return thrower[1] === 'y';
+			}
+		}());
+		if (assignHasPendingExceptions) {
+			delete Object.assign;
+		}
+	}
 	if (!Object.assign) {
-		Object.assign = assignShim;
+		defineProperties(Object, {
+			assign: assignShim
+		});
 	}
 	return Object.assign || assignShim;
 };
@@ -2044,7 +2052,81 @@ assignShim.shim = function shimObjectAssign() {
 module.exports = assignShim;
 
 
-},{"object-keys":16}],16:[function(require,module,exports){
+},{"define-properties":15,"object-keys":17}],15:[function(require,module,exports){
+'use strict';
+
+var keys = require('object-keys');
+var foreach = require('foreach');
+
+var toStr = Object.prototype.toString;
+
+var isFunction = function (fn) {
+	return typeof fn === 'function' && toStr.call(fn) === '[object Function]';
+};
+
+var arePropertyDescriptorsSupported = function () {
+	var obj = {};
+	try {
+		Object.defineProperty(obj, 'x', { value: obj });
+		return obj.x === obj;
+	} catch (e) { /* this is IE 8. */
+		return false;
+	}
+};
+var supportsDescriptors = Object.defineProperty && arePropertyDescriptorsSupported();
+
+var defineProperty = function (object, name, value, predicate) {
+	if (name in object && (!isFunction(predicate) || !predicate())) {
+		return;
+	}
+	if (supportsDescriptors) {
+		Object.defineProperty(object, name, {
+			configurable: true,
+			enumerable: false,
+			writable: true,
+			value: value
+		});
+	} else {
+		object[name] = value;
+	}
+};
+
+var defineProperties = function (object, map) {
+	var predicates = arguments.length > 2 ? arguments[2] : {};
+	foreach(keys(map), function (name) {
+		defineProperty(object, name, map[name], predicates[name]);
+	});
+};
+
+defineProperties.supportsDescriptors = !!supportsDescriptors;
+
+module.exports = defineProperties;
+
+},{"foreach":16,"object-keys":17}],16:[function(require,module,exports){
+
+var hasOwn = Object.prototype.hasOwnProperty;
+var toString = Object.prototype.toString;
+
+module.exports = function forEach (obj, fn, ctx) {
+    if (toString.call(fn) !== '[object Function]') {
+        throw new TypeError('iterator must be a function');
+    }
+    var l = obj.length;
+    if (l === +l) {
+        for (var i = 0; i < l; i++) {
+            fn.call(ctx, obj[i], i, obj);
+        }
+    } else {
+        for (var k in obj) {
+            if (hasOwn.call(obj, k)) {
+                fn.call(ctx, obj[k], k, obj);
+            }
+        }
+    }
+};
+
+
+},{}],17:[function(require,module,exports){
 'use strict';
 
 // modified from https://github.com/es-shims/es5-shim
@@ -2115,7 +2197,7 @@ keysShim.shim = function shimObjectKeys() {
 
 module.exports = keysShim;
 
-},{"./isArguments":17}],17:[function(require,module,exports){
+},{"./isArguments":18}],18:[function(require,module,exports){
 'use strict';
 
 var toStr = Object.prototype.toString;
@@ -2134,7 +2216,7 @@ module.exports = function isArguments(value) {
 	return isArgs;
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /**
  * Copyright 2014-2015, Facebook, Inc.
  * All rights reserved.
@@ -2201,38 +2283,22 @@ if (__DEV__) {
 
 module.exports = warning;
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
-var Action = require('../').Action;
+var Actions = require('./lib/Actions')['default'],
+    Cat = require('./lib/Cat')['default'],
+    Store = require('./lib/Store')['default'],
+    Container = require('./lib/Container'),
+    waitFor = require('./lib/waitFor');
 
 module.exports = {
-  areObservable: areObservable,
-  isActions: isActions,
-  isObservable: isObservable,
-  isPromise: isPromise
+  Actions: Actions,
+  Cat: Cat,
+  Container: Container,
+  Store: Store,
+  waitFor: waitFor
 };
 
-function areObservable(observables) {
-  if (!Array.isArray(observables)) {
-    return false;
-  }
-  return observables.reduce(function (bool, observable) {
-    return bool && isObservable(observable);
-  }, true);
-}
-
-function isActions(_Action) {
-  Action.isPrototypeOf(_Action);
-}
-
-function isObservable(observable) {
-  return observable && typeof observable.subscribe === 'function';
-}
-
-function isPromise(promise) {
-  return promise && typeof promise.then === 'function';
-}
-
-},{"../":1}]},{},[1])(1)
+},{"./lib/Actions":1,"./lib/Cat":2,"./lib/Container":3,"./lib/Store":5,"./lib/waitFor":7}]},{},[20])(20)
 });

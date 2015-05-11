@@ -1,279 +1,312 @@
 'use strict';
 
-var _defineProperty = function (obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: key == null || typeof Symbol == 'undefined' || key.constructor !== Symbol, configurable: true, writable: true }); };
-
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-// # The Cat
-//
-var Rx = require('rx');
-var React = require('react');
-var assign = require('object.assign');
-var invariant = require('invariant');
-var warning = require('warning');
-var debug = require('debug')('thundercats:cat');
-var ContextWrapper = require('./ContextWrapper');
-var Store = require('./store');
-var waitFor = require('./waitFor');
-var _require = require('../utils');
+exports.RenderToObs = RenderToObs;
+exports.Render = Render;
+exports.RenderToString = RenderToString;
+exports.fetch = fetch;
 
-var isActions = _require.isActions;
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } }
+
+function _defineProperty(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var _rx = require('rx');
+
+var _rx2 = _interopRequireDefault(_rx);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _objectAssign = require('object.assign');
+
+var _objectAssign2 = _interopRequireDefault(_objectAssign);
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _warning = require('warning');
+
+var _warning2 = _interopRequireDefault(_warning);
+
+var _debug = require('debug');
+
+var _debug2 = _interopRequireDefault(_debug);
+
+var _ContextWrapper = require('./ContextWrapper');
+
+var _ContextWrapper2 = _interopRequireDefault(_ContextWrapper);
+
+var _Store = require('./Store');
+
+var _Store2 = _interopRequireDefault(_Store);
+
+var _Actions = require('./Actions');
+
+var _Actions2 = _interopRequireDefault(_Actions);
+
+var _waitFor = require('./waitFor');
+
+var _waitFor2 = _interopRequireDefault(_waitFor);
+
+var debug = _debug2['default']('thundercats:cat');
+
+function RenderToObs(Comp, DOMContainer) {
+  return new _rx2['default'].AnonymousObservable(function (observer) {
+    var instance = null;
+    instance = _react2['default'].render(Comp, DOMContainer, function (err) {
+      /* istanbul ignore else */
+      if (err) {
+        return observer.onError(err);
+      }
+      /* istanbul ignore else */
+      if (instance) {
+        observer.onNext(instance);
+      }
+    });
+    observer.onNext(instance);
+  });
+}
+
+function Render(cat, Component, DOMContainer) {
+  return _rx2['default'].Observable.just(Component).map(function (Comp) {
+    return _ContextWrapper2['default'].wrap(Comp, cat);
+  }).flatMap(function (Burrito) {
+    return RenderToObs(Burrito, DOMContainer);
+  }, function (Burrito, inst) {
+    return inst;
+  });
+}
+
+function RenderToString(cat, Component) {
+  var stores = cat.stores;
+
+  var fetchMap = new Map();
+  cat.fetchMap = fetchMap;
+  return _rx2['default'].Observable.just(Component).map(function (Comp) {
+    return _ContextWrapper2['default'].wrap(Comp, cat);
+  }).doOnNext(function (Burrito) {
+    debug('initiation fetcher registration');
+    _react2['default'].renderToStaticMarkup(Burrito);
+    debug('fetcher registration complete');
+  }).flatMap(function () {
+    return fetch(fetchMap, stores);
+  }, function (Burrito, _ref2) {
+    var data = _ref2.data;
+    var fetchMap = _ref2.fetchMap;
+
+    return {
+      Burrito: Burrito,
+      data: data,
+      fetchMap: fetchMap
+    };
+  }).map(function (_ref3) {
+    var Burrito = _ref3.Burrito;
+    var data = _ref3.data;
+    var fetchMap = _ref3.fetchMap;
+
+    var markup = _react2['default'].renderToString(Burrito);
+    return {
+      markup: markup,
+      data: data,
+      fetchMap: fetchMap
+    };
+  }).firstOrDefault().tapOnNext(function () {
+    return cat.fetchMap = null;
+  });
+}
+
+var Register = {
+  store: function store(stores, Store, args) {
+    var name = Store.displayName;
+    if (stores.has(name.toLowerCase())) {
+      return _warning2['default'](false, 'Attempted to add a Store class, %s, that already exists in the Cat', name);
+    }
+    var store = new (Function.prototype.bind.apply(Store, args))();
+    debug('registering store %s', name);
+    stores.set(name.toLowerCase(), store);
+    return store;
+  },
+
+  actions: function actions(actionsMap, Actions, args) {
+    var name = Actions.displayName;
+    if (actionsMap.has(name.toLowerCase())) {
+      return _warning2['default'](false, 'Attempted to add an Actions class, %s, that already exists in the Cat', name);
+    }
+    var _actions = new (Function.prototype.bind.apply(Actions, args))();
+    debug('registering actions %s', name);
+    actionsMap.set(name.toLowerCase(), _actions);
+    return _actions;
+  }
+};
+
+exports.Register = Register;
+var Translate = {
+  serialize: function serialize(stores) {
+    return _rx2['default'].Observable.from(stores.values()).filter(function (store) {
+      return !!store.displayName;
+    }).filter(function (store) {
+      return !!store.value;
+    }).map(function (store) {
+      return _defineProperty({}, store.displayName, store.value);
+    }).reduce(function (allDats, storeDats) {
+      return _objectAssign2['default'](allDats, storeDats);
+    }, Object.create(null)).map(function (allDats) {
+      if (Object.keys(allDats).length === 0) {
+        return;
+      }
+      return allDats;
+    }).map(function (allDats) {
+      return JSON.stringify(allDats);
+    }).map(function (allDats) {
+      return typeof allDats === 'string' ? allDats : '';
+    }).tapOnError(function (err) {
+      debug('an error occurred while stringifing stores', err);
+    });
+  },
+
+  deserialize: function deserialize(stores, stringyCatState) {
+    var stateMapObservable = _rx2['default'].Observable.of(stringyCatState).tap(function (stringyCatState) {
+      _invariant2['default'](typeof stringyCatState === 'string', 'deserialize expects a string but got %s', stringyCatState);
+    }).map(function (stringyCatState) {
+      return JSON.parse(stringyCatState);
+    }).tap(function (catState) {
+      _invariant2['default'](typeof catState === 'object', 'parsed value of deserialize argument should be an object or ' + 'null but got %s', catState);
+    });
+
+    return _rx2['default'].Observable.combineLatest([_rx2['default'].Observable.from(stores.values()), stateMapObservable], function (store, stateMap) {
+      return {
+        store: store,
+        data: stateMap[store.displayName]
+      };
+    }).tapOnNext(function (_ref4) {
+      var store = _ref4.store;
+      var data = _ref4.data;
+
+      if (typeof data === 'object') {
+        return;
+      }
+      debug('deserialize for %s state was not an object but %s', store.displayName, data);
+    }).map(function (_ref5) {
+      var store = _ref5.store;
+      var data = _ref5.data;
+      return store.__value = data;
+    }).lastOrDefault().map(function () {
+      return true;
+    })['do'](null, function (err) {
+      return debug('deserialize encountered a err', err);
+    }, function () {
+      return debug('deserialize completed');
+    });
+  }
+};
+
+exports.Translate = Translate;
+
+function fetch(fetchMap, stores) {
+  if (!fetchMap || fetchMap.size === 0) {
+    debug('cat found empty fetch map');
+    return _rx2['default'].Observable['return']({
+      data: null,
+      fetchMap: fetchMap
+    });
+  }
+
+  var fetchCtx = _rx2['default'].Observable.from(fetchMap.values()).shareReplay();
+
+  var waitForStores = fetchCtx.pluck('store').toArray().tap(function (arrayOfStores) {
+    return debug('waiting for %s stores', arrayOfStores.length);
+  }).map(function (arrayOfStores) {
+    return _waitFor2['default'].apply(undefined, _toConsumableArray(arrayOfStores)).firstOrDefault().shareReplay();
+  }).tap(function (waitForStores) {
+    return waitForStores.subscribe();
+  });
+
+  var fetchObs = fetchCtx.map(function (_ref6) {
+    var action = _ref6.action;
+    var payload = _ref6.payload;
+    return { action: action, payload: payload };
+  }).tapOnNext(function () {
+    return debug('init individual fetchers');
+  }).tapOnNext(function (_ref7) {
+    var action = _ref7.action;
+    var payload = _ref7.payload;
+
+    action(payload);
+  }).tapOnCompleted(function () {
+    return debug('fetchers activated');
+  }).toArray();
+
+  return _rx2['default'].Observable.combineLatest(waitForStores, fetchObs.delaySubscription(50), function (data) {
+    return { data: data, fetchMap: fetchMap };
+  });
+}
 
 var Cat = (function () {
   function Cat() {
     _classCallCheck(this, Cat);
 
-    this._stores = new Map();
-    this._actions = new Map();
-    this._pathsMap = new Map();
-    this._render = Rx.Observable.fromNodeCallback(React.render, React);
+    this.stores = new Map();
+    this.actions = new Map();
   }
 
   _createClass(Cat, [{
-    key: 'setStore',
+    key: 'register',
+    value: function register(StoreOrActions) {
+      _invariant2['default'](_Store2['default'].isPrototypeOf(StoreOrActions) || _Actions2['default'].isPrototypeOf(StoreOrActions), 'Attempted to add a class that is not a ThunderCats Store or Action');
 
-    // ### add a store to Cat.
-    //
-    // This takes as the first argument a Store with ThunderCats
-    // Store as its base.
-    // The rest of the arguments are used to instantiate the store.
-    // The Cat then takes this store and instantiates it with the arguments
-    // provided and adds it to its list of stores.
-    //
-    value: function setStore(_Store) {
-      invariant(Store.prototype.isPrototypeOf(_Store), 'Attempted to add a store that does not have A ThunderCats ' + 'store as its base');
+      var name = StoreOrActions.displayName;
 
-      var name = _Store.name || _Store.prototype.name;
+      _invariant2['default'](typeof name === 'string', 'Attempted to add a Store/Actions that does not have a displayName');
 
-      invariant(name, 'Attempted to add a store that does not have name, stores must have names\n      Either add a static property to your Store class\n      MyStore.name = \'MyStore\', or as a prototype property\n      MyStore.prototype.name = \'MyStore\'');
+      var isStore = _Store2['default'].isPrototypeOf(StoreOrActions);
+      var args = [].slice.call(arguments);
 
-      if (this._stores.has(name)) {
-        return warning(false, 'Attempted to add a store, %s, that already exists in the Cat', name);
-      }
-      // Some wizardry. Create a new instance of 'MyStore' with a variable number
-      // of arguments provided by the user
-      var storeIns = new (Function.prototype.bind.apply(_Store, arguments))();
-      this._stores.add(name, storeIns);
+      return isStore ? Register.store(this.stores, StoreOrActions, args) : Register.actions(this.actions, StoreOrActions, args);
     }
   }, {
     key: 'getStore',
-
-    // ### get store
-    //
-    // returns a store instance if found
-    // otherwise returns undefined
     value: function getStore(store) {
-      return this._stores.get(store);
+      return this.stores.get(('' + store).toLowerCase());
     }
   }, {
-    key: 'setAction',
-
-    // ### set action
-    //
-    // Takes an actions class as a first argument
-    // and the rest of the arguments are passed to the constructor of the action
-    // class.
-    value: function setAction(Actions) {
-      invariant(isActions(Actions), 'attempted to add an action object that is does not have a ' + 'ThunderCats Action class as its base.');
-
-      var name = Actions.name || Actions.constructor.name;
-
-      invariant(name, 'attempted to add an Action class with no name, Actions must have ' + 'names to use them with the Cat');
-
-      if (this._actions.has(name)) {
-        return warning(false, 'attempted to add an Action, %s, to the Cat that it already exists');
-      }
-
-      var actions = new (Function.prototype.bind.apply(Actions, arguments))();
-      this._actions.add(name, actions);
-    }
-  }, {
-    key: 'getAction',
-
-    // ### Get Actions
-    //
-    // returns the instance of actions class if it exist
-    // otherwise returns undefined;
-    value: function getAction(action) {
-      return this._actions.get(action);
+    key: 'getActions',
+    value: function getActions(action) {
+      return this.actions.get(('' + action).toLowerCase());
     }
   }, {
     key: 'serialize',
-
-    // ### serialize
-    //
-    // Get the state of all the stores in string.
-    // returns a string
     value: function serialize() {
-      return Rx.Observable.from(this._stores.values()).filter(function (store) {
-        return !!store.displayName;
-      }).map(function (store) {
-        return _defineProperty({}, store.displayName, store.__value);
-      }).reduce(function (allDats, storeDats) {
-        return assign(allDats, storeDats);
-      }, Object.create(null)).map(function (allDats) {
-        return JSON.stringify(allDats);
-      }).doOnError(function (err) {
-        debug('an error occured while stringifing stores', err);
-      }).toArray().pop();
+      return Translate.serialize(this.stores);
     }
   }, {
     key: 'deserialize',
     value: function deserialize(stringyCatState) {
-      invariant(typeof stringyCatState === 'string', 'deserialize expects a string but got %s', stringyCatState);
-
-      var catState = JSON.parse(stringyCatState);
-      invariant(typeof catState === 'object', 'parsed value of deserialize argument should be an object or ' + 'null but got %s', catState);
-
-      Rx.Observable.from(this._stores.values()).map(function (store) {
-        var newStoreState = catState[store.displayName];
-        if (typeof newStoreState === 'object') {
-          store.__value = newStoreState;
-        } else {
-          debug('deserialize found a store state that is not an object', newStoreState);
-        }
-        return true;
-      }).doOnError(function (err) {
-        debug('deserialize encountered a err', err);
-      }).subscribe(function () {}, null, function () {
-        debug('deserialize completed');
-      });
-    }
-  }, {
-    key: '_setCurrentPath',
-
-    // ### set current path
-    //
-    // register current path
-    // This can be any string but should be a string that uniquely identifies the
-    // current component being rendered
-    value: function _setCurrentPath(path) {
-      this._activePath = path;
-      this._setPath(path);
-    }
-  }, {
-    key: '_setPath',
-
-    // ### set path
-    //
-    // Adds path to the map!
-    value: function _setPath(path) {
-      if (!this._pathsMap.has(path)) {
-        this._pathsMap.set(path, new Map());
-      }
-    }
-  }, {
-    key: '_registerFetcher',
-
-    // ### register a fetcher
-    //
-    // adds the fetcher and its intended payload with the current active path
-    // along with the store that listens for the response from the fetch
-    value: function _registerFetcher(fetchAction, ctx) {
-      var fetchMap = this._pathsMap.get(this._activePath);
-      fetchMap.add(ctx.fetchName, {
-        fetchName: ctx.fetchName,
-        fetcher: fetchAction,
-        fetchPayload: ctx.fetchPayload,
-        store: ctx.storeName
-      });
-    }
-  }, {
-    key: '_doFetch',
-
-    // ### do fetch
-    //
-    // activates each fetcher and then waits for the response from the stores
-    // returns an observable that responds with the value of the stores in
-    // question once they have responded. If stores haven't responded within 3
-    // seconds the observable throws.
-    value: function _doFetch(ctx) {
-      var fetchMap = this._pathsMap.get(ctx.path);
-      var ctxValues = Rx.Observable.from(fetchMap.values());
-      var fetchValues = ctxValues.map(function (ctx) {
-        return {
-          fetcher: ctx.fetcher,
-          payload: ctx.fetchPayload
-        };
-      });
-
-      var stores = ctxValues.map(function (ctx) {
-        return ctx.storeName;
-      }).map(this._getStore.bind(this)).filter(function (store) {
-        // check for positive values
-        return !!store;
-      }).toArray();
-
-      debug('init individual fetchers');
-      fetchValues.subscription(function (_ref2) {
-        var fetcher = _ref2.fetcher;
-        var _ref2$payload = _ref2.payload;
-        var payload = _ref2$payload === undefined ? {} : _ref2$payload;
-
-        fetcher(payload);
-      });
-      debug('init complete');
-      return waitFor(stores);
+      return Translate.deserialize(this.stores, stringyCatState);
     }
   }, {
     key: 'render',
-
-    // ### render
-    //
-    // Wraps the component being rendered and sets this cat instance on the
-    // context object.
-    // calls React.render and returns an observable that responds with the
-    // instance of the component.
-    value: function render(Component, DOMContainer, ctx) {
-      var Burrito = this._wrap(Component);
-      this._setCurrentPath(ctx.path);
-      return this._render(Burrito, DOMContainer);
+    value: function render(Component, DOMContainer) {
+      return Render(this, Component, DOMContainer);
     }
   }, {
     key: 'renderToString',
-
-    // ### renderToString
-    //
-    // Wrap component in and sets this cat instance on the context, same as above,
-    // but will also initiate data fetchers for the current path.
-    // returns an observable that reponds with the data for this path and the
-    // markup
-    value: function renderToString(Component, ctx) {
-      var render = Rx.Observable.fromNodeCallback(React.render, React);
-
-      // Set current path
-      this._setCurrentPath(ctx.path);
-
-      // wrap component in contextWrapper
-      var Burrito = this._wrap(Component);
-
-      // set active stores and fetchers
-      React.renderToStaticMarkup(Burrito);
-      // initial render populated stores and fetch actions to call
-      return this._doFetch(ctx).flatMap(function () {
-        return render(Burrito);
-      }, function (data, markup) {
-        return {
-          markup: markup,
-          data: data
-        };
-      });
-    }
-  }, {
-    key: '_wrap',
-
-    // ### wrap
-    //
-    // Adds this instance of the Cat on the context object
-    value: function _wrap(Component) {
-      invariant(React.isValidElement(Component), 'cat.renderToString and render expects a valid React element');
-      return React.createElement(ContextWrapper, { cat: this }, Component);
+    value: function renderToString(Component) {
+      return RenderToString(this, Component);
     }
   }]);
 
   return Cat;
 })();
 
-module.exports = Cat;
+exports['default'] = Cat;
