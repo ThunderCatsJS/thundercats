@@ -611,12 +611,15 @@ describe('Store', function() {
     });
 
     it(
-      'should throw if data deserializes to non object or non null',
+      'should throw if data deserializes to non object',
       function() {
         expect(store.value).to.be.null;
         expect(() => {
           store.deserialize('true');
-        }).to.throw(/deserialize must return an object or null/);
+        }).to.throw(/deserialize must return an object/);
+        expect(() => {
+          store.deserialize(JSON.stringify(null));
+        }).to.throw(/deserialize must return an object/);
       }
     );
   });
