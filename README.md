@@ -342,6 +342,24 @@ todoApp.render(appElement, document.getElementById('todoapp')).subscribe(
 
 waitFor(observable[, ... observables]) returns an obsevable that waits for all of the observables to publish a new value. Under the hood it uses Rx.Observable.combineLatest but first converts the passed in obvervables into hot observables. This is great when you just want to wait for new values and not current values of observables.
 
+### Contributing
+Commits messages should start with 
+
+* adds
+* changes
+* fixes
+* removes
+
+Use eslint to lint according to the provided .eslintrc file. 
+
+
+
 ### API
 
 more to come...
+
+
+
+
+
+<small>Don't Forget To Be Awesome</small>
