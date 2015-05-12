@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import { Actions } from 'thundercats';
-import cx from 'react/lib/cx';
+import classNames from 'classNames';
 
-const { PropTypes } = React;
 const ESCAPE_KEY = 27;
 const ENTER_KEY = 13;
 
@@ -18,32 +17,37 @@ export class ItemActions extends Actions {
 }
 
 export default class Item extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
     this.state = { editText: props.todo.text };
     this.itemActions = new ItemActions();
+    this.todoActions = context.cat.getActions('todoActions');
   }
 
   static displayName = 'TodoItem'
 
+  static contextTypes = {
+    cat: PropTypes.object
+  }
+
   static propTypes = {
-    editing: React.PropTypes.bool.isRequired,
+    editing: PropTypes.bool.isRequired,
     itemActions: PropTypes.object.isRequired,
     onCancel: PropTypes.func.isRequired,
     onEdit: PropTypes.func.isRequired,
     onSave: PropTypes.func.isRequired,
-    todo: PropTypes.object.isRequired,
-    todoActions: PropTypes.object.isRequired
+    todo: PropTypes.object.isRequired
   }
 
   componentDidMount() {
-    const { todo, todoActions } = this.props;
+    const { todo } = this.props;
+    const { todoActions } = this;
     const {
       handleBlur,
       handleDoubleClick,
       handleKeyDown,
       handleTextChange
-    } = this.props.itemActions;
+    } = this.itemActions;
 
     handleKeyDown
       .tap(e => {
@@ -94,7 +98,8 @@ export default class Item extends React.Component {
   }
 
   render() {
-    const { todo, editing, todoActions } = this.props;
+    const { todoActions } = this;
+    const { todo, editing } = this.props;
     const { editText } = this.state;
     const {
       handleTextChange,
@@ -103,7 +108,7 @@ export default class Item extends React.Component {
       handleBlur
     } = this.itemActions;
 
-    const className = cx({
+    const className = classNames({
       completed: todo.complete,
       editing: editing
     });
@@ -123,7 +128,7 @@ export default class Item extends React.Component {
           </label>
           <button
             className='destroy'
-            onClick={ () => todoActions.destroyTodo(todo.id) }/>
+            onClick={ () => todoActions.destroy(todo.id) }/>
         </div>
         <input
           className='edit'

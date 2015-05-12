@@ -19,7 +19,7 @@ export default class Header extends React.Component {
     const { todoActions } = this;
 
     const handleKeyDownObs = new Rx.Subject();
-    this.handleKeyDown = handleKeyDownObs.onNext(handleKeyDownObs);
+    this.handleKeyDown = handleKeyDownObs.onNext.bind(handleKeyDownObs);
 
     this.subscription = handleKeyDownObs
       .filter(e => e.which === ENTER_KEY)
@@ -28,6 +28,7 @@ export default class Header extends React.Component {
       .filter(input => !!input.value.trim())
       .subscribe(input => {
         const val = input.value.trim();
+        input.value = '';
         todoActions.create(val);
       });
   }

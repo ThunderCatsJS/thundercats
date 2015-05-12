@@ -24,13 +24,13 @@ const { changeRoute } = app.getActions('routerActions');
 
 const router = Router({
   '/': function () {
-    changeRoute(routes.ALL_TODOS);
+    changeRoute(routes.ALL);
   },
   '/active': function () {
-    changeRoute(routes.ACTIVE_TODOS);
+    changeRoute(routes.ACTIVE);
   },
   '/completed': function () {
-    changeRoute(routes.COMPLETED_TODOS);
+    changeRoute(routes.COMPLETED);
   }
 });
 

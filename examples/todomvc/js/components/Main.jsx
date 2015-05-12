@@ -2,12 +2,17 @@ import React, { PropTypes } from 'react';
 import Item from './Item.jsx';
 
 export default class Main extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
+    this.todoActions = context.cat.getActions('todoActions');
     this.state = { editing: null };
   }
 
   static displayName = 'Main'
+
+  static contextTypes = {
+    cat: PropTypes.object.isRequired
+  }
 
   static propTypes = {
     areAllComplete: PropTypes.bool.isRequired,
@@ -37,9 +42,9 @@ export default class Main extends React.Component {
 
   render() {
     const { editing } = this.state;
+    const { todoActions } = this;
     const {
       areAllComplete,
-      todoActions,
       todos
     } = this.props;
 

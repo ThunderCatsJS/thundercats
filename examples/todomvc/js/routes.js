@@ -1,5 +1,5 @@
 export default {
-  ALL: '',
-  ACTIVE: 'active',
-  COMPLETED: 'completed'
+  ALL: '/',
+  ACTIVE: '/active',
+  COMPLETED: '/completed'
 };
