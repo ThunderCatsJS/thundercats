@@ -10,12 +10,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import React from 'react';
-import ThreadListItem from '../components/ThreadListItem.react';
+import React, { PropTypes } from 'react';
+import ThreadListItem from '../components/ThreadListItem.jsx';
 import ChatMessageUtils from '../utils/ChatMessageUtils';
 
 function getUnreadCount(threads) {
-  const unreadCount = 0;
+  let unreadCount = 0;
   Object.keys(threads).forEach(id => {
     if (!threads[id].lastMessage.isRead) {
       unreadCount++;
@@ -53,7 +53,10 @@ export default class ThreadSection extends React.Component {
       <span>Unread threads: { unread }</span>;
   }
 
-  renderListItem(currentID, threads) {
+  renderListItems(currentID, threads) {
+    if (!threads) {
+      return null;
+    }
     return threads.map(thread => (
       <ThreadListItem
         currentThreadID={ currentID }
@@ -67,10 +70,10 @@ export default class ThreadSection extends React.Component {
     return (
       <div className='thread-section'>
         <div className='thread-count'>
-          { this.renderUnread(currentID, unreadCount) }
+          { this.renderUnread(unreadCount) }
         </div>
         <ul className='thread-list'>
-          { this.renderListItems(threads) }
+          { this.renderListItems(currentID, threads) }
         </ul>
       </div>
     );

@@ -9,7 +9,7 @@
     "object-assign": "^1.0.0",
     "react": "^0.13.3",
     "rx": "^2.5.2",
-    "thundercats": "^2.0.0"
+    "thundercats": "2.0.0-alpha.1"
   },
   "devDependencies": {
     "babelify": "^6.0.2",
@@ -18,17 +18,8 @@
     "watchify": "^3.2.1"
   },
   "scripts": {
-    "start": "watchify js/app.jsx -t [ babelify --optional es7.classProperties ] -g envify -o js/bundle.js",
+    "start": "watchify js/app.jsx -r react -d -t [ babelify --sourceMaps false --optional es7.classProperties ] -g envify -o js/bundle.js",
     "build": "NODE_ENV=development browserify js/app.jsx -t [ babelify --optional es7.classProperties ] -g envify -o js/bundle.js"
   },
-  "author": "Bill Fisher",
-  "browserify": {
-    "transform": [
-      "reactify",
-      "envify"
-    ]
-  },
-  "jest": {
-    "rootDir": "./js"
-  }
+  "author": "Bill Fisher"
 }

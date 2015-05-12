@@ -46,7 +46,7 @@ export default class ThreadStore extends Store {
         }, {});
 
         return {
-          newThreads,
+          threads: newThreads,
           currentID: threadID
         };
       }
@@ -83,4 +83,6 @@ export default class ThreadStore extends Store {
       }
     })));
   }
+
+  static displayName = 'ThreadStore'
 }

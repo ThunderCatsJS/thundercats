@@ -12,8 +12,8 @@
 
 import React from 'react';
 import { Container } from 'thundercats';
-import MessageSection from './MessageSection';
-import ThreadSection from './ThreadSection';
+import MessageSection from './MessageSection.jsx';
+import ThreadSection from './ThreadSection.jsx';
 
 export default class ChatApp extends React.Component {
   constructor() {

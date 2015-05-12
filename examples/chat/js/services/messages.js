@@ -26,7 +26,7 @@ export default {
     const rawMessages = JSON.parse(localStorage.getItem(NAMESPACE));
 
     // simulate success callback
-    return Rx.Observable.from(rawMessages).delay(50);
+    return Rx.Observable.just(rawMessages).delay(50);
   },
 
   createMessage: function(message, threadName) {
@@ -46,6 +46,6 @@ export default {
     rawMessages.push(createdMessage);
     localStorage.setItem(NAMESPACE, JSON.stringify(rawMessages));
 
-    return Rx.Observable.from(createdMessage).delay(50);
+    return Rx.Observable.just(createdMessage).delay(50);
   }
 };

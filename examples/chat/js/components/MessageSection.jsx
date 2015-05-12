@@ -12,8 +12,8 @@
 
 import React, { PropTypes } from 'react';
 import messageServices from '../services/messages';
-import MessageComposer from './MessageComposer.react';
-import MessageListItem from './MessageListItem.react';
+import MessageComposer from './MessageComposer.jsx';
+import MessageListItem from './MessageListItem.jsx';
 
 function combineLatest(messages, { currentID, threads }) {
   const threadMessages = [];
@@ -33,7 +33,7 @@ function combineLatest(messages, { currentID, threads }) {
   });
 
   return {
-    thread: threads[currentID],
+    thread: threads[currentID] || {},
     messages: threadMessages
   };
 }
@@ -47,7 +47,7 @@ export default class MessageSection extends React.Component {
   static propTypes = {
     chatActions: PropTypes.object.isRequired,
     messages: PropTypes.array,
-    thread: PropTypes.string
+    thread: PropTypes.object
   }
 
   componentDidMount() {

@@ -49,8 +49,8 @@ export default class MessageComposer extends React.Component {
       <textarea
         className='message-composer'
         name='message'
-        onChange={ this.handleChange }
-        onKeyDown={ this.handleKeyDown }
+        onChange={ this.handleChange.bind(this) }
+        onKeyDown={ this.handleKeyDown.bind(this) }
         value={ this.state.text } />
     );
   }

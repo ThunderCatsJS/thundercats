@@ -19,7 +19,7 @@ export default class MessageListItem extends React.Component {
 
   static displayName = 'MessageListItem'
   static propTypes = {
-    message: ReactPropTypes.object
+    message: PropTypes.object
   }
 
   render() {

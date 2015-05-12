@@ -9,7 +9,7 @@
  * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-import Store from 'thundercats';
+import { Store } from 'thundercats';
 import assign from 'object-assign';
 import ChatMessageUtils from '../utils/ChatMessageUtils';
 
@@ -24,9 +24,9 @@ function markAllInThreadRead(messages, threadID) {
 }
 
 export default class MessageStore extends Store {
-  costructor(cat) {
+  constructor(cat) {
     super();
-    const chatActions = cat.getActions('catActions');
+    const chatActions = cat.getActions('chatActions');
     const threadStore = cat.getStore('threadStore');
 
     const {
@@ -40,7 +40,7 @@ export default class MessageStore extends Store {
     this.register(
       clickThread.withLatestFrom(
         threadStore,
-        (e, { currentId }) => currentId
+        (e, { currentID }) => currentID
       )
       .map(currentID => ({
         transform: messages => markAllInThreadRead(messages, currentID)
@@ -83,4 +83,6 @@ export default class MessageStore extends Store {
         }))
     );
   }
+
+  static displayName = 'MessageStore'
 }

@@ -12,7 +12,7 @@
 
 import React from 'react';
 import { Cat } from 'thundercats';
-import ChatApp from './components/ChatApp';
+import ChatApp from './components/ChatApp.jsx';
 import ExampleData from './ChatExampleData';
 import ChatActions from './actions/ChatActions';
 import ThreadStore from './stores/ThreadStore';
@@ -23,9 +23,10 @@ ExampleData.init();
 // This file bootstraps the entire application.
 class Chat extends Cat {
   constructor() {
+    super();
     this.register(ChatActions);
-    this.register(ThreadStore);
-    this.register(MessageStore);
+    this.register(ThreadStore, this);
+    this.register(MessageStore, this);
   }
 }
 
@@ -34,4 +35,11 @@ const chat = new Chat();
 chat.render(
   <ChatApp />,
   document.getElementById('react')
+).subscribe(
+  () => {
+    console.log('Chat app rendered');
+  },
+  err => {
+    console.log('Chat app has err! Oh noes!!', err.message, err.stack);
+  }
 );

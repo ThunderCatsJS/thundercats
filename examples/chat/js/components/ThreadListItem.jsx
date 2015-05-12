@@ -14,23 +14,27 @@ import React, { PropTypes } from 'react';
 import classNames from 'classnames';
 
 export default class ThreadListItem extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor(props, context) {
+    super(props, context);
+    this.chatActions = this.context.cat.getActions('chatActions');
   }
   static displayName = 'ThreadListItem'
 
+  static contextTypes = {
+    cat: PropTypes.object.isRequired
+  }
+
   static propTypes = {
-    chatActions: PropTypes.object.isRequired,
     currentThreadID: PropTypes.string,
     thread: PropTypes.object
   }
 
   handleClick() {
-    this.props.chatActions.clickThread(this.props.thread.id);
+    this.chatActions.clickThread(this.props.thread.id);
   }
 
   render() {
-    const { thread, currentThreadID } = this.props.thread;
+    const { thread, currentThreadID } = this.props;
     const { date, text } = thread.lastMessage;
     const itemClassName = classNames({
       'thread-list-item': true,
@@ -40,9 +44,9 @@ export default class ThreadListItem extends React.Component {
     return (
       <li
         className={ itemClassName }
-        onClick={ this.handleClick }>
+        onClick={ this.handleClick.bind(this) }>
         <h5 className='thread-name'>
-          { thread.name }
+          { thread && thread.name }
         </h5>
         <div className='thread-time'>
           { date.toLocaleTimeString() }

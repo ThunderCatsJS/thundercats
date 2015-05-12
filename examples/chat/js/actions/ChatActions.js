@@ -1,7 +1,7 @@
 import { Actions } from 'thundercats';
 import messageServices from '../services/messages';
 
-export default class CompActions extends Actions {
+export default class ChatActions extends Actions {
   constructor() {
     super([
       'clickThread',
@@ -9,7 +9,7 @@ export default class CompActions extends Actions {
     ]);
   }
 
-  static displayName = 'CompActions'
+  static displayName = 'ChatActions'
 
   createMessage(data) {
     const text = data.text;
