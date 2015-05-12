@@ -18,8 +18,8 @@
     "watchify": "^3.2.1"
   },
   "scripts": {
-    "start": "watchify js/app.jsx -r react -d -t [ babelify --sourceMaps false --optional es7.classProperties ] -g envify -o js/bundle.js",
-    "build": "NODE_ENV=development browserify js/app.jsx -t [ babelify --optional es7.classProperties ] -g envify -o js/bundle.js"
+    "start": "watchify js/app.jsx -r react -d -t [ babelify --optional es7.classProperties ] -g envify -o js/bundle.js",
+    "build": "NODE_ENV=production browserify js/app.jsx -t [ babelify --optional es7.classProperties ] -g envify -o js/bundle.js"
   },
   "author": "Bill Fisher"
 }
