@@ -11,7 +11,6 @@
  */
 
 import React from 'react';
-import { Container } from 'thundercats';
 import MessageSection from './MessageSection.jsx';
 import ThreadSection from './ThreadSection.jsx';
 
@@ -25,12 +24,8 @@ export default class ChatApp extends React.Component {
   render() {
     return (
       <div className='chatapp'>
-        <Container>
-          <ThreadSection />
-        </Container>
-        <Container>
-          <MessageSection />
-        </Container>
+        <ThreadSection />
+        <MessageSection />
       </div>
     );
   }

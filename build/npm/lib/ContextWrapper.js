@@ -70,12 +70,12 @@ var ContextWrapper = (function (_React$Component) {
     key: 'wrap',
 
     // wrap a component in this context wrapper
-    value: function wrap(Component, cat) {
-      _invariant2['default'](_react2['default'].isValidElement(Component), 'ContextWrapper wrap expects a valid React element');
+    value: function wrap(element, cat) {
+      _invariant2['default'](_react2['default'].isValidElement(element), 'ContextWrapper wrap expects a valid React element');
 
       _invariant2['default'](typeof cat === 'object', 'ContextWrapper expects an instance of Cat');
 
-      return _react2['default'].createElement(ContextWrapper, { cat: cat }, Component);
+      return _react2['default'].createElement(ContextWrapper, { cat: cat }, element);
     }
   }]);
 

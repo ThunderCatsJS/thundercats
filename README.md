@@ -182,9 +182,15 @@ The Container is a React Component use to wrap your components. The Container is
 This is how you use it.
 
 ```js
-<Container>
-  <MessageSection>
-</Container>
+import { createContainer } from 'thundercats';
+
+const Div = React.createClass({
+  render() {
+    <div />
+  }
+});
+
+const WrappedDiv = createContainer(Div);
 
 ```
 By itself it doesn't do much. But in your component you can define the method `getThundercats`. Check out the example below. 

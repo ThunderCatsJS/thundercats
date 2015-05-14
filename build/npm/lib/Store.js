@@ -221,7 +221,9 @@ var Store = (function (_Rx$Observable) {
       if ('optimistic' in ops) {
         var optimisticObs = _utils.isPromise(ops.optimistic) ? _rx2['default'].Observable.fromPromise(ops.optimistic) : ops.optimistic;
 
-        optimisticObs.firstOrDefault().subscribe(function () {}, function () {
+        optimisticObs.firstOrDefault().subscribe(function () {}, function (err) {
+          debug('optimistic error. reverting changes', err);
+
           var _Optimism$revert = Optimism.revert(uid, _this6.history);
 
           var value = _Optimism$revert.value;

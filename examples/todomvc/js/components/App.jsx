@@ -1,11 +1,12 @@
 import React, { PropTypes } from 'react';
+import { createContainer } from 'thundercats';
 
 import routes from '../routes';
 import Footer from './Footer.jsx';
 import Header from './Header.jsx';
 import Main from './Main.jsx';
 
-export default class App extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -85,3 +86,5 @@ export default class App extends React.Component {
     );
   }
 }
+
+export default createContainer(App);

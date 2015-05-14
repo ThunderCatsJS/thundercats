@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { React, createActions, createClass, ReactTestUtils } from './utils';
 
-import { Cat, Store, Actions, Container } from '../';
+import { Cat, Store, Actions, createContainer } from '../';
 import { RenderToString } from '../lib/Cat';
 
 chai.should();
@@ -275,7 +275,7 @@ describe('Cat', function() {
     });
 
     describe('fetching', () => {
-      let Comp, payload, wrappedPayload, TestComp;
+      let payload, wrappedPayload, TestComp;
       beforeEach(() => {
         let CatActions = createActions();
         let CatStore = createStore();
@@ -286,7 +286,7 @@ describe('Cat', function() {
       });
 
       it('should initiate fetcher registration', (done) => {
-        TestComp = createClass({
+        TestComp = createContainer(createClass({
           getThundercats() {
             return {
               store: 'catStore',
@@ -294,13 +294,8 @@ describe('Cat', function() {
               payload: wrappedPayload
             };
           }
-        });
-        Comp = React.createElement(
-          Container,
-          null,
-          React.createElement(TestComp)
-        );
-        cat.renderToString(Comp)
+        }));
+        cat.renderToString(React.createElement(TestComp))
           .subscribe(({ fetchMap }) => {
             expect(fetchMap).to.exist;
             fetchMap.size.should.equal(1);
@@ -318,21 +313,15 @@ describe('Cat', function() {
       });
 
       it('should be ok with empty payload', (done) => {
-        TestComp = createClass({
+        TestComp = createContainer(createClass({
           getThundercats() {
             return {
               store: 'CatStore',
               fetchAction: 'catActions.doAction'
             };
           }
-        });
-
-        Comp = React.createElement(
-          Container,
-          null,
-          React.createElement(TestComp)
-        );
-        cat.renderToString(Comp)
+        }));
+        cat.renderToString(React.createElement(TestComp))
           .subscribe(({ fetchMap }) => {
             const fetchContext = fetchMap.get('catActions.doAction');
             expect(fetchContext).to.exist;
@@ -349,29 +338,25 @@ describe('Cat', function() {
     });
 
     describe('observable', () => {
-      let Comp;
+      let element;
       beforeEach(() => {
         let CatActions = createActions();
         let CatStore = createStore();
-        let TestComp = createClass({
+        let Comp = createContainer(createClass({
           getThundercats() {
             return {
               store: 'CatStore',
               fetchAction: 'catActions.doAction'
             };
           }
-        });
+        }));
+        element = React.createElement(Comp);
         cat.register(CatActions);
         cat.register(CatStore, cat);
-        Comp = React.createElement(
-          Container,
-          null,
-          React.createElement(TestComp)
-        );
       });
 
       it('should return markup, data', (done) => {
-        cat.renderToString(Comp)
+        cat.renderToString(element)
           .subscribe(data => {
             expect(data.markup).to.exist;
             expect(data.data).to.exist;
@@ -394,7 +379,7 @@ describe('Cat', function() {
       });
 
       it('should complete', (done) => {
-        cat.renderToString(Comp)
+        cat.renderToString(element)
           .subscribe(
             () => {},
             () => {},
@@ -405,31 +390,27 @@ describe('Cat', function() {
   });
 
   describe('render', function () {
-    let cat, Comp;
+    let cat, Comp, element;
     beforeEach(() => {
       let CatActions = createActions();
       let CatStore = createStore();
-      let TestComp = createClass({
+      Comp = createContainer(createClass({
         getThundercats() {
           return {
             store: 'CatStore',
             fetchAction: 'catActions.doAction'
           };
         }
-      });
+      }));
+      element = React.createElement(Comp);
       cat = new Cat();
       cat.register(CatActions);
       cat.register(CatStore, cat);
-      Comp = React.createElement(
-        Container,
-        null,
-        React.createElement(TestComp)
-      );
     });
 
     it('should return an observable', () => {
       let divContainer = document.createElement('div');
-      let renderObserable = cat.render(Comp, divContainer);
+      let renderObserable = cat.render(element, divContainer);
       expect(renderObserable).to.exist;
       renderObserable.subscribe.should.be.a('function');
     });
@@ -445,7 +426,7 @@ describe('Cat', function() {
       });
 
       it('should return react instance', (done) => {
-        let renderObserable = cat.render(Comp, divContainer);
+        let renderObserable = cat.render(element, divContainer);
         expect(renderObserable).to.exist;
         renderObserable
           .firstOrDefault()

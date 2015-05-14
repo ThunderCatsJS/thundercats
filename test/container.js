@@ -6,7 +6,7 @@ import sinonChai from 'sinon-chai';
 
 import utils from './utils';
 import ContextWrapper from '../lib/ContextWrapper';
-import { Store, Cat, Container } from '../';
+import { Store, Cat, createContainer } from '../';
 
 const {
   React, ReactTestUtils, render, createClass, unmountComp, createActions
@@ -16,30 +16,6 @@ chai.use(sinonChai);
 
 describe('Container', function() {
   describe('initialization', ()=> {
-    it('should throw if given no children', () => {
-      expect(() => {
-        let cat = new Cat();
-        let Burrito = ContextWrapper.wrap(React.createElement(Container), cat);
-        render(Burrito);
-      }).to.throw(/expects a single child/);
-    });
-
-    it('should throw if given more than one child', () => {
-      expect(() => {
-        let cat = new Cat();
-        let Burrito = ContextWrapper.wrap(
-          React.createElement(
-            Container,
-            null,
-            React.createElement('div'),
-            React.createElement('div')
-          ),
-          cat
-        );
-        render(Burrito);
-      }).to.throw(/expects a single child/);
-    });
-
     it('should be ok without getThundercats defined', () => {
       expect(() => {
         let CatActions = createActions();
@@ -47,12 +23,11 @@ describe('Container', function() {
         let cat = new Cat();
         cat.register(CatActions);
         cat.register(LionActions);
-        let Comp = createClass();
+        let Comp = createContainer(createClass());
         let Burrito = ContextWrapper.wrap(
           React.createElement(
-            Container,
-            null,
-            React.createElement(Comp)
+            Comp,
+            null
           ),
           cat
         );
@@ -85,12 +60,9 @@ describe('Container', function() {
           };
         }
       });
+      let WrappedComp = createContainer(Comp);
       let Burrito = ContextWrapper.wrap(
-        React.createElement(
-          Container,
-          null,
-          React.createElement(Comp)
-        ),
+        React.createElement(WrappedComp),
         cat
       );
       let { instance, cont } = render(Burrito);
@@ -110,12 +82,9 @@ describe('Container', function() {
           };
         }
       });
+      let WrappedComp = createContainer(Comp);
       let Burrito = ContextWrapper.wrap(
-        React.createElement(
-          Container,
-          null,
-          React.createElement(Comp)
-        ),
+        React.createElement(WrappedComp),
         cat
       );
       let { instance, cont } = render(Burrito);
@@ -147,13 +116,9 @@ describe('Container', function() {
           };
         }
       });
-
+      let WrappedComp = createContainer(Comp);
       let Burrito = ContextWrapper.wrap(
-        React.createElement(
-          Container,
-          null,
-          React.createElement(Comp)
-        ),
+        React.createElement(WrappedComp),
         cat
       );
       let { instance, container } = render(Burrito);
@@ -175,13 +140,9 @@ describe('Container', function() {
           };
         }
       });
-
+      let WrappedComp = createContainer(Comp);
       let Burrito = ContextWrapper.wrap(
-        React.createElement(
-          Container,
-          null,
-          React.createElement(Comp)
-        ),
+        React.createElement(WrappedComp),
         cat
       );
       let { instance, container } = render(Burrito);
@@ -194,19 +155,15 @@ describe('Container', function() {
     it('should throw if no store is found for store name', () => {
       const err = /should get at a store with a value/;
       expect(() => {
-        Comp = createClass({
+        Comp = createContainer(createClass({
           getThundercats() {
             return {
               store: 'yo'
             };
           }
-        });
+        }));
         let Burrito = ContextWrapper.wrap(
-          React.createElement(
-            Container,
-            null,
-            React.createElement(Comp)
-          ),
+          React.createElement(Comp),
           cat
         );
         let { container } = render(Burrito);
@@ -214,7 +171,7 @@ describe('Container', function() {
       }).to.throw(err);
 
       expect(() => {
-        Comp = createClass({
+        Comp = createContainer(createClass({
           getThundercats() {
             return {
               stores: [
@@ -224,13 +181,9 @@ describe('Container', function() {
               ]
             };
           }
-        });
+        }));
         let Burrito = ContextWrapper.wrap(
-          React.createElement(
-            Container,
-            null,
-            React.createElement(Comp)
-          ),
+          React.createElement(Comp),
           cat
         );
         let { container } = render(Burrito);
@@ -239,7 +192,7 @@ describe('Container', function() {
     });
 
     it('should add multiple stores', () => {
-      Comp = createClass({
+      Comp = createClass(createClass({
         getThundercats() {
           return {
             stores: [
@@ -253,13 +206,9 @@ describe('Container', function() {
             ]
           };
         }
-      });
+      }));
       let Burrito = ContextWrapper.wrap(
-        React.createElement(
-          Container,
-          null,
-          React.createElement(Comp)
-        ),
+        React.createElement(Comp),
         cat
       );
       let { container } = render(Burrito);
@@ -267,7 +216,7 @@ describe('Container', function() {
     });
 
     it('should throw if not given selector function as last array', () => {
-      Comp = createClass({
+      Comp = createContainer(createClass({
         getThundercats() {
           return {
             stores: [
@@ -276,13 +225,9 @@ describe('Container', function() {
             ]
           };
         }
-      });
+      }));
       let Burrito = ContextWrapper.wrap(
-        React.createElement(
-          Container,
-          null,
-          React.createElement(Comp)
-        ),
+        React.createElement(Comp),
         cat
       );
       expect(() => {
@@ -291,7 +236,7 @@ describe('Container', function() {
     });
 
     describe('observable', () => {
-      let inst, cont, Burrito;
+      let inst, cont, Burrito, WrappedComp;
       beforeEach(() => {
         Comp = createClass({
           getThundercats() {
@@ -301,22 +246,20 @@ describe('Container', function() {
             };
           }
         });
-
+        WrappedComp = createContainer(Comp);
         Burrito = ContextWrapper.wrap(
-          React.createElement(
-            Container,
-            null,
-            React.createElement(Comp)
-          ),
+          React.createElement(WrappedComp),
           cat
         );
-        let { instance, container } = render(Burrito);
-        inst = instance;
-        cont = container;
+        let ref = render(Burrito);
+        inst = ref.instance;
+        cont = ref.container;
       });
 
       afterEach(() => {
-        unmountComp(cont);
+        if (cont) {
+          unmountComp(cont);
+        }
       });
 
       it('should update comp props ', () => {
@@ -354,13 +297,13 @@ describe('Container', function() {
         let catStore = cat.getStore('CatStore');
         catStore.hasObservers().should.be.true;
         let container =
-          ReactTestUtils.findRenderedComponentWithType(inst, Container);
+          ReactTestUtils.findRenderedComponentWithType(inst, WrappedComp);
         expect(container.stateSubscription).to.exist;
       });
 
       it('should dispose on component will unmounting', () => {
         let container =
-          ReactTestUtils.findRenderedComponentWithType(inst, Container);
+          ReactTestUtils.findRenderedComponentWithType(inst, WrappedComp);
         expect(container.stateSubscription).to.exist;
         unmountComp(cont).should.equal.true;
         expect(container.stateSubscription).to.be.null;
@@ -392,7 +335,7 @@ describe('Container', function() {
     });
 
     it('should register a fetch action for given fetch prop', () => {
-      Comp = createClass({
+      Comp = createContainer(createClass({
         getThundercats() {
           return {
             store: 'CatStore',
@@ -400,13 +343,9 @@ describe('Container', function() {
             payload: fetchPayload
           };
         }
-      });
+      }));
       const Burrito = ContextWrapper.wrap(
-        React.createElement(
-          Container,
-          null,
-          React.createElement(Comp)
-        ),
+        React.createElement(Comp),
         cat
       );
       const { container } = render(Burrito);
@@ -418,7 +357,7 @@ describe('Container', function() {
     });
 
     it('should register with fetchWaitFor with multiple stores', () => {
-      Comp = createClass({
+      Comp = createContainer(createClass({
         getThundercats() {
           return {
             stores: [
@@ -430,13 +369,9 @@ describe('Container', function() {
             payload: fetchPayload
           };
         }
-      });
+      }));
       const Burrito = ContextWrapper.wrap(
-        React.createElement(
-          Container,
-          null,
-          React.createElement(Comp)
-        ),
+        React.createElement(Comp),
         cat
       );
       const { container } = render(Burrito);

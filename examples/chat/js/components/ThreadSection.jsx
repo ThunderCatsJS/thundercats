@@ -11,6 +11,8 @@
  */
 
 import React, { PropTypes } from 'react';
+import { createContainer } from 'thundercats';
+
 import ThreadListItem from '../components/ThreadListItem.jsx';
 import ChatMessageUtils from '../utils/ChatMessageUtils';
 
@@ -24,7 +26,7 @@ function getUnreadCount(threads) {
   return unreadCount;
 }
 
-export default class ThreadSection extends React.Component {
+class ThreadSection extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -79,3 +81,5 @@ export default class ThreadSection extends React.Component {
     );
   }
 }
+
+export default createContainer(ThreadSection);

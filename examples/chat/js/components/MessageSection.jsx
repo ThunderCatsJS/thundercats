@@ -11,6 +11,7 @@
  */
 
 import React, { PropTypes } from 'react';
+import { createContainer } from 'thundecats';
 import messageServices from '../services/messages';
 import MessageComposer from './MessageComposer.jsx';
 import MessageListItem from './MessageListItem.jsx';
@@ -38,7 +39,7 @@ function combineLatest(messages, { currentID, threads }) {
   };
 }
 
-export default class MessageSection extends React.Component {
+class MessageSection extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -108,3 +109,5 @@ export default class MessageSection extends React.Component {
     );
   }
 }
+
+export default createContainer(MessageSection);

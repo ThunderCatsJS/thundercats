@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cat, Container } from 'thundercats';
+import { Cat } from 'thundercats';
 import { Router } from 'director';
 
 import TodoStore from './stores/TodoStore';
@@ -36,13 +36,7 @@ const router = Router({
 
 router.init('/');
 
-const appElement = (
-  <Container>
-    <TodoApp />
-  </Container>
-);
-
-app.render(appElement, document.getElementById('todoapp')).subscribe(
+app.render(<TodoApp />, document.getElementById('todoapp')).subscribe(
   () => {
     console.log('app rendered!');
   },
