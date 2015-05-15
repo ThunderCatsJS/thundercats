@@ -48,10 +48,33 @@ var _Actions2 = _interopRequireDefault(_Actions);
 var _utils = require('./utils');
 
 var debug = _debug2['default']('thundercats:store');
+var __DEV__ = process.env.NODE_ENV !== 'production';
+
+function createObjectValidator(message) {
+  return function (obj) {
+    /* istanbul ignore else */
+    if (__DEV__) {
+      _invariant2['default'](obj && typeof obj === 'object', message, obj);
+    }
+  };
+}
+
+function validateObservable(observable) {
+  /* istanbul ignore else */
+  if (__DEV__) {
+    _invariant2['default'](_utils.isObservable(observable), 'register should get observables but was given %s', observable);
+  }
+  return observable;
+}
+
+function addOperation(observable, validateItem, map) {
+  return validateObservable(observable).tap(validateItem).map(map);
+}
 
 var Register = {
   observable: function observable(obs, actionsArr, storeName) {
-    _invariant2['default'](_utils.isObservable(obs), '%s should register observables but got %s for %s', storeName, obs);
+    actionsArr = actionsArr.slice();
+    _invariant2['default'](_utils.isObservable(obs), '%s should register observables but was given %s', storeName, obs);
 
     debug('%s registering action', storeName);
 
@@ -64,11 +87,9 @@ var Register = {
 
     debug('%s register actions class %s', storeName, actionsInst.displayName);
 
-    actionNames.map(function (name) {
-      Register.observable(actionsInst[name], actionsArr, storeName);
-    });
-
-    return actionsArr;
+    return actionNames.reduce(function (actionsArr, name) {
+      return Register.observable(actionsInst[name], actionsArr, storeName);
+    }, actionsArr);
   }
 };
 
@@ -113,12 +134,18 @@ var Optimism = {
 exports.Optimism = Optimism;
 
 function applyOperation(oldValue, operation) {
-  if (operation.value) {
-    return operation.value;
-  } else if (typeof operation.transform === 'function') {
-    return operation.transform(oldValue);
+  var value = operation.value;
+  var transform = operation.transform;
+  var set = operation.set;
+
+  if (value) {
+    return value;
+  } else if (transform) {
+    return transform(oldValue);
+  } else if (set) {
+    return _objectAssign2['default']({}, oldValue, set);
   } else {
-    return _objectAssign2['default']({}, oldValue, operation.set);
+    return oldValue;
   }
 }
 
@@ -161,9 +188,11 @@ var Store = (function (_Rx$Observable) {
     key: 'register',
     value: function register(observableOrActionsInstance) {
       if (observableOrActionsInstance instanceof _Actions2['default']) {
-        return Register.actions(observableOrActionsInstance, this.actions, this.displayName);
+        this.actions = Register.actions(observableOrActionsInstance, this.actions, this.displayName);
+        return this.actions;
       }
-      return Register.observable(observableOrActionsInstance, this.actions, this.displayName);
+      this.actions = Register.observable(observableOrActionsInstance, this.actions, this.displayName);
+      return this.actions;
     }
   }, {
     key: 'hasObservers',
@@ -288,6 +317,41 @@ var Store = (function (_Rx$Observable) {
       _invariant2['default'](data && typeof data === 'object', '%s deserialize must return an object but got: %s', this.displayName, data);
       this.value = data;
       return this.value;
+    }
+  }], [{
+    key: 'createRegistrar',
+    value: function createRegistrar(store) {
+      function register(observable) {
+        store.actions = Register.observable(observable, store.actions, store.displayName);
+        return store.actions;
+      }
+      return register;
+    }
+  }, {
+    key: 'transformer',
+    value: function transformer(observable) {
+      return addOperation(observable, function (fun) {
+        /* istanbul ignore else */
+        if (__DEV__) {
+          _invariant2['default'](typeof fun === 'function', 'transform should receive functions but was given %s', fun);
+        }
+      }, function (transform) {
+        return { transform: transform };
+      });
+    }
+  }, {
+    key: 'setter',
+    value: function setter(observable) {
+      return addOperation(observable, createObjectValidator('setter should receive objects but was given %s'), function (set) {
+        return { set: set };
+      });
+    }
+  }, {
+    key: 'override',
+    value: function override(observable) {
+      return addOperation(observable, createObjectValidator('setter should receive objects but was given %s'), function (value) {
+        return { value: value };
+      });
     }
   }]);
 

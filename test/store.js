@@ -7,6 +7,7 @@ import chaiAsPromised from 'chai-as-promised';
 import Rx from 'rx';
 import Q from 'q';
 import { Store, Actions } from '../';
+import { isObservable } from '../lib/utils';
 
 chai.should();
 chai.use(chaiAsPromised);
@@ -67,29 +68,6 @@ describe('Store', function() {
   describe('operations', function() {
 
     describe('register', function() {
-
-      it('should accept a single observable action', function() {
-        let fn = function() {
-          class CatActions extends Actions {
-            constructor() {
-              super();
-            }
-            doAction() {
-            }
-          }
-          let catActions = new CatActions();
-          class CatStore extends Store {
-            constructor() {
-              super();
-              this.value = {};
-              this.register(catActions.doAction);
-            }
-          }
-          let store = new CatStore();
-          store.subscribe(function() { });
-        };
-        expect(fn).not.to.throw();
-      });
 
       it('should register actions class instance', function() {
         let fn = function() {
@@ -178,6 +156,163 @@ describe('Store', function() {
         onCompletedSpy.should.have.been.calledOnce;
       });
     });
+    describe('register helpers', function() {
+      let catActions, store, register;
+      const {
+        createRegistrar,
+        transformer,
+        setter,
+        override
+      } = Store;
+
+      beforeEach(() => {
+        catActions = createActions();
+        class CatStore extends Store {
+          constructor() {
+            super();
+            this.value = {};
+          }
+        }
+        store = new CatStore();
+      });
+
+      describe('transformer', () => {
+
+        it('should throw if given non observable', () => {
+          expect(() => {
+            transformer('bananas');
+          }).to.throw(/should get observables but was given bananas/);
+        });
+
+        it('should return an observable', () => {
+          let transformOperation = transformer(catActions.doAction);
+          expect(transformOperation).to.exist;
+          isObservable(transformOperation).should.be.true;
+        });
+
+        describe('observable', () => {
+          it('should call onError with non function payloads', (done) => {
+            transformer(catActions.doAction)
+              .subscribeOnError(err => {
+                err.should.be.an.instanceOf(Error);
+                err.message.should.match(
+                  /should receive functions but was given bananas/
+                );
+                done();
+              });
+            catActions.doAction('bananas');
+          });
+          it('should call onNext with { transformer }', done => {
+            transformer(catActions.doAction)
+              .subscribe(item => {
+                item.should.be.an('object');
+                item.should.have.keys('transform');
+                done();
+              });
+            catActions.doAction(() => {});
+          });
+        });
+      });
+
+      describe('setter', () => {
+
+        it('should throw if given non observable', () => {
+          expect(() => {
+            setter('bananas');
+          }).to.throw(/should get observables but was given bananas/);
+        });
+
+        it('should return an observable', () => {
+          let setterOperation = setter(catActions.doAction);
+          expect(setterOperation).to.exist;
+          isObservable(setterOperation).should.be.true;
+        });
+
+        describe('observable', () => {
+
+          it('should call onError with non function payloads', (done) => {
+            setter(catActions.doAction)
+              .subscribeOnError(err => {
+                err.should.be.an.instanceOf(Error);
+                err.message.should.match(
+                  /should receive objects but was given bananas/
+                );
+                done();
+              });
+            catActions.doAction('bananas');
+          });
+
+          it('should call onNext with { set }', done => {
+            setter(catActions.doAction)
+              .subscribe(item => {
+                item.should.be.an('object');
+                item.should.have.keys('set');
+                done();
+              });
+            catActions.doAction({});
+          });
+        });
+      });
+
+      describe('override', () => {
+        it('should throw if given non observable', () => {
+          expect(() => {
+            override('bananas');
+          }).to.throw(/should get observables but was given bananas/);
+        });
+
+        it('should return an observable', () => {
+          let overrideOperation = override(catActions.doAction);
+          expect(overrideOperation).to.exist;
+          isObservable(overrideOperation).should.be.true;
+        });
+
+        describe('observable', () => {
+          it('should call onError with non function payloads', (done) => {
+            override(catActions.doAction)
+              .subscribeOnError(err => {
+                err.should.be.an.instanceOf(Error);
+                err.message.should.match(
+                  /should receive objects but was given bananas/
+                );
+                done();
+              });
+            catActions.doAction('bananas');
+          });
+
+          it('should call onNext with { value }', done => {
+            override(catActions.doAction)
+              .subscribe(item => {
+                item.should.be.an('object');
+                item.should.have.keys('value');
+                done();
+              });
+            catActions.doAction({});
+          });
+        });
+      });
+
+      describe('createRegistrar', () => {
+        it('should return a function', () => {
+          let register = createRegistrar(store);
+          register.should.be.a('function');
+        });
+        describe('register', () => {
+          let register, observable;
+          beforeEach(() => {
+            register = createRegistrar(store);
+            observable = Rx.Observable.just('not the momma');
+          });
+
+          it('should update store actions', () => {
+            store.actions.length.should.equal(0);
+            register(observable);
+            store.actions.length.should.equal(1);
+          });
+        });
+      });
+    });
+
 
     describe('value', function() {
 
