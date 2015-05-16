@@ -19,20 +19,60 @@ describe('Container', function() {
     it('should be ok without getThundercats defined', () => {
       expect(() => {
         let CatActions = createActions();
-        let LionActions = createActions(null, 'LionActions');
         let cat = new Cat();
         cat.register(CatActions);
-        cat.register(LionActions);
         let Comp = createContainer(createClass());
         let Burrito = ContextWrapper.wrap(
-          React.createElement(
-            Comp,
-            null
-          ),
+          React.createElement(Comp),
           cat
         );
         render(Burrito);
       }).to.not.throw();
+    });
+  });
+
+  describe('getThundercats', function() {
+    let thundercatSpy, Comp, cat, divContainer;
+    before(() => {
+      thundercatSpy = sinon.spy(function() {
+        return {};
+      });
+      cat = new Cat();
+      Comp = createContainer(createClass({
+        getInitialState: function() {
+          return {
+            pew: 'pew'
+          };
+        },
+        contextTypes: {
+          cat: React.PropTypes.object
+        },
+        propTypes: {
+          mew: React.PropTypes.string
+        },
+        getThundercats: thundercatSpy
+      }));
+    });
+
+    after(() => {
+      if (divContainer) {
+        unmountComp(divContainer);
+      }
+    });
+
+    it('should be called with props, state, and context', () => {
+      let Burrito = ContextWrapper.wrap(
+        React.createElement(Comp, { mew: 'purr' }),
+        cat
+      );
+      divContainer = render(Burrito).container;
+      thundercatSpy.should.have.been.calledOnce;
+      thundercatSpy.should.have.calledWithMatch(
+        { mew: 'purr' },
+        { pew: 'pew' },
+        { cat: cat }
+      );
+      // thundercatSpy.should.have.calledWithMatch({ cat: cat });
     });
   });
 
