@@ -32,26 +32,12 @@ describe('Container', function() {
   });
 
   describe('getThundercats', function() {
-    let thundercatSpy, Comp, cat, divContainer;
-    before(() => {
+    let thundercatSpy, cat, divContainer;
+    beforeEach(() => {
       thundercatSpy = sinon.spy(function() {
         return {};
       });
       cat = new Cat();
-      Comp = createContainer(createClass({
-        getInitialState: function() {
-          return {
-            pew: 'pew'
-          };
-        },
-        contextTypes: {
-          cat: React.PropTypes.object
-        },
-        propTypes: {
-          mew: React.PropTypes.string
-        },
-        getThundercats: thundercatSpy
-      }));
     });
 
     after(() => {
@@ -60,7 +46,16 @@ describe('Container', function() {
       }
     });
 
-    it('should be called with props, state, and context', () => {
+    it('should be called with props and context', () => {
+      let Comp = createContainer(createClass({
+        contextTypes: {
+          foo: React.PropTypes.string
+        },
+        propTypes: {
+          mew: React.PropTypes.string
+        },
+        getThundercats: thundercatSpy
+      }));
       let Burrito = ContextWrapper.wrap(
         React.createElement(Comp, { mew: 'purr' }),
         cat
@@ -69,10 +64,37 @@ describe('Container', function() {
       thundercatSpy.should.have.been.calledOnce;
       thundercatSpy.should.have.calledWithMatch(
         { mew: 'purr' },
-        { pew: 'pew' },
-        { cat: cat }
+        { foo: undefined } // eslint-disable-line
       );
-      // thundercatSpy.should.have.calledWithMatch({ cat: cat });
+    });
+
+    it('should not have the cat in context', () => {
+      let Comp = createContainer(createClass({
+        getThundercats: thundercatSpy
+      }));
+      let Burrito = ContextWrapper.wrap(
+        React.createElement(Comp),
+        cat
+      );
+      divContainer = render(Burrito).container;
+      thundercatSpy.should.have.been.calledOnce;
+      thundercatSpy.args[0][1].should.deep.equal({});
+    });
+
+    it('should have the cat in context if in Comp.contextTypes', () => {
+      let Comp = createContainer(createClass({
+        contextTypes: {
+          cat: React.PropTypes.object
+        },
+        getThundercats: thundercatSpy
+      }));
+      let Burrito = ContextWrapper.wrap(
+        React.createElement(Comp),
+        cat
+      );
+      divContainer = render(Burrito).container;
+      thundercatSpy.should.have.been.calledOnce;
+      thundercatSpy.args[0][1].should.deep.equal({ cat: cat });
     });
   });
 
