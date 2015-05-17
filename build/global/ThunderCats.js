@@ -944,10 +944,6 @@ var _react = (typeof window !== "undefined" ? window.React : typeof global !== "
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactLibInstantiateReactComponent = require('react/lib/instantiateReactComponent');
-
-var _reactLibInstantiateReactComponent2 = _interopRequireDefault(_reactLibInstantiateReactComponent);
-
 var _invariant = require('invariant');
 
 var _invariant2 = _interopRequireDefault(_invariant);
@@ -964,6 +960,19 @@ var _utils = require('./utils');
 
 var __DEV__ = "production" !== 'production';
 var debug = _debug2['default']('thundercats:container');
+
+function getThundercatsFromComponent(Component, props, context) {
+  var compContext = _objectAssign2['default']({}, context);
+  // istanbul ignore else
+  if (!Component.contextTypes || !Component.contextTypes.cat) {
+    delete compContext.cat;
+  }
+  var getThundercats = typeof Component.prototype.getThundercats === 'function' ? Component.prototype.getThundercats : function () {
+    return {};
+  };
+
+  return getThundercats(props, compContext);
+}
 
 function storeOnError(err) {
   throw new Error('ThunderCats Store encountered an error: ' + err);
@@ -986,13 +995,13 @@ function createContainer(Component) {
     _invariant2['default'](typeof Component === 'function', 'Container child should be a React Component but got %s', Component);
   }
 
-  var Container = (function (_React$Component) {
-    function Container(props, context) {
+  return (function (_React$Component) {
+    var _class = function (props, context) {
       var _this2 = this;
 
-      _classCallCheck(this, Container);
+      _classCallCheck(this, _class);
 
-      _get(Object.getPrototypeOf(Container.prototype), 'constructor', this).call(this, props, context);
+      _get(Object.getPrototypeOf(_class.prototype), 'constructor', this).call(this, props, context);
 
       /* istanbul ignore else */
       if (__DEV__) {
@@ -1000,22 +1009,9 @@ function createContainer(Component) {
       }
 
       var cat = context.cat;
-      var element = _react2['default'].createElement(Component, props);
-
-      // instantiate the child component and call getThundercats to retrieve
-      // config info
-      var instance = _reactLibInstantiateReactComponent2['default'](element);
-      var publicProps = instance._processProps(instance._currentElement.props);
-
-      var publicContext = instance._processContext(instance._currentElement._context);
-
-      var inst = new Component(publicProps, publicContext);
-      var getThundercats = typeof inst.getThundercats === 'function' ? inst.getThundercats : function () {
-        return {};
-      };
 
       var val = {};
-      var thundercats = this.thundercats = getThundercats(inst.props, inst.state);
+      var thundercats = this.thundercats = getThundercatsFromComponent(Component, props, context);
 
       // set up observable state. This can be a single store or a combination of
       // multiple stores
@@ -1072,11 +1068,11 @@ function createContainer(Component) {
           _this2.state[name] = cat.getActions(name);
         });
       }
-    }
+    };
 
-    _inherits(Container, _React$Component);
+    _inherits(_class, _React$Component);
 
-    _createClass(Container, [{
+    _createClass(_class, [{
       key: 'componentWillMount',
       value: function componentWillMount() {
         var cat = this.context.cat;
@@ -1146,6 +1142,10 @@ function createContainer(Component) {
         return _react2['default'].createElement(Component, _objectAssign2['default']({}, this.state, this.props));
       }
     }], [{
+      key: 'contextTypes',
+      value: _objectAssign2['default']({}, Component.contextTypes || {}, { cat: _react.PropTypes.object.isRequired }),
+      enumerable: true
+    }, {
       key: 'displayName',
       value: Component.displayName + 'Container',
       enumerable: true
@@ -1153,22 +1153,16 @@ function createContainer(Component) {
       key: 'propTypes',
       value: Component.propTypes,
       enumerable: true
-    }, {
-      key: 'contextTypes',
-      value: { cat: _react.PropTypes.object.isRequired },
-      enumerable: true
     }]);
 
-    return Container;
+    return _class;
   })(_react2['default'].Component);
-
-  return Container;
 }
 
 module.exports = exports['default'];
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./utils":6,"debug":9,"invariant":12,"object.assign":14,"react/lib/instantiateReactComponent":8}],6:[function(require,module,exports){
+},{"./utils":6,"debug":9,"invariant":12,"object.assign":14}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {

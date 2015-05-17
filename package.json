@@ -14,7 +14,7 @@
     "frp",
     "reactive"
   ],
-  "main": "index.js",
+  "main": "build/",
   "bugs": "https://github.com/r3dm/thundercats/issues",
   "repository": {
     "type": "git",
@@ -22,16 +22,16 @@
   },
   "scripts": {
     "build": "npm run build-clean && npm run build-global && npm run build-npm",
-    "build-clean": "rm -rf build/global/* && rm -rf build/npm/*",
+    "build-clean": "rm -rf build/* && mkdir build/global",
     "build-global": "NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional es7.classProperties ] -t browserify-shim -g envify -o build/global/ThunderCats.js",
     "build-global-min": "NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional es7.classProperties ] -t browserify-shim -g envify -p [ minifyify --no-map --uglify [--compress --mangle --dead_code]] -o build/global/ThunderCats.min.js",
-    "build-npm": "mkdir build/npm/lib && babel --optional es7.classProperties ./lib -d build/npm/lib && cp README.md build/npm && cp index.js build/npm && npm run build-package-json",
-    "build-package-json": "node -p 'p=require(\"./package\");p.main=\"lib\";p.scripts=p.devDependencies=p[\"browserify-shim\"]=undefined;JSON.stringify(p,null,2)' > build/npm/package.json",
-    "lint": "eslint .",
-    "pretest": "npm run lint",
-    "test": "mocha --compilers js:./registerWithOptions.js",
+    "build-npm": "babel --optional es7.classProperties ./lib -d build/",
+    "cover": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js",
     "coverAlls": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js && istanbul-coveralls",
-    "cover": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js"
+    "lint": "eslint .",
+    "prepublish": "npm run build",
+    "pretest": "npm run lint",
+    "test": "mocha --compilers js:./registerWithOptions.js"
   },
   "browserify-shim": {
     "react": "global:React",
