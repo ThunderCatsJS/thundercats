@@ -23,8 +23,8 @@
   "scripts": {
     "build": "npm run build-clean && npm run build-global && npm run build-npm",
     "build-clean": "rm -rf build/* && mkdir build/global",
-    "build-global": "NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional es7.classProperties ] -t browserify-shim -g envify -o build/global/ThunderCats.js",
-    "build-global-min": "NODE_ENV='production' browserify index.js -s ThunderCats -i react -i rx -t [ babelify --optional es7.classProperties ] -t browserify-shim -g envify -p [ minifyify --no-map --uglify [--compress --mangle --dead_code]] -o build/global/ThunderCats.min.js",
+    "build-global": "NODE_ENV='production' browserify lib/index.js -s ThunderCats -i react -i rx -t [ babelify --optional es7.classProperties ] -t browserify-shim -g envify -o build/global/ThunderCats.js",
+    "build-global-min": "NODE_ENV='production' browserify lib/index.js -s ThunderCats -i react -i rx -t [ babelify --optional es7.classProperties ] -t browserify-shim -g envify -p [ minifyify --no-map --uglify [--compress --mangle --dead_code]] -o build/global/ThunderCats.min.js",
     "build-npm": "babel --optional es7.classProperties ./lib -d build/",
     "cover": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js",
     "coverAlls": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js && istanbul-coveralls",

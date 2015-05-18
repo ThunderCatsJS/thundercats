@@ -2343,19 +2343,40 @@ module.exports = warning;
 },{}],20:[function(require,module,exports){
 'use strict';
 
-var Actions = require('./lib/Actions')['default'],
-    Cat = require('./lib/Cat')['default'],
-    Store = require('./lib/Store')['default'],
-    createContainer = require('./lib/createContainer'),
-    waitFor = require('./lib/waitFor');
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 
-module.exports = {
-  Actions: Actions,
-  Cat: Cat,
-  createContainer: createContainer,
-  Store: Store,
-  waitFor: waitFor
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _Actions = require('./Actions');
+
+var _Actions2 = _interopRequireDefault(_Actions);
+
+var _Cat = require('./Cat');
+
+var _Cat2 = _interopRequireDefault(_Cat);
+
+var _Store = require('./Store');
+
+var _Store2 = _interopRequireDefault(_Store);
+
+var _createContainer = require('./createContainer');
+
+var _createContainer2 = _interopRequireDefault(_createContainer);
+
+var _waitFor = require('./waitFor');
+
+var _waitFor2 = _interopRequireDefault(_waitFor);
+
+exports['default'] = {
+  Actions: _Actions2['default'],
+  Cat: _Cat2['default'],
+  createContainer: _createContainer2['default'],
+  Store: _Store2['default'],
+  waitFor: _waitFor2['default']
 };
+module.exports = exports['default'];
 
-},{"./lib/Actions":1,"./lib/Cat":2,"./lib/Store":4,"./lib/createContainer":5,"./lib/waitFor":7}]},{},[20])(20)
+},{"./Actions":1,"./Cat":2,"./Store":4,"./createContainer":5,"./waitFor":7}]},{},[20])(20)
 });

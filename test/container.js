@@ -6,7 +6,7 @@ import sinonChai from 'sinon-chai';
 
 import utils from './utils';
 import ContextWrapper from '../lib/ContextWrapper';
-import { Store, Cat, createContainer } from '../';
+import { Store, Cat, createContainer } from '../lib';
 
 const {
   React, ReactTestUtils, render, createClass, unmountComp, createActions

@@ -1,17 +1,13 @@
 /* eslint-disable no-unused-expressions */
 // make sure window and document is added before any test is run
-import chai from 'chai';
+import Rx from 'rx';
+import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
 
-/* eslint-disable no-unused-vars */
-import utils from './utils';
-/* eslint-enable no-unused-vars */
-
-const expect = chai.expect;
-const Rx = require('rx');
-const Actions = require('../').Actions;
+import utils from './utils'; // eslint-disable-line no-unused-vars
+import { Actions } from '../lib';
 
 chai.should();
 chai.use(chaiAsPromised);

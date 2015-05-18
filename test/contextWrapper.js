@@ -5,8 +5,8 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
 import { React, ReactTestUtils } from './utils';
+import { Cat } from '../lib';
 import ContextWrapper from '../lib/ContextWrapper';
-import { Cat } from '../';
 
 chai.should();
 chai.use(sinonChai);

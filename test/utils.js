@@ -11,7 +11,7 @@ global.navigator = {
 console.debug = console.log;
 
 var assign = require('object.assign');
-var Actions = require('../').Actions;
+var Actions = require('../lib').Actions;
 var React = require('react/addons');
 var TestUtils = React.addons.TestUtils;
 

@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { React, createActions, createClass, ReactTestUtils } from './utils';
 
-import { Cat, Store, Actions, createContainer } from '../';
+import { Cat, Store, Actions, createContainer } from '../lib';
 import { RenderToString } from '../lib/Cat';
 
 chai.should();
