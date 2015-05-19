@@ -5,8 +5,8 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { React, createActions, createClass, ReactTestUtils } from './utils';
 
-import { Cat, Store, Actions, createContainer } from '../lib';
-import Render from '../lib/Render';
+import { Cat, Store, Actions, createContainer } from '../src';
+import Render from '../src/Render';
 
 Rx.config.longStackSupport = true;
 chai.should();

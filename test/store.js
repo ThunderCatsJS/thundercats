@@ -6,8 +6,8 @@ import chaiAsPromised from 'chai-as-promised';
 
 import Rx from 'rx';
 import Q from 'q';
-import { Store, Actions } from '../lib';
-import { isObservable } from '../lib/utils';
+import { Store, Actions } from '../src';
+import { isObservable } from '../src/utils';
 
 chai.should();
 chai.use(chaiAsPromised);

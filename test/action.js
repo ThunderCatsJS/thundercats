@@ -7,7 +7,7 @@ import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
 
 import utils from './utils'; // eslint-disable-line no-unused-vars
-import { Actions } from '../lib';
+import { Actions } from '../src';
 
 chai.should();
 chai.use(chaiAsPromised);

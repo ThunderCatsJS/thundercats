@@ -1,5 +1,5 @@
-build/*
-!build/global
+lib/*
+!lib/global
 node_modules
 .idea
 docs

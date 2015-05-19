@@ -1,6 +1,6 @@
 dist
 coverage
-build
+lib
 docs
 examples/todomvc/node_modules
 examples/todomvc/js/bundle.js

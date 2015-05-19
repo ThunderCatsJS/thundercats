@@ -14,7 +14,7 @@
     "frp",
     "reactive"
   ],
-  "main": "build/",
+  "main": "lib/",
   "bugs": "https://github.com/r3dm/thundercats/issues",
   "repository": {
     "type": "git",
@@ -22,10 +22,10 @@
   },
   "scripts": {
     "build": "npm run build-clean && npm run build-global && npm run build-npm",
-    "build-clean": "rm -rf build/* && mkdir build/global",
-    "build-global": "NODE_ENV='production' browserify lib/index.js -s ThunderCats -i react -i rx -t babelify  -t browserify-shim -g envify -o build/global/ThunderCats.js",
-    "build-global-min": "NODE_ENV='production' browserify lib/index.js -s ThunderCats -i react -i rx -t babelify -t browserify-shim -g envify -p [ minifyify --no-map --uglify [--compress --mangle --dead_code]] -o build/global/ThunderCats.min.js",
-    "build-npm": "babel ./lib -d build/",
+    "build-clean": "rm -rf lib/* && mkdir lib/global",
+    "build-global": "NODE_ENV='production' browserify src/index.js -s ThunderCats -i react -i rx -t babelify  -t browserify-shim -g envify -o lib/global/ThunderCats.js",
+    "build-global-min": "NODE_ENV='production' browserify src/index.js -s ThunderCats -i react -i rx -t babelify -t browserify-shim -g envify -p [ minifyify --no-map --uglify [--compress --mangle --dead_code]] -o lib/global/ThunderCats.min.js",
+    "build-npm": "babel ./src -d lib/",
     "cover": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js",
     "coverAlls": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js && istanbul-coveralls",
     "lint": "eslint .",
