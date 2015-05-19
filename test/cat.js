@@ -6,7 +6,7 @@ import sinonChai from 'sinon-chai';
 import { React, createActions, createClass, ReactTestUtils } from './utils';
 
 import { Cat, Store, Actions, createContainer } from '../lib';
-import { RenderToString } from '../lib/Cat';
+import Render from '../lib/Render';
 
 Rx.config.longStackSupport = true;
 chai.should();
@@ -372,7 +372,7 @@ describe('Cat', function() {
     it('should return an observable', () => {
       let TestComp = createClass({});
       let TestElement = React.createElement(TestComp);
-      let renderObs = RenderToString(cat, TestElement);
+      let renderObs = Render.renderToString(cat, TestElement);
       renderObs.subscribe.should.be.a('function');
     });
 
