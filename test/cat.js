@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-expressions */
+import Rx from 'rx';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -7,6 +8,7 @@ import { React, createActions, createClass, ReactTestUtils } from './utils';
 import { Cat, Store, Actions, createContainer } from '../lib';
 import { RenderToString } from '../lib/Cat';
 
+Rx.config.longStackSupport = true;
 chai.should();
 chai.use(sinonChai);
 
@@ -160,6 +162,100 @@ describe('Cat', function() {
     });
   });
 
+  describe('hydrate', function() {
+    let CatStore, CatActions, cat;
+    beforeEach(() => {
+      CatActions = createActions();
+      class CatApp extends Cat {
+        constructor() {
+          super();
+          this.register(CatActions);
+        }
+      }
+      cat = new CatApp();
+    });
+
+    it('should return an observable', () => {
+      CatStore = createStore();
+      cat.register(CatStore, cat);
+      cat.hydrate().subscribe.should.be.a('function');
+    });
+
+    describe('observable', () => {
+      it('should call onError if given non object', (done) => {
+        CatStore = createStore();
+        cat.register(CatStore, cat);
+        cat.hydrate('').subscribeOnError(err => {
+          err.should.match(/hydrate should get objects/);
+          done();
+        });
+      });
+
+      it('should hydrate store with correct data', (done) => {
+        let val = { foo: 'bar' };
+        CatStore = createStore();
+        cat.register(CatStore, cat);
+        let catStore = cat.getStore('CatStore');
+        cat.hydrate({ CatStore: val })
+          .subscribeOnCompleted(() => {
+            catStore.value.should.deep.equal(val);
+            done();
+          });
+      });
+    });
+  });
+
+  describe('dehydrate', function() {
+    let CatStore, CatActions, cat, storeVal;
+    beforeEach(function() {
+      CatActions = createActions();
+      class CatApp extends Cat {
+        constructor() {
+          super();
+          this.register(CatActions);
+        }
+      }
+      cat = new CatApp();
+    });
+
+    it('should return an observable', function(done) {
+      CatStore = createStore();
+      cat.register(CatStore, cat);
+      let stateObs = cat.dehydrate();
+      expect(stateObs).to.exist;
+      stateObs.should.be.an('object');
+      stateObs.subscribe.should.be.a('function');
+      stateObs.subscribe(state => {
+        expect(state).to.exist;
+        state.should.be.an('object');
+        done();
+      });
+    });
+
+    describe('observable', () => {
+      it('should return store data', function(done) {
+        storeVal = { bah: 'humbug' };
+        CatStore = createStore(storeVal);
+        cat.register(CatStore, cat);
+        let stateObs = cat.dehydrate();
+        stateObs.subscribe(state => {
+          state.should.deep.equal({ CatStore: storeVal });
+          done();
+        });
+      });
+
+      it('should return an empty object if no stores have data', done => {
+        CatStore = createStore();
+        cat.register(CatStore, cat);
+        let stateObs = cat.dehydrate();
+        stateObs.subscribe(state => {
+          state.should.deep.equal({});
+          done();
+        });
+      });
+    });
+  });
+
   describe('serialize', function() {
     let CatStore, CatActions, cat, storeVal;
     beforeEach(function() {
@@ -173,7 +269,7 @@ describe('Cat', function() {
       cat = new CatApp();
     });
 
-    it('should return an observable', function() {
+    it('should return an observable', function(done) {
       CatStore = createStore();
       cat.register(CatStore, cat);
       let stringyStateObs = cat.serialize();
@@ -183,26 +279,29 @@ describe('Cat', function() {
       stringyStateObs.subscribe((stringyState) => {
         expect(stringyState).to.exist;
         stringyState.should.be.a('string');
+        done();
       });
     });
 
     describe('observable', () => {
-      it('should serialize store data', function() {
+      it('should serialize store data', function(done) {
         storeVal = { bah: 'humbug' };
         CatStore = createStore(storeVal);
         cat.register(CatStore, cat);
         let stringyStateObs = cat.serialize();
         stringyStateObs.subscribe(stringyState => {
           stringyState.should.equal(JSON.stringify({ CatStore: storeVal }));
+          done();
         });
       });
 
-      it('should return an empty string if no stores have data', function() {
+      it('should return an "{}" if no stores have data', function(done) {
         CatStore = createStore();
         cat.register(CatStore, cat);
         let stringyStateObs = cat.serialize();
         stringyStateObs.subscribe((stringyState) => {
-          stringyState.should.equal('');
+          stringyState.should.equal('{}');
+          done();
         });
       });
     });
@@ -228,33 +327,36 @@ describe('Cat', function() {
     });
 
     describe('observable', () => {
-      it('should error if given non strings', () => {
+      it('should error if given non strings', done => {
         CatStore = createStore();
         cat.register(CatStore, cat);
         cat.deserialize({ notA: 'String' }).subscribeOnError((err) => {
           err.should.match(/deserialize expects a string/);
+          done();
         });
       });
 
       it(
         'should error if stringy data does not parse into an object or null',
-        () => {
+        done => {
           CatStore = createStore();
           cat.register(CatStore, cat);
           cat.deserialize('1').subscribeOnError((err) => {
             err.should.match(/should be an object or null/);
+            done();
           });
         }
       );
 
-      it('should hydrate store with correct data', () => {
+      it('should hydrate store with correct data', (done) => {
         let val = { foo: 'bar' };
         CatStore = createStore();
         cat.register(CatStore, cat);
         let catStore = cat.getStore('CatStore');
         cat.deserialize(JSON.stringify({ CatStore: val }))
           .subscribeOnCompleted(() => {
-            catStore.__value.should.deep.equal(val);
+            catStore.value.should.deep.equal(val);
+            done();
           });
       });
     });
