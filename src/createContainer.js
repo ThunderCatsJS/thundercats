@@ -8,18 +8,20 @@ import { isObservable } from './utils';
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const debug = debugFactory('thundercats:container');
 
-function getThundercatsFromComponent(Component, props, context) {
-  const compContext = assign({}, context);
-  // istanbul ignore else
-  if (!Component.contextTypes || !Component.contextTypes.cat) {
-    delete compContext.cat;
-  }
-  const getThundercats =
-    typeof Component.prototype.getThundercats === 'function' ?
+function getThundercatsFromComponent(Component) {
+  return typeof Component.prototype.getThundercats === 'function' ?
       Component.prototype.getThundercats :
       () => ({});
+}
 
-  return getThundercats(props, compContext);
+function getChildContext(childContextTypes, currentContext) {
+
+  const compContext = assign({}, currentContext);
+  // istanbul ignore else
+  if (!childContextTypes || !childContextTypes.cat) {
+    delete compContext.cat;
+  }
+  return compContext;
 }
 
 function storeOnError(err) {
@@ -74,10 +76,10 @@ export default function createContainer(Component) {
       }
 
       const cat = context.cat;
-
       let val = {};
+      this.getThundercats = getThundercatsFromComponent(Component);
       const thundercats = this.thundercats =
-        getThundercatsFromComponent(Component, props, context);
+        this.getThundercats(props, getChildContext(context));
 
       // set up observable state. This can be a single store or a combination of
       // multiple stores
@@ -238,6 +240,15 @@ export default function createContainer(Component) {
           );
       }
       if (this.thundercats && this.thundercats.context) {
+        this.thundercats.context.action(this.thundercats.context.payload);
+      }
+    }
+
+    componentWillReceiveProps(nextProps, nextContext) {
+      const { payload } =
+        this.getThundercats(nextProps, getChildContext(nextContext));
+      const { thundercats } = this;
+      if (thundercats && payload !== thundercats.payload) {
         this.thundercats.context.action(this.thundercats.context.payload);
       }
     }
