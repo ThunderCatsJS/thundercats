@@ -388,15 +388,14 @@ describe('Cat', function() {
       });
 
       it('should initiate fetcher registration', (done) => {
-        TestComp = createContainer(createClass({
-          getThundercats() {
-            return {
-              store: 'catStore',
-              fetchAction: 'catActions.doAction',
-              payload: wrappedPayload
-            };
-          }
-        }));
+        TestComp = createContainer(
+          {
+            store: 'catStore',
+            fetchAction: 'catActions.doAction',
+            getPayload: () => wrappedPayload
+          },
+          createClass()
+        );
         cat.renderToString(React.createElement(TestComp))
           .subscribe(({ fetchMap }) => {
             expect(fetchMap).to.exist;
@@ -415,14 +414,14 @@ describe('Cat', function() {
       });
 
       it('should be ok with empty payload', (done) => {
-        TestComp = createContainer(createClass({
-          getThundercats() {
-            return {
-              store: 'CatStore',
-              fetchAction: 'catActions.doAction'
-            };
-          }
-        }));
+        TestComp = createContainer(
+          {
+            store: 'CatStore',
+            fetchAction: 'catActions.doAction',
+            getPayload: () => ({})
+          },
+          createClass()
+        );
         cat.renderToString(React.createElement(TestComp))
           .subscribe(({ fetchMap }) => {
             const fetchContext = fetchMap.get('catActions.doAction');
@@ -444,14 +443,14 @@ describe('Cat', function() {
       beforeEach(() => {
         let CatActions = createActions();
         let CatStore = createStore();
-        let Comp = createContainer(createClass({
-          getThundercats() {
-            return {
-              store: 'CatStore',
-              fetchAction: 'catActions.doAction'
-            };
-          }
-        }));
+        let Comp = createContainer(
+          {
+            store: 'CatStore',
+            fetchAction: 'catActions.doAction',
+            getPayload: () => ({})
+          },
+          createClass()
+        );
         element = React.createElement(Comp);
         cat.register(CatActions);
         cat.register(CatStore, cat);
@@ -496,14 +495,14 @@ describe('Cat', function() {
     beforeEach(() => {
       let CatActions = createActions();
       let CatStore = createStore();
-      Comp = createContainer(createClass({
-        getThundercats() {
-          return {
-            store: 'CatStore',
-            fetchAction: 'catActions.doAction'
-          };
-        }
-      }));
+      Comp = createContainer(
+        {
+          store: 'CatStore',
+          fetchAction: 'catActions.doAction',
+          getPayload: () => ({})
+        },
+        createClass()
+      );
       element = React.createElement(Comp);
       cat = new Cat();
       cat.register(CatActions);

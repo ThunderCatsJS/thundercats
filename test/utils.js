@@ -19,6 +19,7 @@ module.exports = {
   createActions: createActions,
   createClass: createClass,
   doc: doc,
+  isComponentClass: isComponentClass,
   React: React,
   ReactTestUtils: TestUtils,
   render: render,
@@ -50,6 +51,12 @@ function createClass(spec) {
     },
     spec
   ));
+}
+
+function isComponentClass(Comp) {
+  return Comp.prototype &&
+    Comp.prototype.render &&
+    !!Comp.prototype.setState;
 }
 
 function render(Comp) {

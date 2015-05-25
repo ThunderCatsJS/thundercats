@@ -27,7 +27,7 @@ your application.
 This is a pre-release 2.0.0 version and is currently unstable.
 
 ```
-npm install thundercats@2.0.0-alpha.1
+npm install thundercats@2.0.0-alpha.7
 ```
 Thundecats makes heavy use of es6 Map object. While avaible in the latest versions of Node.js, io.js and all modern browsers, a great many older browsers will need a polyfill inorder to work with Thundercats. 
 
@@ -169,20 +169,25 @@ note: observables must return an object with atleast one of the above keys
 
 Optimistic updates can be done using the optimistic key. The store will update its value and register the operation for later undoing. If the promise rejects of if the observable calls onError the store will undo the operation and replay the operations after it with this value. Bam!
 
+
 ---
 
 ### The Container
 
-The Container is a React Component use to wrap your components. The Container is responible for many things. For instance, 
+createContainer is a function that wraps your component in a React Component use to wrap your components. The Container is responible for many things. For instance, 
 
 * Setting requested actions on your Components props.
 * Listening to a registered store(s).
 * Setting fetch action to pre-fetch data when using renderToString method.
+* fetch lifecycles
 
 This is how you use it.
 
 ```js
 import { createContainer } from 'thundercats';
+
+const options = {
+};
 
 const Div = React.createClass({
   render() {
@@ -190,13 +195,53 @@ const Div = React.createClass({
   }
 });
 
-const WrappedDiv = createContainer(Div);
+const WrappedDiv = createContainer(options, Div);
 
 ```
-By itself it doesn't do much. But in your component you can define the method `getThundercats`. Check out the example below. 
+By itself it doesn't do much.  Check out the example below. 
 
 ```js
 
+// note: using es7 Decorators
+ @createContainer({
+      // actions to be made avaible on this components props
+      actions: 'chatActions', // can be an array of strings
+      
+      // stores this component should subscribe too.
+      stores: [
+        'messageStore',
+        'threadStore',
+        
+        
+      
+      ],
+      // a function that takes the values of the stores
+      // and returns an Object{ messages, thread }
+      combineLatest: function(messages, threadStoreState) {
+        return { messageStoreState, threadStoreState.threadId };
+      }
+      
+      // The actions class and method to call to prefetch data
+      // when using cat.renderToString method
+      fetchAction: 'chatActions.fetchMessages',
+      
+      // Which store to listen for fetch completion
+      // note: if the component subscribes to only one store this can be ommited.
+      fetchWaitFor: 'messagesStore',
+      
+      // the payload to use when calling the fetchAction
+      // e.i chatActions.fetchMessages(getPayload(props, context));
+      getPayload: function(props, context) {
+        return { path: props.path };
+      },
+      
+      // The fetch action is called on componentDidMount but can be called
+      // continuesly as the props change depending on the return of 
+      // this function
+      shouldContainerFetch: function(props, nextProps) {
+        return props.threadID !== nextProps.threadID;
+      }
+})
 export default class MessageSection extends React.Component {
   constructor(props) {
     super(props);
@@ -225,38 +270,6 @@ export default class MessageSection extends React.Component {
   scrollToBottom() {
     const ul = this.refs.messageList.getDOMNode();
     ul.scrollTop = ul.scrollHeight;
-  }
-  
-  // This is where the magic happens. getThundercats returns an
-  // object with all the information that the Container needs! 
-  getThundercats(props, context) {
-    return {
-      // actions to be made avaible on this components props
-      actions: ['chatActions'],
-      
-      // stores this component should subscribe too.
-      stores: [
-        'messageStore',
-        'threadStore',
-        
-        // a function that takes the values of the stores
-        // and returns an Object{ messages, thread }
-        combineLatest 
-      ],
-      
-      // The actions class and method to call to prefetch data
-      // when using cat.renderToString method
-      fetchAction: 'chatActions.fetchMessages',
-      
-      // Which store to listen for fetch completion
-      // note: if the component subscribes to only one store this can be ommited.
-      fetchWaitFor: 'messagesStore',
-      
-      // the payload to use when calling the fetchAction
-      // e.i chatActions.fetchMessages(fetchPayload);
-      fetchPayload: {
-        param: context.router.getParams();
-    };
   }
 
   renderMessages(messages) {

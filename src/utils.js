@@ -3,6 +3,7 @@ import invariant from 'invariant';
 export default {
   areObservable,
   createObjectValidator,
+  getName,
   isObservable,
   isPromise
 };
@@ -28,6 +29,12 @@ function createObjectValidator(message) {
       );
     }
   };
+}
+
+function getName(comp) {
+  return comp.displayName ||
+    comp.constructor.displayName ||
+    comp.constructor.name;
 }
 
 function isObservable(observable) {

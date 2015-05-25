@@ -3,16 +3,10 @@ import React, { PropTypes } from 'react';
 import invariant from 'invariant';
 import assign from 'object.assign';
 import debugFactory from 'debug';
-import { isObservable } from './utils';
+import { getName, isObservable } from './utils';
 
 const __DEV__ = process.env.NODE_ENV !== 'production';
 const debug = debugFactory('thundercats:container');
-
-function getThundercatsFromComponent(Component) {
-  return typeof Component.prototype.getThundercats === 'function' ?
-      Component.prototype.getThundercats :
-      () => ({});
-}
 
 function getChildContext(childContextTypes, currentContext) {
 
@@ -50,7 +44,19 @@ function verifyStore(displayName, storeName, store) {
   }
 }
 
-export default function createContainer(Component) {
+export default function createContainer(options, Component) {
+  /* istanbul ignore else */
+  if (__DEV__) {
+    invariant(
+      typeof options === 'object',
+      '%s should get an options object but got %s',
+      options
+    );
+  }
+  /* istanbul ignore else */
+  if (!Component) {
+    return createContainer.bind(null, options);
+  }
   /* istanbul ignore else */
   if (__DEV__) {
     invariant(
@@ -70,40 +76,38 @@ export default function createContainer(Component) {
         invariant(
           typeof context.cat === 'object',
           '%s should find an instance of the Cat in the context but got %s',
-          this.constructor.displayName,
+          getName(this),
           context.cat
         );
       }
 
       const cat = context.cat;
       let val = {};
-      this.getThundercats = getThundercatsFromComponent(Component);
-      const thundercats = this.thundercats =
-        this.getThundercats(props, getChildContext(context));
 
       // set up observable state. This can be a single store or a combination of
       // multiple stores
-      if (thundercats.store) {
-        this.observableState = cat.getStore(thundercats.store);
-        verifyStore(this.displayName, thundercats.store, this.observableState);
-        if (typeof thundercats.map === 'function') {
-          val = thundercats.map(this.observableState.value);
-          this.observableState = this.observableState.map(thundercats.map);
+      if (options.store) {
+        this.observableState = cat.getStore(options.store);
+        verifyStore(getName(this), options.store, this.observableState);
+
+        if (typeof options.map === 'function') {
+          val = options.map(this.observableState.value);
+          this.observableState = this.observableState.map(options.map);
         } else {
           val = this.observableState.value;
         }
 
-      } else if (thundercats.stores) {
-        const storeNames = [].slice.call(thundercats.stores);
-        const combineLatest = storeNames.pop();
+      } else if (options.stores) {
+        const storeNames = [].slice.call(options.stores);
+        const combineLatest = options.combineLatest;
 
         /* istanbul ignore else */
         if (__DEV__) {
           invariant(
             typeof combineLatest === 'function',
-            '%s should get a function for the last argument for ' +
-            'thundercats.stores but got %s',
-            this.displayName,
+            '%s should get a function for options.combineLatest with ' +
+            ' options.stores but got %s',
+            getName(this),
             combineLatest
           );
         }
@@ -112,12 +116,12 @@ export default function createContainer(Component) {
         const values = [];
         storeNames.forEach(storeName => {
           let store = cat.getStore(storeName);
-          verifyStore(this.displayName, storeName, store);
+          verifyStore(getName(this), storeName, store);
           stores.push(store);
           values.push(store.value);
         });
 
-        const args = [].slice.call(stores);
+        const args = stores.slice(0);
         args.push(combineLatest);
         this.observableState =
           Rx.Observable.combineLatest(...args);
@@ -126,22 +130,22 @@ export default function createContainer(Component) {
       }
 
       /* istanbul ignore else */
-      if (__DEV__ && (thundercats.store || thundercats.stores)) {
+      if (__DEV__ && (options.store || options.stores)) {
         invariant(
           isObservable(this.observableState),
           '%s should get at a store but found none for %s',
-          this.displayName,
-          thundercats.store || thundercats.stores
+          getName(this),
+          options.store || options.stores
         );
       }
 
       this.state = assign({}, val);
 
       // set up actions on state. These will be passed down as props to child
-      if (thundercats.actions) {
-        const actionsClassNames = Array.isArray(thundercats.actions) ?
-          thundercats.actions :
-          [thundercats.actions];
+      if (options.actions) {
+        const actionsClassNames = Array.isArray(options.actions) ?
+          options.actions :
+          [options.actions];
 
         actionsClassNames.forEach(name => {
           this.state[name] = cat.getActions(name);
@@ -155,35 +159,43 @@ export default function createContainer(Component) {
       { cat: PropTypes.object.isRequired }
     );
     static displayName = Component.displayName + 'Container'
-    static propTypes = Component.propTypes
+    static propTypes = Component.propTypes || {}
 
     componentWillMount() {
       const cat = this.context.cat;
-      const { thundercats } = this;
 
-      if (thundercats.fetchAction) {
+      if (options.fetchAction) {
         /* istanbul ignore else */
         if (__DEV__) {
           invariant(
-            thundercats.fetchAction.split('.').length === 2,
+            options.fetchAction.split('.').length === 2,
             '%s fetch action should be in the form of ' +
             '`actionsClass.actionMethod` but was given %s',
-            thundercats.fetchAction
+            getName(this),
+            options.fetchAction
           );
 
           invariant(
-            typeof thundercats.store === 'string' ||
-            typeof thundercats.fetchWaitFor === 'string',
+            typeof options.store === 'string' ||
+            typeof options.fetchWaitFor === 'string',
             '%s requires a store to wait for after fetch but was given %s',
-            thundercats.store || thundercats.fetchWaitFor
+            getName(this),
+            options.store || options.fetchWaitFor
+          );
+
+          invariant(
+            typeof options.getPayload === 'function',
+            '%s should get a function for options.getPayload but was given %s',
+            getName(this),
+            options.getPayload
           );
         }
 
-        const fetchActionsName = thundercats.fetchAction.split('.')[0];
-        const fetchMethodName = thundercats.fetchAction.split('.')[1];
+        const fetchActionsName = options.fetchAction.split('.')[0];
+        const fetchMethodName = options.fetchAction.split('.')[1];
         const fetchActionsInst = cat.getActions(fetchActionsName);
         const fetchStore = cat.getStore(
-          thundercats.store || thundercats.fetchWaitFor
+          options.store || options.fetchWaitFor
         );
 
         /* istanbul ignore else */
@@ -191,37 +203,44 @@ export default function createContainer(Component) {
           invariant(
             fetchActionsInst && fetchActionsInst[fetchMethodName],
             '%s expected to find actions class for %s, but found %s',
-            this.displayName,
-            thundercats.fetchAction,
+            getName(this),
+            options.fetchAction,
             fetchActionsInst
           );
 
           invariant(
             isObservable(fetchStore),
             '%s should get an observable but got %s for %s',
-            this.displayName,
+            getName(this),
             fetchStore,
-            thundercats.fetchWaitFor
+            options.fetchWaitFor
           );
         }
 
         debug(
-          'cat returned %s for %s',
+          'cat returned %s for %s for %s',
           fetchActionsInst.displayName,
-          fetchActionsName
+          fetchActionsName,
+          getName(this)
         );
 
-        const fetchContext = {
-          name: thundercats.fetchAction,
-          payload: thundercats.payload || {},
-          store: fetchStore,
-          action: fetchActionsInst[fetchMethodName]
-        };
+        const action = fetchActionsInst[fetchMethodName];
 
         if (cat.fetchMap) {
-          cat.fetchMap.set(fetchContext.name, fetchContext);
+          debug('%s getPayload in componentWillMount', getName(this));
+          const payload = options.getPayload(
+            this.props,
+            getChildContext(Component.contextTypes, this.context)
+          );
+
+          cat.fetchMap.set(options.fetchAction, {
+            name: options.fetchAction,
+            payload: payload,
+            store: fetchStore,
+            action: action
+          });
         } else {
-          thundercats.context = fetchContext;
+          options.action = action;
         }
       }
     }
@@ -232,39 +251,56 @@ export default function createContainer(Component) {
         // Now that the component has mounted, we will use a long lived
         // subscription
         this.stateSubscription = this.observableState
-          .catch(this.thundercats.onError || storeOnError)
           .subscribe(
             this.storeOnNext.bind(this),
-            storeOnError,
-            this.thundercats.onCompleted || storeOnCompleted
+            options.storeOnError || storeOnError,
+            options.onCompleted || storeOnCompleted
           );
       }
-      if (this.thundercats && this.thundercats.context) {
-        this.thundercats.context.action(this.thundercats.context.payload);
+      /* istanbul ignore else */
+      if (options.action && options.getPayload) {
+        debug('%s fetching on componentDidMount', getName(this));
+        options.action(
+          options.getPayload(
+            this.props,
+            getChildContext(Component.contextTypes, this.context)
+          )
+        );
       }
     }
 
     componentWillReceiveProps(nextProps, nextContext) {
-      const { payload } =
-        this.getThundercats(nextProps, getChildContext(nextContext));
-      const { thundercats } = this;
-      if (thundercats && payload !== thundercats.payload) {
-        this.thundercats.context.action(this.thundercats.context.payload);
+      /* istanbul ignore else */
+      if (
+        options.action &&
+        options.shouldContainerFetch &&
+        options.shouldContainerFetch(
+          this.props,
+          nextProps,
+          this.context,
+          nextContext
+        )
+      ) {
+        debug('%s fetching on componentWillReceiveProps', getName(this));
+        options.action(
+          options.getPayload(
+          nextProps,
+          getChildContext(Component.contextTypes, nextContext)
+        ));
       }
     }
 
     componentWillUnmount() {
       /* istanbul ignore else */
       if (this.stateSubscription) {
-        debug('disposing store subscription');
+        debug('%s disposing store subscription', getName(this));
         this.stateSubscription.dispose();
         this.stateSubscription = null;
       }
-      this.thundercats = null;
     }
 
     storeOnNext(val) {
-      debug('%s value updating', this.displayName, val);
+      debug('%s value updating', getName(this), val);
       this.setState(val);
     }
 
