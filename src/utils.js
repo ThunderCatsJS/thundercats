@@ -32,9 +32,11 @@ function createObjectValidator(message) {
 }
 
 function getName(comp) {
-  return comp.displayName ||
-    comp.constructor.displayName ||
-    comp.constructor.name;
+  return '' +
+    ((comp && comp.displayName) ||
+    (comp.constructor &&
+    comp.constructor.displayName) ||
+    'AnonymousComponent');
 }
 
 function isObservable(observable) {

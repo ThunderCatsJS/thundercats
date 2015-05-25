@@ -53,7 +53,7 @@ describe('Container', function() {
       it('should throw when not given a Component', () => {
         expect(() => {
           createContainerDecorator('not the momma');
-        }).to.throw(/should be a React Component/);
+        }).to.throw(/should get a React Component/);
       });
 
       it('should return a Component', () => {

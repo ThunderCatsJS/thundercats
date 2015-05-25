@@ -49,20 +49,24 @@ export default function createContainer(options, Component) {
   if (__DEV__) {
     invariant(
       typeof options === 'object',
-      '%s should get an options object but got %s',
+      'createContainer should get an options object but got %s',
       options
     );
   }
+
   /* istanbul ignore else */
   if (!Component) {
     return createContainer.bind(null, options);
   }
+
   /* istanbul ignore else */
   if (__DEV__) {
     invariant(
-      typeof Component === 'function',
-      'Container child should be a React Component but got %s',
-      Component
+      Component.prototype &&
+      Component.prototype.render &&
+      Component.prototype.setState,
+      'createContainer should get a React Component but got %s',
+      getName(Component) + 'Container'
     );
   }
 
