@@ -45,18 +45,18 @@ describe('Store', function() {
       let spy = sinon.spy();
       store.subscribe.should.be.a('function');
       store.subscribe(spy);
-      catActions.doAction({ value: { name: 'purr' }});
+      catActions.doAction({ replace: { name: 'purr' }});
       spy.should.have.been.calledWith({ name: 'purr' });
     });
 
-    it('should override built in operations onError handler', function() {
+    it('should replacer built in operations onError handler', function() {
       expect(function() {
         store.subscribe(function() { });
         catActions.doAction.onError(new Error('Do not cross streams'));
       }).to.not.throw();
     });
 
-    it('should override built in operations onComplete handler', function() {
+    it('should replacer built in operations onComplete handler', function() {
       expect(function() {
         let spy = sinon.spy();
         store.subscribe(spy);
@@ -162,7 +162,7 @@ describe('Store', function() {
         createRegistrar,
         transformer,
         setter,
-        override
+        replacer
       } = Store;
 
       beforeEach(() => {
@@ -254,22 +254,22 @@ describe('Store', function() {
         });
       });
 
-      describe('override', () => {
+      describe('replacer', () => {
         it('should throw if given non observable', () => {
           expect(() => {
-            override('bananas');
+            replacer('bananas');
           }).to.throw(/should get observables but was given bananas/);
         });
 
         it('should return an observable', () => {
-          let overrideOperation = override(catActions.doAction);
-          expect(overrideOperation).to.exist;
-          isObservable(overrideOperation).should.be.true;
+          let replacerOperation = replacer(catActions.doAction);
+          expect(replacerOperation).to.exist;
+          isObservable(replacerOperation).should.be.true;
         });
 
         describe('observable', () => {
           it('should call onError with non function payloads', (done) => {
-            override(catActions.doAction)
+            replacer(catActions.doAction)
               .subscribeOnError(err => {
                 err.should.be.an.instanceOf(Error);
                 err.message.should.match(
@@ -280,11 +280,11 @@ describe('Store', function() {
             catActions.doAction('bananas');
           });
 
-          it('should call onNext with { value }', done => {
-            override(catActions.doAction)
+          it('should call onNext with { replace }', done => {
+            replacer(catActions.doAction)
               .subscribe(item => {
                 item.should.be.an('object');
-                item.should.have.keys('value');
+                item.should.have.keys('replace');
                 done();
               });
             catActions.doAction({});
@@ -342,21 +342,21 @@ describe('Store', function() {
         }
       );
 
-      it('should have notified observers with the new value', function() {
-        catActions.doAction.onNext({ value: newValue });
+      it('should notify observers with the new value', function() {
+        catActions.doAction.onNext({ replace: newValue });
         spy.should.have.been.calledWith(newValue);
         spy.should.have.been.calledTwice;
       });
 
       it('should not throw if value is null', function() {
         expect(() => {
-          catActions.doAction({ value: null });
+          catActions.doAction({ replace: null });
         }).to.not.throw();
       });
 
       it('should throw if value is not an object', function() {
         expect(() => {
-          catActions.doAction({ value: 'not the momma' });
+          catActions.doAction({ replace: 'not the momma' });
         }).to.throw(/invalid operation/);
       });
     });
@@ -494,7 +494,7 @@ describe('Store', function() {
         function() {
           store.history.size.should.equal(0);
           catActions.doAction({
-            value: newValue,
+            replace: newValue,
             optimistic: defer.promise
           });
           store.history.size.should.equal(1);
@@ -504,7 +504,7 @@ describe('Store', function() {
       it('should respect previous operations', function() {
         let defer2 = new Rx.Subject();
         catActions.doAction({
-          value: {},
+          replace: {},
           optimistic: defer2
         });
         defer2.onError('boo');
@@ -550,7 +550,7 @@ describe('Store', function() {
         function () {
           spy.should.have.been.calledOnce;
           spy.should.have.been.calledWith(value);
-          catActions.doAction({ value: value });
+          catActions.doAction({ replace: value });
         }
       );
 
@@ -558,7 +558,7 @@ describe('Store', function() {
         'should have notified observers with the new value',
         function () {
           catActions.doAction({
-            value: newValue,
+            replace: newValue,
             optimistic: defer.promise
           });
           spy.should.have.been.calledWith(newValue);

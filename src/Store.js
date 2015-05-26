@@ -106,9 +106,9 @@ export const Optimism = {
 };
 
 export function applyOperation(oldValue, operation) {
-  const { value, transform, set } = operation;
-  if (value) {
-    return value;
+  const { replace, transform, set } = operation;
+  if (replace) {
+    return replace;
   } else if (transform) {
     return transform(oldValue);
   } else if (set) {
@@ -192,11 +192,11 @@ export default class Store extends Rx.Observable {
     );
   }
 
-  static override(observable) {
+  static replacer(observable) {
     return addOperation(
       observable,
       createObjectValidator('setter should receive objects but was given %s'),
-      value => ({ value })
+      replace => ({ replace })
     );
   }
 
@@ -244,8 +244,8 @@ export default class Store extends Rx.Observable {
     );
 
     this._operationsSubscription = Rx.Observable.merge(operations)
-      .filter(operation => typeof operation.value === 'object' ?
-        !!operation.value :
+      .filter(operation => typeof operation.replace === 'object' ?
+        !!operation.replace :
         true
       )
       .filter(operation => typeof operation.set === 'object' ?
@@ -260,12 +260,13 @@ export default class Store extends Rx.Observable {
         );
 
         invariant(
-          typeof operation.value === 'object' ||
+          typeof operation.replace === 'object' ||
           typeof operation.transform === 'function' ||
           typeof operation.set === 'object',
           'invalid operation, ' +
-          'operations should have a value(an object), ' +
-          'transform(a function), or set(an object) property'
+          'operations should have a replace(an object), ' +
+          'transform(a function), or set(an object) property but got %s',
+          Object.keys(operation)
         );
 
         if ('optimistic' in operation) {

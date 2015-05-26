@@ -559,7 +559,7 @@ function createStore(initValue = null) {
       this.value = initValue;
       let catActions = cat.getActions('CatActions');
       this.register(
-        catActions.doAction.delay(500).map(() => ({ value: {}}))
+        catActions.doAction.delay(500).map(() => ({ replace: {}}))
       );
     }
   }

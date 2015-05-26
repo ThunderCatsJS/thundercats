@@ -129,7 +129,7 @@ export default class TodoStore extends Store {
 	// create is an RxJS observable, so you can use any observable operation available to you in RxJS. 
     const createTodoObs = create.map(({ todo, promise }) => {
     
-      // The store expects observables to return objects with specific keys. `value`, `set`, `transform`, `optimistic`
+      // The store expects observables to return objects with specific keys. `replace`, `set`, `transform`, `optimistic`
       // Here is an example using `transform` and `optimistic` 
       return {
         transform: function (state) {
@@ -154,8 +154,8 @@ export default class TodoStore extends Store {
 #### store.register(Observable<Object>)
 Registered observables must return objects. The object determines the type of operations the store will proform.
 
-##### _value<Object>_
-Observables that return `{ value: newStoreValue }` will override the current value of the store with the properity supplied. 
+##### _replace<Object>_
+Observables that return `{ replace: newStoreValue }` will replace the current value of the store with the properity supplied, deleting properties not specified in the new value. 
 
 ##### _transform<Function>_
 Observables can alse return `{ transform: transfromFunctin }`. The transfrom function will then be called internall and be supplied the with the current value held by the store. This transfrom function should then return the new value of the store.
