@@ -167,6 +167,29 @@ export default class Store extends Rx.Observable {
     return register;
   }
 
+  static fromMany() {
+    return Rx.Observable.from(arguments)
+      .tap(validateObservable)
+      .toArray()
+      .flatMap(observables => Rx.Observable.merge(observables));
+  }
+
+  static replacer(observable) {
+    return addOperation(
+      observable,
+      createObjectValidator('setter should receive objects but was given %s'),
+      replace => ({ replace })
+    );
+  }
+
+  static setter(observable) {
+    return addOperation(
+      observable,
+      createObjectValidator('setter should receive objects but was given %s'),
+      set => ({ set })
+    );
+  }
+
   static transformer(observable) {
     return addOperation(
       observable,
@@ -181,22 +204,6 @@ export default class Store extends Rx.Observable {
         }
       },
       transform => ({ transform })
-    );
-  }
-
-  static setter(observable) {
-    return addOperation(
-      observable,
-      createObjectValidator('setter should receive objects but was given %s'),
-      set => ({ set })
-    );
-  }
-
-  static replacer(observable) {
-    return addOperation(
-      observable,
-      createObjectValidator('setter should receive objects but was given %s'),
-      replace => ({ replace })
     );
   }
 

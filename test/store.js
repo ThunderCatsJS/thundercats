@@ -160,9 +160,10 @@ describe('Store', function() {
       let catActions, store, register;
       const {
         createRegistrar,
-        transformer,
+        fromMany,
+        replacer,
         setter,
-        replacer
+        transformer
       } = Store;
 
       beforeEach(() => {
@@ -176,80 +177,59 @@ describe('Store', function() {
         store = new CatStore();
       });
 
-      describe('transformer', () => {
-
-        it('should throw if given non observable', () => {
-          expect(() => {
-            transformer('bananas');
-          }).to.throw(/should get observables but was given bananas/);
+      describe('createRegistrar', () => {
+        it('should return a function', () => {
+          let register = createRegistrar(store);
+          register.should.be.a('function');
         });
-
-        it('should return an observable', () => {
-          let transformOperation = transformer(catActions.doAction);
-          expect(transformOperation).to.exist;
-          isObservable(transformOperation).should.be.true;
-        });
-
-        describe('observable', () => {
-          it('should call onError with non function payloads', (done) => {
-            transformer(catActions.doAction)
-              .subscribeOnError(err => {
-                err.should.be.an.instanceOf(Error);
-                err.message.should.match(
-                  /should receive functions but was given bananas/
-                );
-                done();
-              });
-            catActions.doAction('bananas');
+        describe('register', () => {
+          let register, observable;
+          beforeEach(() => {
+            register = createRegistrar(store);
+            observable = Rx.Observable.just('not the momma');
           });
-          it('should call onNext with { transformer }', done => {
-            transformer(catActions.doAction)
-              .subscribe(item => {
-                item.should.be.an('object');
-                item.should.have.keys('transform');
-                done();
-              });
-            catActions.doAction(() => {});
+
+          it('should update store actions', () => {
+            store.actions.length.should.equal(0);
+            register(observable);
+            store.actions.length.should.equal(1);
           });
         });
       });
 
-      describe('setter', () => {
-
-        it('should throw if given non observable', () => {
-          expect(() => {
-            setter('bananas');
-          }).to.throw(/should get observables but was given bananas/);
-        });
-
+      describe('fromMany', () => {
         it('should return an observable', () => {
-          let setterOperation = setter(catActions.doAction);
-          expect(setterOperation).to.exist;
-          isObservable(setterOperation).should.be.true;
+          let mergedObservable = fromMany(catActions.doAction);
+          isObservable(mergedObservable).should.be.true;
         });
-
         describe('observable', () => {
-
-          it('should call onError with non function payloads', (done) => {
-            setter(catActions.doAction)
-              .subscribeOnError(err => {
-                err.should.be.an.instanceOf(Error);
-                err.message.should.match(
-                  /should receive objects but was given bananas/
-                );
-                done();
-              });
-            catActions.doAction('bananas');
+          it('should call onError if given non observable', () => {
+            fromMany('bananas').subscribeOnError(err => {
+              expect(err).to.exist;
+              err.should.be.instanceOf(Error);
+              err.should.match(/should get observables but was given bananas/);
+            });
+            fromMany(catActions.doAction, 'bananas').subscribeOnError(err => {
+              expect(err).to.exist;
+              err.should.be.instanceOf(Error);
+              err.should.match(/should get observables but was given bananas/);
+            });
           });
 
-          it('should call onNext with { set }', done => {
-            setter(catActions.doAction)
-              .subscribe(item => {
-                item.should.be.an('object');
-                item.should.have.keys('set');
-                done();
-              });
-            catActions.doAction({});
+          it('should call pass through values', (done) => {
+            let subject1 = new Rx.Subject();
+            let subject2 = new Rx.Subject();
+            fromMany(subject1, subject2).subscribe(
+              value => {
+                value.should.match(/bananas/);
+              },
+              null,
+              done
+            );
+            subject1.onNext('go bananas');
+            subject2.onNext('eat bananas');
+            subject1.onCompleted();
+            subject2.onCompleted();
           });
         });
       });
@@ -292,29 +272,84 @@ describe('Store', function() {
         });
       });
 
-      describe('createRegistrar', () => {
-        it('should return a function', () => {
-          let register = createRegistrar(store);
-          register.should.be.a('function');
+      describe('setter', () => {
+        it('should throw if given non observable', () => {
+          expect(() => {
+            setter('bananas');
+          }).to.throw(/should get observables but was given bananas/);
         });
-        describe('register', () => {
-          let register, observable;
-          beforeEach(() => {
-            register = createRegistrar(store);
-            observable = Rx.Observable.just('not the momma');
+
+        it('should return an observable', () => {
+          let setterOperation = setter(catActions.doAction);
+          expect(setterOperation).to.exist;
+          isObservable(setterOperation).should.be.true;
+        });
+
+        describe('observable', () => {
+
+          it('should call onError with non function payloads', (done) => {
+            setter(catActions.doAction)
+              .subscribeOnError(err => {
+                err.should.be.an.instanceOf(Error);
+                err.message.should.match(
+                  /should receive objects but was given bananas/
+                );
+                done();
+              });
+            catActions.doAction('bananas');
           });
 
-          it('should update store actions', () => {
-            store.actions.length.should.equal(0);
-            register(observable);
-            store.actions.length.should.equal(1);
+          it('should call onNext with { set }', done => {
+            setter(catActions.doAction)
+              .subscribe(item => {
+                item.should.be.an('object');
+                item.should.have.keys('set');
+                done();
+              });
+            catActions.doAction({});
+          });
+        });
+      });
+
+      describe('transformer', () => {
+        it('should throw if given non observable', () => {
+          expect(() => {
+            transformer('bananas');
+          }).to.throw(/should get observables but was given bananas/);
+        });
+
+        it('should return an observable', () => {
+          let transformOperation = transformer(catActions.doAction);
+          expect(transformOperation).to.exist;
+          isObservable(transformOperation).should.be.true;
+        });
+
+        describe('observable', () => {
+          it('should call onError with non function payloads', (done) => {
+            transformer(catActions.doAction)
+              .subscribeOnError(err => {
+                err.should.be.an.instanceOf(Error);
+                err.message.should.match(
+                  /should receive functions but was given bananas/
+                );
+                done();
+              });
+            catActions.doAction('bananas');
+          });
+          it('should call onNext with { transformer }', done => {
+            transformer(catActions.doAction)
+              .subscribe(item => {
+                item.should.be.an('object');
+                item.should.have.keys('transform');
+                done();
+              });
+            catActions.doAction(() => {});
           });
         });
       });
     });
 
-
-    describe('value', function() {
+    describe('replace', function() {
 
       let value = { hello: 'world' };
       let newValue = { foo: 'bar' };
