@@ -1,21 +1,4 @@
 {
-  "ecmaFeatures": {
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "classes": true,
-    "defaultParams": true,
-    "destructuring": true,
-    "generators": true,
-    "modules": true,
-    "objectLiteralComputedProperties": true,
-    "objectLiteralShorthandMethods": true,
-    "objectLiteralShorthandProperties": true,
-    "restParams": true,
-    "superInFunctions": true,
-    "spread": true,
-    "templateStrings": true,
-    "jsx": true
-  },
   "env": {
     "browser": true,
     "mocha": true,
@@ -29,6 +12,7 @@
     "react"
   ],
   "rules": {
+    "indent": [2, 2, { "indentSwitchCase": true }],
     "no-comma-dangle": 2,
     "no-cond-assign": 2,
     "no-console": 0,
