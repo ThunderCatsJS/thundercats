@@ -72,7 +72,7 @@ The body of the method provides mapping function for every call to the observabl
 i.e.
 
 ```js
-todoActions.create.subscribe((data) {
+todoActions.create.subscribe((data) => {
   console.log(data.todo);
 });
 
