@@ -9,8 +9,8 @@ const debug = debugFactory('thundercats:translate');
 export default {
   dehydrate(storesObservable) {
     return storesObservable
-      .filter(store => !!store.displayName)
-      .filter(store => !!store.value)
+      // store must have displayName and value
+      .filter(store => store.displayName && !!store.value)
       .map(store => ({ [store.displayName]: store.value }))
       .reduce((allDats, storeDats) => {
         return assign(allDats, storeDats);
@@ -36,22 +36,25 @@ export default {
           data: stateMap[store.displayName]
         };
       })
-      .tapOnNext(({ store, data }) => {
-        if (typeof data === 'object') { return; }
+      // filter out falsey data and non objects
+      .filter(({ data }) => data && typeof data === 'object')
+      // assign value to store
+      .tap(({ store, data }) => {
         debug(
-          'hydrate for %s state was not an object but %s',
+          'updating %s with value: ',
           store.displayName,
           data
         );
+        store.value = data;
       })
-      .map(({ store, data }) => store.value = data)
-      .lastOrDefault()
-      .map(() => true)
+      // wait to run through all the stores
       .do(
         null,
         (err) => debug('deserialize encountered a err', err),
         () => debug('deserialize completed')
-      );
+      )
+      .lastOrDefault()
+      .map(() => true);
   },
 
   deserialize(storesObservable, stringyCatStateObservable) {

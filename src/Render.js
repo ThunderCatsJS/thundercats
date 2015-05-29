@@ -29,8 +29,7 @@ export function fetch(fetchMap, stores) {
 
   const storeNames = fetchCtx
     .pluck('store')
-    .pluck('displayName')
-    .toArray();
+    .pluck('displayName');
 
   const fetchObs = fetchCtx
     .map(({ action, payload }) => ({ action, payload }))
