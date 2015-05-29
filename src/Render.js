@@ -1,5 +1,6 @@
 import Rx from 'rx';
 import React from 'react';
+import assign from 'object.assign';
 import debugFactory from 'debug';
 
 import ContextWrapper from './ContextWrapper';
@@ -22,12 +23,13 @@ export function fetch(fetchMap, stores) {
     .pluck('store')
     .toArray()
     .tap(arrayOfStores => debug('waiting for %s stores', arrayOfStores.length))
-    .map(arrayOfStores => {
-      return waitFor(...arrayOfStores)
-        .firstOrDefault()
-        .shareReplay();
-    })
-    .tap(waitForStores => waitForStores.subscribe());
+    .flatMap(arrayOfStores => {
+      return waitFor(...arrayOfStores).firstOrDefault();
+    });
+
+  const storeNames = fetchCtx
+    .pluck('store')
+    .pluck('displayName');
 
   const fetchObs = fetchCtx
     .map(({ action, payload }) => ({ action, payload }))
@@ -41,8 +43,17 @@ export function fetch(fetchMap, stores) {
   return Rx.Observable.combineLatest(
     waitForStores,
     fetchObs.delaySubscription(50),
-    data => ({ data, fetchMap })
-  );
+    data => data
+  )
+    .flatMap(data => Rx.Observable.from(data))
+    .zip(
+      storeNames,
+      (data, name) => ({ [name]: data })
+    )
+    .reduce((accu, item) => {
+      return assign({}, accu, item);
+    }, {})
+    .map(data => ({ data, fetchMap }));
 }
 
 export function RenderToObs(Comp, DOMContainer) {

@@ -2,7 +2,6 @@
 [![Coverage Status](https://coveralls.io/repos/r3dm/thundercats/badge.svg)](https://coveralls.io/r/r3dm/thundercats)
 [![Dependency Status](https://gemnasium.com/r3dm/thundercats.svg)](https://gemnasium.com/r3dm/thundercats)
 [![NPM version](http://img.shields.io/npm/v/thundercats.svg)](https://npmjs.org/package/thundercats)
-[![Code Climate](https://codeclimate.com/github/r3dm/thundercats/badges/gpa.svg)](https://codeclimate.com/github/r3dm/thundercats)
 
 [![Stories in Ready](https://badge.waffle.io/r3dm/thundercats.png?label=ready&title=Ready)](https://waffle.io/r3dm/thundercats)
 [![Join the chat at https://gitter.im/r3dm/thundercats](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/r3dm/thundercats?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -27,7 +26,7 @@ your application.
 This is a pre-release 2.0.0 version and is currently unstable.
 
 ```
-npm install thundercats@2.0.0-alpha.7
+npm install thundercats@2.0.0-rc4
 ```
 Thundecats makes heavy use of es6 Map object. While avaible in the latest versions of Node.js, io.js and all modern browsers, a great many older browsers will need a polyfill inorder to work with Thundercats. 
 
@@ -73,7 +72,7 @@ The body of the method provides mapping function for every call to the observabl
 i.e.
 
 ```js
-todoActions.create.subscribe((data) {
+todoActions.create.subscribe((data) => {
   console.log(data.todo);
 });
 
@@ -210,10 +209,7 @@ By itself it doesn't do much.  Check out the example below.
       // stores this component should subscribe too.
       stores: [
         'messageStore',
-        'threadStore',
-        
-        
-      
+        'threadStore'
       ],
       // a function that takes the values of the stores
       // and returns an Object{ messages, thread }
