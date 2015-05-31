@@ -28,7 +28,7 @@ This is a pre-release 2.0.0 version and is currently unstable.
 ```
 npm install thundercats@2.0.0-rc5
 ```
-Thundecats makes heavy use of es6 Map object. While avaible in the latest versions of Node.js, io.js and all modern browsers, a great many older browsers will need a polyfill inorder to work with Thundercats. 
+Thundecats makes heavy use of es6 Map object. While available in the latest versions of Node.js, io.js and all modern browsers, a great many older browsers will need a polyfill inorder to work with Thundercats. 
 
 I recommend using [es6-map](https://www.npmjs.com/package/es6-map) as a polyfill for just the Map object or [babel polyfill](https://babeljs.io/docs/usage/polyfill/) to give you all the es6 goodies!
 
