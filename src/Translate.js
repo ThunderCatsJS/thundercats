@@ -2,7 +2,7 @@ import Rx from 'rx';
 import assign from 'object.assign';
 import invariant from 'invariant';
 import debugFactory from 'debug';
-import { createObjectValidator } from './utils';
+import { createObjectValidator, getName, getNameOrNull } from './utils';
 
 const debug = debugFactory('thundercats:translate');
 
@@ -10,8 +10,8 @@ export default {
   dehydrate(storesObservable) {
     return storesObservable
       // store must have displayName and value
-      .filter(store => store.displayName && !!store.value)
-      .map(store => ({ [store.displayName]: store.value }))
+      .filter(store => !!getNameOrNull(store) && !!store.value)
+      .map(store => ({ [getName(store)]: store.value }))
       .reduce((allDats, storeDats) => {
         return assign(allDats, storeDats);
       }, {})
@@ -33,7 +33,7 @@ export default {
       (store, stateMap) => {
         return {
           store,
-          data: stateMap[store.displayName]
+          data: stateMap[getNameOrNull(store)]
         };
       })
       // filter out falsey data and non objects
@@ -42,7 +42,7 @@ export default {
       .tap(({ store, data }) => {
         debug(
           'updating %s with value: ',
-          store.displayName,
+          getName(store),
           data
         );
         store.value = data;

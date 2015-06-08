@@ -7,12 +7,13 @@ import Store from './Store';
 import Actions from './Actions';
 import Translate from './Translate';
 import Render from './Render';
+import { getName, getNameOrNull } from './utils';
 
 const debug = debugFactory('thundercats:cat');
 
 export const Register = {
   store(stores, Store, args) {
-    const name = Store.displayName;
+    const name = getName(Store);
     if (stores.has(name.toLowerCase())) {
       return warning(
         false,
@@ -28,7 +29,7 @@ export const Register = {
   },
 
   actions(actionsMap, Actions, args) {
-    let name = Actions.displayName;
+    let name = getName(Actions);
     if (actionsMap.has(name.toLowerCase())) {
       return warning(
         false,
@@ -57,7 +58,7 @@ export default class Cat {
       'Attempted to add a class that is not a ThunderCats Store or Action'
     );
 
-    let name = StoreOrActions.displayName;
+    let name = getNameOrNull(StoreOrActions);
 
     invariant(
       typeof name === 'string',

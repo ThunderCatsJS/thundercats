@@ -223,7 +223,7 @@ export default function createContainer(options, Component) {
 
         debug(
           'cat returned %s for %s for %s',
-          fetchActionsInst.displayName,
+          getName(fetchActionsInst),
           fetchActionsName,
           getName(this)
         );

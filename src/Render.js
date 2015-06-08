@@ -5,6 +5,7 @@ import debugFactory from 'debug';
 
 import ContextWrapper from './ContextWrapper';
 import waitFor from './waitFor';
+import { getName, getNameOrNull } from './utils';
 
 const debug = debugFactory('thundercats:render');
 
@@ -21,6 +22,8 @@ export function fetch(fetchMap, stores) {
 
   const waitForStores = fetchCtx
     .pluck('store')
+    // store should have names
+    .filter(store => !!getNameOrNull(store))
     .toArray()
     .tap(arrayOfStores => debug('waiting for %s stores', arrayOfStores.length))
     .flatMap(arrayOfStores => {
@@ -29,7 +32,7 @@ export function fetch(fetchMap, stores) {
 
   const storeNames = fetchCtx
     .pluck('store')
-    .pluck('displayName');
+    .map(store => getName(store));
 
   const fetchObs = fetchCtx
     .map(({ action, payload }) => ({ action, payload }))

@@ -4,14 +4,13 @@ import invariant from 'invariant';
 import debugFactory from 'debug';
 import assign from 'object.assign';
 import Actions, { getActionNames } from './Actions';
-import utils from './utils';
-
-const {
+import {
   areObservable,
   createObjectValidator,
+  getName,
   isObservable,
   isPromise
-} = utils;
+} from './utils';
 
 const debug = debugFactory('thundercats:store');
 const __DEV__ = process.env.NODE_ENV !== 'production';
@@ -59,7 +58,7 @@ export const Register = {
     debug(
       '%s register actions class %s',
       storeName,
-      actionsInst.displayName
+      getName(actionsInst)
     );
 
     return actionNames.reduce((actionsArr, name) => {
@@ -152,7 +151,6 @@ export default class Store extends Rx.Observable {
     this.actions = [];
     this.observers = new Map();
     this.history = new Map();
-    this.displayName = this.constructor.displayName || 'BaseStore';
   }
 
   static createRegistrar(store) {
@@ -160,7 +158,7 @@ export default class Store extends Rx.Observable {
       store.actions = Register.observable(
         observable,
         store.actions,
-        store.displayName
+        getName(store)
       );
       return store.actions;
     }
@@ -212,14 +210,14 @@ export default class Store extends Rx.Observable {
       this.actions = Register.actions(
         observableOrActionsInstance,
         this.actions,
-        this.displayName
+        getName(this)
       );
       return this.actions;
     }
     this.actions = Register.observable(
       observableOrActionsInstance,
       this.actions,
-      this.displayName
+      getName(this)
     );
     return this.actions;
   }
@@ -229,13 +227,13 @@ export default class Store extends Rx.Observable {
   }
 
   _init() {
-    debug('initiating %s', this.displayName);
+    debug('initiating %s', getName(this));
     this.history = dispose(this._operationsSubscription, this.history);
 
     invariant(
       this.actions.length,
       '%s must have at least one action to listen to but has %s',
-      this.displayName,
+      getName(this),
       this.actions.length
     );
 
@@ -247,7 +245,7 @@ export default class Store extends Rx.Observable {
     invariant(
       areObservable(operations),
       '"%s" actions should be an array of observables',
-      this.displayName
+      getName(this)
     );
 
     this._operationsSubscription = Rx.Observable.merge(operations)
@@ -375,7 +373,7 @@ export default class Store extends Rx.Observable {
     invariant(
       data && typeof data === 'object',
       '%s deserialize must return an object but got: %s',
-      this.displayName,
+      getName(this),
       data
     );
     this.value = data;
