@@ -28,10 +28,7 @@ export const ActionCreator = {
     let actionStart = new Rx.Subject();
 
     function action(value) {
-      /* istanbul ignore else */
-      if (typeof map === 'function') {
-        value = map(value);
-      }
+      value = map(value);
 
       actionStart.onNext(value);
       observers.forEach((observer) => {
@@ -121,8 +118,9 @@ export default class Actions {
       .map(name => ({ name: name, map: this[name] }));
 
     if (actionNames) {
-      actionDefinitions =
-        actionDefinitions.concat(actionNames.map(name => ({ name })));
+      actionDefinitions = actionDefinitions.concat(
+        actionNames.map(name => ({ name, map: Rx.helpers.identity }))
+      );
     }
 
     // istanbul ignore else
