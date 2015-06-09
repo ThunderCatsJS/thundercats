@@ -13,9 +13,7 @@ function updateTodos(todos, update, condition) {
   }, {});
 }
 
-
 export default class TodoStore extends Store {
-
   constructor(cat) {
     super();
     const todoActions = cat.getActions('todoActions');
@@ -139,5 +137,3 @@ export default class TodoStore extends Store {
 
   static displayName = 'TodoStore'
 }
-
-module.exports = TodoStore;

@@ -1,11 +1,11 @@
 import React, { PropTypes } from 'react';
-import { Actions } from 'thundercats';
+import { Actions, createContainer } from 'thundercats';
 import classNames from 'classNames';
 
 const ESCAPE_KEY = 27;
 const ENTER_KEY = 13;
 
-export class ItemActions extends Actions {
+class ItemActions extends Actions {
   constructor() {
     super([
       'handleBlur',
@@ -16,19 +16,17 @@ export class ItemActions extends Actions {
   }
 }
 
+@createContainer({
+  actions: ['todoActions']
+})
 export default class Item extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.state = { editText: props.todo.text };
     this.itemActions = new ItemActions();
-    this.todoActions = context.cat.getActions('todoActions');
   }
 
   static displayName = 'TodoItem'
-
-  static contextTypes = {
-    cat: PropTypes.object
-  }
 
   static propTypes = {
     editing: PropTypes.bool.isRequired,
@@ -36,7 +34,8 @@ export default class Item extends React.Component {
     onCancel: PropTypes.func.isRequired,
     onEdit: PropTypes.func.isRequired,
     onSave: PropTypes.func.isRequired,
-    todo: PropTypes.object.isRequired
+    todo: PropTypes.object.isRequired,
+    todoActions: PropTypes.object
   }
 
   componentDidMount() {
@@ -84,22 +83,14 @@ export default class Item extends React.Component {
       this.props.onEdit(todo.id);
       this.setState({ editText: todo.text });
     });
-
-    /*
-    this.lifecycle.componentDidUpdate
-      .filter(prev => this.props.editing && !prev.editing)
-      .subscribe(() => {
-        var node = this.refs.editField.getDOMNode();
-        node.focus();
-        node.value = this.props.todo.text;
-        node.setSelectionRange(node.value.length, node.value.length);
-      });
-    */
   }
 
   render() {
-    const { todoActions } = this;
-    const { todo, editing } = this.props;
+    const {
+      editing,
+      todo,
+      todoActions
+    } = this.props;
     const { editText } = this.state;
     const {
       handleTextChange,

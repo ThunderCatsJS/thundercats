@@ -11,26 +11,26 @@
  */
 
 import React, { PropTypes } from 'react';
+import { createContainer } from 'thundercats';
 import classNames from 'classnames';
 
+@createContainer({
+  actions: ['chatActions']
+})
 export default class ThreadListItem extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.chatActions = this.context.cat.getActions('chatActions');
   }
   static displayName = 'ThreadListItem'
 
-  static contextTypes = {
-    cat: PropTypes.object.isRequired
-  }
-
   static propTypes = {
+    chatActions: PropTypes.object,
     currentThreadID: PropTypes.string,
     thread: PropTypes.object
   }
 
   handleClick() {
-    this.chatActions.clickThread(this.props.thread.id);
+    this.props.chatActions.clickThread(this.props.thread.id);
   }
 
   render() {

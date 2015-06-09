@@ -1,22 +1,24 @@
 import Rx from 'rx';
+import { createContainer } from 'thundercats';
 import React, { PropTypes } from 'react';
 
 const ENTER_KEY = 13;
 
+@createContainer({
+  actions: ['todoActions']
+})
 export default class Header extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.todoActions = context.cat.getActions('todoActions');
   }
 
   static displayName = 'Header'
-
-  static contextTypes = {
-    cat: PropTypes.object.isRequired
+  static propTypes = {
+    todoActions: PropTypes.object
   }
 
   componentDidMount() {
-    const { todoActions } = this;
+    const { todoActions } = this.props;
 
     const handleKeyDownObs = new Rx.Subject();
     this.handleKeyDown = handleKeyDownObs.onNext.bind(handleKeyDownObs);

@@ -26,7 +26,15 @@ function getUnreadCount(threads) {
   return unreadCount;
 }
 
-class ThreadSection extends React.Component {
+@createContainer({
+  store: 'threadStore',
+  map: ({ threads, currentID }) => ({
+    currentID,
+    threads: ChatMessageUtils.getAllChrono(threads),
+    unreadCount: getUnreadCount(threads)
+  })
+})
+export default class ThreadSection extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -36,17 +44,6 @@ class ThreadSection extends React.Component {
     currentID: PropTypes.string,
     threads: PropTypes.array,
     unreadCount: PropTypes.number
-  }
-
-  getThundercats() {
-    return {
-      store: 'threadStore',
-      map: ({ threads, currentID }) => ({
-        currentID,
-        threads: ChatMessageUtils.getAllChrono(threads),
-        unreadCount: getUnreadCount(threads)
-      })
-    };
   }
 
   renderUnread(unread) {
@@ -81,5 +78,3 @@ class ThreadSection extends React.Component {
     );
   }
 }
-
-export default createContainer(ThreadSection);

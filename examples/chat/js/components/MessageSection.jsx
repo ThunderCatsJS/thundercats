@@ -11,7 +11,7 @@
  */
 
 import React, { PropTypes } from 'react';
-import { createContainer } from 'thundecats';
+import { createContainer } from 'thundercats';
 import messageServices from '../services/messages';
 import MessageComposer from './MessageComposer.jsx';
 import MessageListItem from './MessageListItem.jsx';
@@ -39,7 +39,15 @@ function combineLatest(messages, { currentID, threads }) {
   };
 }
 
-class MessageSection extends React.Component {
+@createContainer({
+  actions: ['chatActions'],
+  stores: [
+    'messageStore',
+    'threadStore'
+  ],
+  combineLatest: combineLatest
+})
+export default class MessageSection extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -70,17 +78,6 @@ class MessageSection extends React.Component {
     ul.scrollTop = ul.scrollHeight;
   }
 
-  getThundercats() {
-    return {
-      actions: ['chatActions'],
-      stores: [
-        'messageStore',
-        'threadStore',
-        combineLatest
-      ]
-    };
-  }
-
   renderMessages(messages) {
     return messages.map(message => (
       <MessageListItem
@@ -109,5 +106,3 @@ class MessageSection extends React.Component {
     );
   }
 }
-
-export default createContainer(MessageSection);

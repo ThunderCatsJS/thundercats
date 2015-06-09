@@ -1,19 +1,17 @@
 import React, { PropTypes } from 'react';
+import { createContainer } from 'thundercats';
 import Item from './Item.jsx';
 
+@createContainer({
+  actions: ['todoActions']
+})
 export default class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.todoActions = context.cat.getActions('todoActions');
     this.state = { editing: null };
   }
 
   static displayName = 'Main'
-
-  static contextTypes = {
-    cat: PropTypes.object.isRequired
-  }
-
   static propTypes = {
     areAllComplete: PropTypes.bool.isRequired,
     todoActions: PropTypes.object.isRequired,
@@ -42,10 +40,10 @@ export default class Main extends React.Component {
 
   render() {
     const { editing } = this.state;
-    const { todoActions } = this;
     const {
       areAllComplete,
-      todos
+      todos,
+      todoActions
     } = this.props;
 
     if (!todos || !todos.length) {

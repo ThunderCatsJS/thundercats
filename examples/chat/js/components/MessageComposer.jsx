@@ -40,7 +40,7 @@ export default class MessageComposer extends React.Component {
           threadID: this.props.thread.id
         });
       }
-      this.setState({text: ''});
+      this.setState({ text: '' });
     }
   }
 

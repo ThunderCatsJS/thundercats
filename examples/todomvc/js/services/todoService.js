@@ -9,7 +9,7 @@ export default {
   destroy: fakeRemoteCall,
   destroyCompleted: fakeRemoteCall,
 
-  fetchState() {
+  getTodos() {
     const state = localStorage.getItem(NAMESPACE);
     return Promise.resolve(state ? JSON.parse(state) : {});
   },

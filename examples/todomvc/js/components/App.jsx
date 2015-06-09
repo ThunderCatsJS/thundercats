@@ -6,7 +6,40 @@ import Footer from './Footer.jsx';
 import Header from './Header.jsx';
 import Main from './Main.jsx';
 
-class App extends React.Component {
+@createContainer({
+  store: 'todoStore',
+  fetchAction: 'todoActions.fetchState',
+  map: ({ currentRoute, todosMap }) => {
+    const allTodos = Object.keys(todosMap).reduce(function (todos, id) {
+      todos.push(todosMap[id]);
+      return todos;
+    }, []);
+
+    const todos = allTodos.filter(({ complete }) => (
+      currentRoute === routes.ALL ||
+      (complete && currentRoute === routes.COMPLETED) ||
+      (!complete && currentRoute === routes.ACTIVE)
+    ));
+
+    const areAllComplete = allTodos.every(todo => todo.complete);
+
+    const activeTodosCount = allTodos.reduce((accum, todo) => {
+      return todo.complete ? accum : accum + 1;
+    }, 0);
+
+    const completeTodosCount = allTodos.length - activeTodosCount;
+
+    return {
+      activeTodosCount,
+      allTodosCount: allTodos.length,
+      areAllComplete,
+      completeTodosCount,
+      currentRoute,
+      todos
+    };
+  }
+})
+export default class App extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -20,41 +53,6 @@ class App extends React.Component {
     currentRoute: PropTypes.string,
     todos: PropTypes.array
   };
-
-  getThundercats() {
-    return {
-      store: 'todoStore',
-      map: ({ currentRoute, todosMap }) => {
-        const allTodos = Object.keys(todosMap).reduce(function (todos, id) {
-          todos.push(todosMap[id]);
-          return todos;
-        }, []);
-
-        const todos = allTodos.filter(({ complete }) => (
-          currentRoute === routes.ALL ||
-          (complete && currentRoute === routes.COMPLETED) ||
-          (!complete && currentRoute === routes.ACTIVE)
-        ));
-
-        const areAllComplete = allTodos.every(todo => todo.complete);
-
-        const activeTodosCount = allTodos.reduce((accum, todo) => {
-          return todo.complete ? accum : accum + 1;
-        }, 0);
-
-        const completeTodosCount = allTodos.length - activeTodosCount;
-
-        return {
-          activeTodosCount,
-          allTodosCount: allTodos.length,
-          areAllComplete,
-          completeTodosCount,
-          currentRoute,
-          todos
-        };
-      }
-    };
-  }
 
   shouldComponentUpdate(props) {
     return this.props.todos !== props.todos ||
@@ -86,5 +84,3 @@ class App extends React.Component {
     );
   }
 }
-
-export default createContainer(App);
