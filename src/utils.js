@@ -4,6 +4,7 @@ export default {
   areObservable,
   createObjectValidator,
   getName,
+  getNameOrNull,
   isObservable,
   isPromise
 };
@@ -32,11 +33,16 @@ function createObjectValidator(message) {
 }
 
 function getName(comp) {
-  return '' +
-    ((comp && comp.displayName) ||
+  return '' + (getNameOrNull(comp) || 'Anonymous');
+}
+
+function getNameOrNull(comp) {
+  return (
+    (comp && comp.displayName) ||
     (comp.constructor &&
     comp.constructor.displayName) ||
-    'AnonymousComponent');
+    null
+  );
 }
 
 function isObservable(observable) {

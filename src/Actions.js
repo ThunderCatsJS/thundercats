@@ -6,12 +6,16 @@ import debugFactory from 'debug';
 import waitFor from './waitFor';
 
 const debug = debugFactory('thundercats:actions');
+const protectedProperties = [
+  'displayName',
+  'constructor'
+];
 
 export function getActionNames(ctx) {
   return Object.getOwnPropertyNames(ctx.constructor.prototype)
     .filter(name => {
       return (
-        name !== 'constructor' &&
+        protectedProperties.indexOf(name) === -1 &&
         name.indexOf('_') === -1 &&
         typeof ctx[name] === 'function'
       );
@@ -24,10 +28,7 @@ export const ActionCreator = {
     let actionStart = new Rx.Subject();
 
     function action(value) {
-      /* istanbul ignore else */
-      if (typeof map === 'function') {
-        value = map(value);
-      }
+      value = map(value);
 
       actionStart.onNext(value);
       observers.forEach((observer) => {
@@ -64,22 +65,17 @@ export const ActionCreator = {
 
   createManyOn(ctx, actions) {
     invariant(
-      typeof ctx === 'object',
-      'thisArg supplied to createActions must be an object but got %s',
-      ctx
-    );
-
-    invariant(
       Array.isArray(actions),
-      'createActions requires an array of objects but got %s',
+      'createActions requires an array but got %s',
       actions
     );
 
     let actionsBag = actions.reduce(function(ctx, action) {
       invariant(
+        action &&
         typeof action === 'object',
-        'createActions requires items in array to be either strings ' +
-        'or objects but was supplied with %s',
+        'createActions requires items in array to be objects but ' +
+        'was supplied with %s',
         action
       );
 
@@ -109,7 +105,6 @@ export const ActionCreator = {
 
 export default class Actions {
   constructor(actionNames) {
-    this.displayName = this.displayName || this.constructor.displayName;
     if (actionNames) {
       invariant(
         Array.isArray(actionNames) &&
@@ -118,19 +113,19 @@ export default class Actions {
         actionNames
       );
     }
-    let actionDefs = getActionNames(this)
+
+    let actionDefinitions = getActionNames(this)
       .map(name => ({ name: name, map: this[name] }));
 
     if (actionNames) {
-      actionDefs = actionDefs.concat(actionNames.map(name => ({ name })));
+      actionDefinitions = actionDefinitions.concat(
+        actionNames.map(name => ({ name, map: Rx.helpers.identity }))
+      );
     }
 
-    invariant(
-      actionDefs.length,
-      'Actions Class %s instantiated without any actions defined!',
-      this.displayName
-    );
-
-    ActionCreator.createManyOn(this, actionDefs);
+    // istanbul ignore else
+    if (actionDefinitions && actionDefinitions.length) {
+      ActionCreator.createManyOn(this, actionDefinitions);
+    }
   }
 }

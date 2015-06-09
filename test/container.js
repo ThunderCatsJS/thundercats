@@ -7,6 +7,7 @@ import sinonChai from 'sinon-chai';
 import assign from 'object.assign';
 
 import utils from './utils';
+import { getNameOrNull } from '../src/utils';
 import ContextWrapper from '../src/ContextWrapper';
 import { Store, Cat, createContainer } from '../src';
 
@@ -523,7 +524,7 @@ describe('Container', function() {
       cont = container;
       const fetchCtx = cat.fetchMap.get(fetchAction);
       expect(fetchCtx).to.not.be.undefined;
-      fetchCtx.store.displayName.should.deep.equal('CatStore');
+      getNameOrNull(fetchCtx.store).should.deep.equal('CatStore');
     });
   });
 });
