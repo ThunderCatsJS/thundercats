@@ -32,10 +32,19 @@ Thundecats makes heavy use of es6 Map object. While available in the latest vers
 
 I recommend using [es6-map](https://www.npmjs.com/package/es6-map) as a polyfill for just the Map object or [babel polyfill](https://babeljs.io/docs/usage/polyfill/) to give you all the es6 goodies!
 
+## Examples!
+
+Check out:
+
+* [TodoMVC](https://github.com/r3dm/thundercats-todomvc) app.
+* [Chat App](https://github.com/r3dm/thundercats-chat)
+* The source for [The R3DM Consulting](https://github.com/r3dm/r3dm.com) isomorphic app.
+
 ## Guide
 
 
 ### Actions
+
 Actions class creates an object with observable methods. The methods themselves emit its arguments when called to its observers. You extend the Actions class like so...
 
 note: using es6 and [class property initializers](https://github.com/babel/babel/issues/619)
@@ -151,15 +160,19 @@ export default class TodoStore extends Store {
 
 ```
 #### store.register(Observable<Object>)
+
 Registered observables must return objects. The object determines the type of operations the store will proform.
 
 ##### _replace<Object>_
+
 Observables that return `{ replace: newStoreValue }` will replace the current value of the store with the properity supplied, deleting properties not specified in the new value. 
 
 ##### _transform<Function>_
+
 Observables can alse return `{ transform: transfromFunctin }`. The transfrom function will then be called internall and be supplied the with the current value held by the store. This transfrom function should then return the new value of the store.
 
 ##### _set<Object>_
+
 Observables that return '{ set: newValues }' will use Object.assign to update the value held by the store.
 
 note: observables must return an object with atleast one of the above keys
@@ -300,6 +313,7 @@ export default class MessageSection extends React.Component {
 ```
 
 ---
+
 ### The Cat
 
 The Cat is the bag. It's the main place to put all your fluxy stuff.
@@ -326,14 +340,17 @@ todoCat.register(TodoClass, todoCat);
 ```
 
 #### cat.register(StoreOrActionsClass[, ...optional args to pass to construtor])
+
 register your Store and Actions classes using the `register` instance method. Any extra arguments to the register method are passed to the contructor for the class.
 
 ### cat.render(ReactElement, DOMelement)
+
 Yup, thats right! the cat provides a render function. Under the hood it uses Reacts render function but wraps your component so that the cat will be available in your components context and returns an observable. The observable produces the instance returned by React.render.
 
 ### cat.renderToString(ReactElement, DOMelement)
 
 This is where things get sweet. cat.renderToString acts as above except the observable returns an object composed of the markup and prefetched data.
+
 
 ```js
 class TodoApp extends Cat {
@@ -363,6 +380,7 @@ todoApp.render(appElement, document.getElementById('todoapp')).subscribe(
 waitFor(observable[, ... observables]) returns an obsevable that waits for all of the observables to publish a new value. Under the hood it uses Rx.Observable.combineLatest but first converts the passed in obvervables into hot observables. This is great when you just want to wait for new values and not current values of observables.
 
 ### Contributing
+
 Commits messages should start with 
 
 * adds
