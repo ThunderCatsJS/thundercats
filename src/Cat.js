@@ -6,7 +6,6 @@ import debugFactory from 'debug';
 import Store from './Store';
 import Actions from './Actions';
 import Translate from './Translate';
-import Render from './Render';
 import { getName, getNameOrNull } from './utils';
 
 const debug = debugFactory('thundercats:cat');
@@ -102,12 +101,4 @@ export default class Cat {
       Rx.Observable.just(stringyCatState)
     );
   }
-
-  render(Component, DOMContainer) {
-    return Render.render(this, Component, DOMContainer);
-  }
-
-  renderToString(Component) {
-    return Render.renderToString(this, Component);
-  };
 }

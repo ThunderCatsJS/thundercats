@@ -24,8 +24,8 @@
   "scripts": {
     "build": "npm run build-clean && npm run build-global && npm run build-npm",
     "build-clean": "rm -rf lib/* && mkdir lib/global",
-    "build-global": "NODE_ENV='production' browserify src/index.js -s ThunderCats -i react -i rx -t babelify  -t browserify-shim -g envify -o lib/global/ThunderCats.js",
-    "build-global-min": "NODE_ENV='production' browserify src/index.js -s ThunderCats -i react -i rx -t babelify -t browserify-shim -g envify -p [ minifyify --no-map --uglify [--compress --mangle --dead_code]] -o lib/global/ThunderCats.min.js",
+    "build-global": "NODE_ENV='production' browserify src/index.js -s ThunderCats -i rx -t babelify  -t browserify-shim -g envify -o lib/global/ThunderCats.js",
+    "build-global-min": "NODE_ENV='production' browserify src/index.js -s ThunderCats -i rx -t babelify -t browserify-shim -g envify -p [ minifyify --no-map --uglify [--compress --mangle --dead_code]] -o lib/global/ThunderCats.min.js",
     "build-npm": "babel ./src -d lib/",
     "cover": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js",
     "coverAlls": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js && istanbul-coveralls",
@@ -34,7 +34,6 @@
     "test": "mocha --compilers js:babel/register"
   },
   "browserify-shim": {
-    "react": "global:React",
     "rx": "global:Rx"
   },
   "author": {
@@ -51,7 +50,6 @@
     "warning": "^1.0.1"
   },
   "peerDependencies": {
-    "react": "^0.13.1",
     "rx": "^2.3.14"
   },
   "devDependencies": {
@@ -73,7 +71,6 @@
     "mocha": "^2.2.1",
     "mocha-istanbul": "^0.2.0",
     "q": "^1.2.0",
-    "react": "^0.13.1",
     "rx": "^2.3.14",
     "sinon": "^1.11.1",
     "sinon-chai": "^2.7.0"

@@ -6,7 +6,6 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
 
-import utils from './utils'; // eslint-disable-line
 import { Actions } from '../src';
 
 chai.should();
