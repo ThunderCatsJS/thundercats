@@ -13,7 +13,7 @@ var routerApp = (
     <Route component={ App }>
       <Route
         component={ Home }
-        path='/' />
+        path='*' />
     </Route>
   </Router>
 );
