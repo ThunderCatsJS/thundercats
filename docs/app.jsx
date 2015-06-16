@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import StyleSheet from 'react-style';
 import {
   AppBar,
   Overlay,
@@ -6,8 +7,14 @@ import {
   List,
   ListItem
 } from 'react-material';
-
 import urls from './constants/urls.json';
+import { logoColor } from './shared/Colors';
+
+const AppStyles = StyleSheet.create({
+  normalAppBarStyle: {
+    backgroundColor: logoColor
+  }
+});
 
 export default class extends React.Component {
   constructor(props) {
@@ -44,6 +51,7 @@ export default class extends React.Component {
       <div>
         <AppBar
           onNavButtonClick={ ::this.handleNavButtonClick }
+          styles={ AppStyles }
           title={ 'ThunderCats.js'} />
         <Overlay
           onClick={ ::this.handleOverlayClick }

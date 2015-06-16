@@ -2,7 +2,10 @@
 <html>
 <head>
   <title>ThunderCats.js</title>
-  <link href='//fonts.googleapis.com/css?family=Roboto:400,700,300,300italic,500,100,100italic,400italic,500italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Roboto:400,700,300,300italic,500,100,100italic,400italic,500italic,700italic,900,900italic' rel='stylesheet' type='text/css' media="none" onload="if(media!='all')media='all'">
+  <noscript>
+    <link href='//fonts.googleapis.com/css?family=Roboto:400,700,300,300italic,500,100,100italic,400italic,500italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+  </noscript>>
   <link rel='stylesheet' type='text/css' href='assets/bundle.css'>
   <meta content='text/html, charset=utf-8' http-equiv='content-type'>
   <meta content=
@@ -21,13 +24,30 @@
         text-rendering: optimizeLegibility;
     }
     a {
-        color: #00bcd4;
+        color: #FF7300;
         text-decoration: none;
+    }
+    #noscript-warning {
+        font-family: sans-serif;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 101;
+        text-align: center;
+        font-weight: bold;
+        font-size: 120%;
+        color: #000;
+        background-color: #FF7300;
+        padding: 5px 0 5px 0;
     }
   </style>
 </head>
 <body>
-  <div id='thunder'></div>
-  <script src='assets/bundle.js'></script>
+    <div id='thunder'></div>
+    <script src='assets/bundle.js'></script>
+    <noscript>
+        <div id='noscript-warning'>This site requires JavaScript enabled</div>
+    </noscript>
 </body>
 </html>

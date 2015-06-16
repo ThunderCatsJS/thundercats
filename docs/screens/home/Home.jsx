@@ -1,12 +1,21 @@
 import React from 'react';
 import StyleSheet from 'react-style';
 import { Colors } from 'react-material/lib/style';
+
 import urls from '../../constants/urls';
+import { logoColor } from '../../shared/Colors';
+
+import Logo from '../../shared/Logo.jsx';
 
 const HomeStyles = StyleSheet.create({
   normal: {
     backgroundColor: Colors.grey.P100,
     minHeight: '100%'
+  },
+
+  logo: {
+    height: '75%',
+    width: '100%'
   },
 
   container: {
@@ -16,7 +25,7 @@ const HomeStyles = StyleSheet.create({
   },
 
   header: {
-    color: Colors.cyan.P500,
+    color: logoColor,
     fontSize: '34',
     lineHeight: '32px',
     marginBottom: 42,
@@ -36,6 +45,9 @@ export default class extends React.Component {
   render() {
     return (
       <div styles={ [HomeStyles.container] }>
+        <Logo
+          mark={ false }
+          styles={HomeStyles.logo }/>
         <header>
           <h1 styles={ [HomeStyles.header] }>ThunderCats, Ho!</h1>
         </header>
