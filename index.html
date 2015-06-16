@@ -2,83 +2,28 @@
 <html>
 <head>
   <title>ThunderCats.js</title>
-  <meta content="text/html, charset=utf-8" http-equiv="content-type">
+  <link href='//fonts.googleapis.com/css?family=Roboto:400,700,300,300italic,500,100,100italic,400italic,500italic,700italic,900,900italic' rel='stylesheet' type='text/css'>
+  <link rel='stylesheet' type='text/css' href='/assets/bundle.css'>
+  <meta content='text/html, charset=utf-8' http-equiv='content-type'>
   <meta content=
-  "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
-  name="viewport">
+  'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0'
+  name='viewport'>
+  <style>
+    html, body, #thunder {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    body {
+        font-family: RobotoDraft, 'Helvetica Neue', Helvetica, Arial;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: greyscale;
+        text-rendering: optimizeLegibility;
+    }
+  </style>
 </head>
-
 <body>
-  <div id="container">
-    <div id="background"></div>
-      <p><a href="https://circleci.com/gh/r3dm/thundercats"><img alt=
-      "Circle CI" src=
-      "https://circleci.com/gh/r3dm/thundercats.svg?style=svg"></a>
-      <a href="https://coveralls.io/r/r3dm/thundercats"><img alt=
-      "Coverage Status" src=
-      "https://coveralls.io/repos/r3dm/thundercats/badge.svg"></a> <a href=
-      "https://gemnasium.com/r3dm/thundercats"><img alt="Dependency Status"
-      src="https://gemnasium.com/r3dm/thundercats.svg"></a></p>
-
-      <p><a href="https://waffle.io/r3dm/thundercats"><img alt=
-      "Stories in Ready" src=
-      "https://badge.waffle.io/r3dm/thundercats.png?label=ready&amp;title=Ready"></a>
-      <a href=
-      "https://gitter.im/r3dm/thundercats?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge">
-      <img alt="Join the chat at https://gitter.im/r3dm/thundercats" src=
-      "https://badges.gitter.im/Join%20Chat.svg"></a></p>
-
-      <h1 id="thundercats-js">ThunderCats.js</h1>
-
-      <blockquote>
-        <p>Thundercats, Ho!</p>
-      </blockquote>
-
-      <p>A <a href="https://github.com/facebook/flux/">Flux</a>
-      architecture implementation based on <a href=
-      "https://github.com/Reactive-Extensions/RxJS">RxJS</a></p>
-
-
-      <p>The <a href="https://github.com/facebook/flux/">Flux</a>
-      architecture allows you to think of your application as an
-      unidirectional flow of data, this module aims to facilitate the use
-      of <a href=
-      "https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md">
-      RxJS Observable</a> as basis for defining the relations between the
-      different entities composing your application.</p>
-
-      <h2 id="difference-with-the-facebooks-flux">Difference with the
-      Facebooks Flux</h2>
-
-      <p>Thundercats.js shares more similarities with <a href=
-      "https://github.com/spoike/refluxjs">RefluxJS</a> than with the
-      original architecture.</p>
-
-      <ul>
-        <li>A store is an <a href=
-        "https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md">
-          RxJS Observable</a> that a view layer can listen to for state
-        </li>
-
-        <li>An action is a function and an <a href=
-        "https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md">
-          RxJS Observable</a>
-        </li>
-
-        <li>A store subscribes to an action and updates its state
-        according to the actions operations.</li>
-
-        <li>Actions dispatch themselves so no need for a central
-        dispatcher.</li>
-      </ul>
-    </div>
-    <div>
-        <h2>More to come...</h2>
-    </div>
-    <div>
-        <h2>
-            <a href="http://github.com/r3dm/thundercats">Github</a>
-        </h2>
-    </div>
+  <div id='thunder'></div>
+  <script src='/assets/bundle.js'></script>
 </body>
 </html>

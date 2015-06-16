@@ -1,8 +1,2 @@
-dist
 coverage
 lib
-docs
-examples/todomvc/node_modules
-examples/todomvc/js/bundle.js
-examples/chat/node_modules
-examples/chat/js/bundle.js
