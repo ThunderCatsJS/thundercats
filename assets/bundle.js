@@ -159,7 +159,6 @@
 	        'div',
 	        null,
 	        _react2['default'].createElement(_reactMaterial.AppBar, {
-	          onNavButtonClick: this.handleNavButtonClick.bind(this),
 	          styles: AppStyles,
 	          title: 'ThunderCats.js' }),
 	        _react2['default'].createElement(_reactMaterial.Overlay, {
@@ -30917,7 +30916,7 @@
 	  container: {
 	    margin: 'auto',
 	    maxWidth: '700px',
-	    padding: '56px 20px 0'
+	    padding: '56px 20px 20% 20px'
 	  },
 	
 	  header: {
@@ -31071,6 +31070,15 @@
 	              { href: _constantsUrls2['default'].source },
 	              'View The Source'
 	            )
+	          )
+	        ),
+	        _react2['default'].createElement(
+	          'div',
+	          null,
+	          _react2['default'].createElement(
+	            'p',
+	            null,
+	            'More to come...'
 	          )
 	        )
 	      );

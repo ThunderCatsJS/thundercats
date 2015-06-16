@@ -21,7 +21,7 @@ const HomeStyles = StyleSheet.create({
   container: {
     margin: 'auto',
     maxWidth: '700px',
-    padding: '56px 20px 0'
+    padding: '56px 20px 20% 20px'
   },
 
   header: {
@@ -104,6 +104,9 @@ export default class extends React.Component {
         </ul>
         <div>
           <p><a href={ urls.source }>View The Source</a></p>
+        </div>
+        <div>
+          <p>More to come...</p>
         </div>
       </div>
     );

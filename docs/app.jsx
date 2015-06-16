@@ -50,7 +50,6 @@ export default class extends React.Component {
     return (
       <div>
         <AppBar
-          onNavButtonClick={ ::this.handleNavButtonClick }
           styles={ AppStyles }
           title={ 'ThunderCats.js'} />
         <Overlay
