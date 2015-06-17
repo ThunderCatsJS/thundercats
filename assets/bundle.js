@@ -151,6 +151,14 @@
 	      });
 	    }
 	  }, {
+	    key: 'goToExternal',
+	    value: function goToExternal(url) {
+	      var location = typeof window !== 'undefined' ? window.location : {};
+	      return function () {
+	        location.href = url;
+	      };
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      var showSideNavigation = this.state.showSideNavigation;
@@ -159,6 +167,7 @@
 	        'div',
 	        null,
 	        _react2['default'].createElement(_reactMaterial.AppBar, {
+	          onNavButtonClick: this.handleNavButtonClick.bind(this),
 	          styles: AppStyles,
 	          title: 'ThunderCats.js' }),
 	        _react2['default'].createElement(_reactMaterial.Overlay, {
@@ -173,39 +182,23 @@
 	            null,
 	            _react2['default'].createElement(
 	              _reactMaterial.ListItem,
-	              null,
-	              _react2['default'].createElement(
-	                'a',
-	                { href: _constantsUrlsJson2['default'].rxjs },
-	                'RxJS'
-	              )
+	              { onClick: this.goToExternal(_constantsUrlsJson2['default'].rxjs) },
+	              'RxJS'
 	            ),
 	            _react2['default'].createElement(
 	              _reactMaterial.ListItem,
-	              null,
-	              _react2['default'].createElement(
-	                'a',
-	                { href: _constantsUrlsJson2['default'].react },
-	                'React.js'
-	              )
+	              { onClick: this.goToExternal(_constantsUrlsJson2['default'].react) },
+	              'React.js'
 	            ),
 	            _react2['default'].createElement(
 	              _reactMaterial.ListItem,
-	              null,
-	              _react2['default'].createElement(
-	                'a',
-	                { href: _constantsUrlsJson2['default'].flux },
-	                'Flux'
-	              )
+	              { onClick: this.goToExternal(_constantsUrlsJson2['default'].flux) },
+	              'Flux'
 	            ),
 	            _react2['default'].createElement(
 	              _reactMaterial.ListItem,
-	              null,
-	              _react2['default'].createElement(
-	                'a',
-	                { href: _constantsUrlsJson2['default'].source },
-	                'Source'
-	              )
+	              { onClick: this.goToExternal(_constantsUrlsJson2['default'].source) },
+	              'Source'
 	            )
 	          )
 	        )

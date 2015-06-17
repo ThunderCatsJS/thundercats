@@ -42,6 +42,15 @@ export default class extends React.Component {
     });
   }
 
+  goToExternal(url) {
+    const location = typeof window !== 'undefined' ?
+      window.location :
+      { };
+    return () => {
+      location.href = url;
+    };
+  }
+
   render() {
     const {
       showSideNavigation
@@ -50,6 +59,7 @@ export default class extends React.Component {
     return (
       <div>
         <AppBar
+          onNavButtonClick={ ::this.handleNavButtonClick }
           styles={ AppStyles }
           title={ 'ThunderCats.js'} />
         <Overlay
@@ -58,17 +68,17 @@ export default class extends React.Component {
         { this.props.children || 'Welcome Thunderians' }
         <SideNavigation show={ showSideNavigation }>
           <List>
-            <ListItem>
-              <a href={ urls.rxjs }>RxJS</a>
+            <ListItem onClick={ this.goToExternal(urls.rxjs) }>
+              RxJS
             </ListItem>
-            <ListItem>
-              <a href={ urls.react }>React.js</a>
+            <ListItem onClick={ this.goToExternal(urls.react) }>
+              React.js
             </ListItem>
-            <ListItem>
-              <a href={ urls.flux }>Flux</a>
+            <ListItem onClick={ this.goToExternal(urls.flux) }>
+              Flux
             </ListItem>
-            <ListItem>
-              <a href={ urls.source }>Source</a>
+            <ListItem onClick={ this.goToExternal(urls.source) }>
+              Source
             </ListItem>
           </List>
         </SideNavigation>
