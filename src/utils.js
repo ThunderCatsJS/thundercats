@@ -43,3 +43,15 @@ export function isObservable(observable) {
 export function isPromise(promise) {
   return promise && typeof promise.then === 'function';
 }
+
+export function isStore(obj) {
+  return !!(
+    obj.createRegistrar &&
+    obj.fromMany &&
+    obj.replacer &&
+    obj.setter &&
+    obj.transformer &&
+    obj.prototype &&
+    obj.prototype.register
+  );
+}

@@ -53,13 +53,6 @@ describe('Cat', function() {
       cat.stores.size.should.equal(1);
     });
 
-    it('should throw if given non ThunderCats Store/Actions', function() {
-      let cat = new CatApp();
-      expect(() => {
-        cat.register('not the momma', cat);
-      }).to.throw(/Attempted to add a class that is not/);
-    });
-
     it('should throw if actions/store does not have a displayName', function() {
       class NoName extends Actions {
         constructor() {

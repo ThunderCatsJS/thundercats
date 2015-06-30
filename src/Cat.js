@@ -3,46 +3,26 @@ import invariant from 'invariant';
 import warning from 'warning';
 import debugFactory from 'debug';
 
-import Store from './Store';
-import Actions from './Actions';
 import Translate from './Translate';
-import { getName, getNameOrNull } from './utils';
+import { getName, getNameOrNull, isStore } from './utils';
 
 const debug = debugFactory('thundercats:cat');
 
-export const Register = {
-  store(stores, Store, args) {
-    const name = getName(Store);
-    if (stores.has(name.toLowerCase())) {
-      return warning(
-        false,
-        'Attempted to add a Store class, %s, that already exists in the Cat',
-        name
-      );
-    }
-    const store =
-      new (Function.prototype.bind.apply(Store, args));
-    debug('registering store %s', name);
-    stores.set(name.toLowerCase(), store);
-    return store;
-  },
-
-  actions(actionsMap, Actions, args) {
-    let name = getName(Actions);
-    if (actionsMap.has(name.toLowerCase())) {
-      return warning(
-        false,
-        'Attempted to add an Actions class, %s, that already exists in the Cat',
-        name
-      );
-    }
-    let _actions =
-      new (Function.prototype.bind.apply(Actions, args));
-    debug('registering actions %s', name);
-    actionsMap.set(name.toLowerCase(), _actions);
-    return _actions;
+export function Register(map, Constructor, constructorArgs) {
+  const name = getName(Constructor);
+  if (map.has(name.toLowerCase())) {
+    return warning(
+      false,
+      'Attempted to add a class, %s, that already exists',
+      name
+    );
   }
-};
+  const instance =
+    new (Function.prototype.bind.apply(Constructor, constructorArgs));
+  debug('registering store %s', name);
+  map.set(name.toLowerCase(), instance);
+  return map;
+}
 
 export default class Cat {
   constructor() {
@@ -51,12 +31,6 @@ export default class Cat {
   }
 
   register(StoreOrActions) {
-    invariant(
-      Store.isPrototypeOf(StoreOrActions) ||
-      Actions.isPrototypeOf(StoreOrActions),
-      'Attempted to add a class that is not a ThunderCats Store or Action'
-    );
-
     let name = getNameOrNull(StoreOrActions);
 
     invariant(
@@ -64,12 +38,11 @@ export default class Cat {
       'Attempted to add a Store/Actions that does not have a displayName'
     );
 
-    let isStore = Store.isPrototypeOf(StoreOrActions);
-    var args = [].slice.call(arguments);
-
-    return isStore ?
-      Register.store(this.stores, StoreOrActions, args) :
-      Register.actions(this.actions, StoreOrActions, args);
+    return Register(
+      isStore(StoreOrActions) ? this.stores : this.actions,
+      StoreOrActions,
+      [...arguments]
+    );
   }
 
   getStore(store) {
