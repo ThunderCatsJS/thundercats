@@ -1,17 +1,8 @@
 import invariant from 'invariant';
 
-export default {
-  areObservable,
-  createObjectValidator,
-  getName,
-  getNameOrNull,
-  isObservable,
-  isPromise
-};
+export const __DEV__ = process.env.NODE_ENV !== 'production';
 
-const __DEV__ = process.env.NODE_ENV !== 'production';
-
-function areObservable(observables) {
+export function areObservable(observables) {
   return Array.isArray(observables) &&
     observables.length > 0 &&
     observables.reduce(function(bool, observable) {
@@ -19,7 +10,7 @@ function areObservable(observables) {
     }, true);
 }
 
-function createObjectValidator(message) {
+export function createObjectValidator(message) {
   return obj => {
     /* istanbul ignore else */
     if (__DEV__) {
@@ -32,11 +23,11 @@ function createObjectValidator(message) {
   };
 }
 
-function getName(comp) {
+export function getName(comp) {
   return '' + (getNameOrNull(comp) || 'Anonymous');
 }
 
-function getNameOrNull(comp) {
+export function getNameOrNull(comp) {
   return (
     (comp && comp.displayName) ||
     (comp.constructor &&
@@ -45,10 +36,10 @@ function getNameOrNull(comp) {
   );
 }
 
-function isObservable(observable) {
+export function isObservable(observable) {
   return observable && typeof observable.subscribe === 'function';
 }
 
-function isPromise(promise) {
+export function isPromise(promise) {
   return promise && typeof promise.then === 'function';
 }
