@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-expressions */
-// make sure window and document is added before any test is run
 import Rx from 'rx';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
@@ -13,54 +12,53 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 describe('Actions', function() {
-  describe('Class', function() {
+  describe('Factory', function() {
     let catActions;
 
     beforeEach(function() {
-      class CatActions extends Actions {
-        constructor() {
-          super([
-            'shortCut'
-          ]);
-        }
-
+      const CatActions = Actions({
+        displayName: 'catActions',
+        shortcut: null,
         getInBox(value) {
           return {
             author: value,
             result: 'disobey'
           };
-        }
+        },
         passThrough(value) {
           return value;
-        }
+        },
         errorMap() {
           throw new Error('test');
         }
-      }
-      catActions = new CatActions();
+      });
+      catActions = CatActions();
+    });
+    it('should add displayName as property, not observable', () => {
+      catActions.displayName.should.equal('catActions');
     });
 
     it('should be extend-able', function() {
-      catActions.should.be.an.instanceOf(Actions);
       catActions.getInBox.should.exist;
+      catActions.getInBox.subscribe.should.exist;
     });
 
     it('should produce observables for defined methods', function() {
       catActions.getInBox.subscribe.should.be.a('function');
     });
 
-    it(
-      'should produce observables for array of strings passed to super',
+    it('should produce observables for null props passed to factory',
       function() {
-        catActions.shortCut.subscribe.should.be.a('function');
+        catActions.shortcut.subscribe.should.be.a('function');
       }
     );
 
-    it('should respect original map function', function() {
+    it('should respect original map function', function(done) {
       catActions.getInBox.subscribe(function(value) {
         value.should.be.an('object');
         value.author.should.equal('human');
         value.result.should.equal('disobey');
+        done();
       });
       catActions.getInBox('human');
     });
@@ -68,7 +66,7 @@ describe('Actions', function() {
     it(
       'should notify passed value to subscribed observer when called',
       function(done) {
-        catActions.passThrough.first().subscribe(function (val) {
+        catActions.passThrough.first().subscribe(function(val) {
           val.should.equal(3);
           done();
         });
@@ -76,28 +74,28 @@ describe('Actions', function() {
       }
     );
 
-    it(
-      'should throw an error when an error is thrown in the map',
-      function() {
-        expect(function() {
-          catActions.errorMap();
-        }).to.throw();
-      }
-    );
+    it('should call onError when map throws', function(done) {
+      catActions.errorMap.subscribe(
+        () => {},
+        err => {
+          expect(err).to.be.an.instanceOf(Error);
+          done();
+        },
+        done
+      );
+      catActions.errorMap();
+    });
   });
 
   describe('waitFor', function() {
     let catActions, observable1, observable2;
 
     beforeEach(function() {
-      class CatActions extends Actions {
-        constructor() {
-          super();
-        }
+      const CatActions = Actions({
         tryWaitFor(val) {
           return val;
         }
-      }
+      });
       observable1 = new Rx.BehaviorSubject('jaga');
       observable2 = new Rx.BehaviorSubject('lion-o');
       catActions = new CatActions();
@@ -166,15 +164,12 @@ describe('Actions', function() {
     let catActions;
 
     beforeEach(function() {
-      class CatActions extends Actions {
-        constructor() {
-          super();
-        }
+      const CatActions = Actions({
         doThis(val) {
           return val;
         }
-      }
-      catActions = new CatActions();
+      });
+      catActions = CatActions();
       spy = sinon.spy();
     });
 
@@ -200,15 +195,12 @@ describe('Actions', function() {
 
     let catActions, disposable;
     beforeEach(function() {
-      class CatActions extends Actions {
-        constructor() {
-          super();
-        }
+      const CatActions = Actions({
         doThis(val) {
           return val;
         }
-      }
-      catActions = new CatActions();
+      });
+      catActions = CatActions();
     });
 
     it('should return false if the action has no observers', function() {

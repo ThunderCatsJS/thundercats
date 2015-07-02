@@ -3,7 +3,6 @@ import uuid from 'node-uuid';
 import invariant from 'invariant';
 import debugFactory from 'debug';
 import assign from 'object.assign';
-import Actions, { getActionNames } from './Actions';
 import {
   areObservable,
   createObjectValidator,
@@ -33,39 +32,23 @@ function addOperation(observable, validateItem, map) {
     .map(map);
 }
 
-export const Register = {
-  observable(obs, actionsArr, storeName) {
-    actionsArr = actionsArr.slice();
-    invariant(
-      isObservable(obs),
-      '%s should register observables but was given %s',
-      storeName,
-      obs
-    );
+export function registerObservable(obs, actionsArr, storeName) {
+  actionsArr = actionsArr.slice();
+  invariant(
+    isObservable(obs),
+    '%s should register observables but was given %s',
+    storeName,
+    obs
+  );
 
-    debug(
-      '%s registering action',
-      storeName
-    );
+  debug(
+    '%s registering action',
+    storeName
+  );
 
-    actionsArr.push(obs);
-    return actionsArr;
-  },
-
-  actions(actionsInst, actionsArr, storeName) {
-    let actionNames = getActionNames(actionsInst);
-
-    debug(
-      '%s register actions class %s',
-      storeName,
-      getName(actionsInst)
-    );
-
-    return actionNames.reduce((actionsArr, name) => {
-      return Register.observable(actionsInst[name], actionsArr, storeName);
-    }, actionsArr);
-  }
-};
+  actionsArr.push(obs);
+  return actionsArr;
+}
 
 export const Optimism = {
   confirm(uid, history) {
@@ -155,12 +138,12 @@ export default class Store extends Rx.Observable {
 
   static createRegistrar(store) {
     function register(observable) {
-      store.actions = Register.observable(
+      store.actions = registerObservable(
         observable,
         store.actions,
         getName(store)
       );
-      return store.actions;
+      return store;
     }
     return register;
   }
@@ -205,21 +188,9 @@ export default class Store extends Rx.Observable {
     );
   }
 
-  register(observableOrActionsInstance) {
-    if (observableOrActionsInstance instanceof Actions) {
-      this.actions = Register.actions(
-        observableOrActionsInstance,
-        this.actions,
-        getName(this)
-      );
-      return this.actions;
-    }
-    this.actions = Register.observable(
-      observableOrActionsInstance,
-      this.actions,
-      getName(this)
-    );
-    return this.actions;
+  register(observable) {
+    this.actions = registerObservable(observable, this.actions, getName(this));
+    return this;
   }
 
   hasObservers() {

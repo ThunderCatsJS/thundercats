@@ -32,6 +32,9 @@ export function getNameOrNull(comp) {
     (comp && comp.displayName) ||
     (comp.constructor &&
     comp.constructor.displayName) ||
+    (comp.fixed &&
+    comp.fixed.refs &&
+    comp.fixed.refs.displayName) ||
     null
   );
 }

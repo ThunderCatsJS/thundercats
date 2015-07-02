@@ -1,6 +1,5 @@
 import Rx from 'rx';
-import invariant from 'invariant';
-import assign from 'object.assign';
+import stampit from 'stampit';
 import debugFactory from 'debug';
 
 import waitFor from './waitFor';
@@ -11,121 +10,86 @@ const protectedProperties = [
   'constructor'
 ];
 
-export function getActionNames(ctx) {
-  return Object.getOwnPropertyNames(ctx.constructor.prototype)
+export function getActionDef(ctx) {
+  return Object.getOwnPropertyNames(ctx)
     .filter(name => {
       return (
         protectedProperties.indexOf(name) === -1 &&
-        name.indexOf('_') === -1 &&
-        typeof ctx[name] === 'function'
+        name.indexOf('_') === -1
       );
+    })
+    .map(name => ({ name: name, map: ctx[name] }))
+    .map(def => {
+      if (typeof def.map !== 'function') {
+        def.map = Rx.helpers.identity;
+      }
+      return def;
     });
 }
 
-export const ActionCreator = {
-  create(name, map) {
-    let observers = [];
-    let actionStart = new Rx.Subject();
 
-    function action(value) {
+export function create({ name, map }) {
+  let observers = [];
+  let actionStart = new Rx.Subject();
+
+  function action(value) {
+    let err = null;
+    try {
       value = map(value);
-
-      actionStart.onNext(value);
-      observers.forEach((observer) => {
-        observer.onNext(value);
-      });
-
-      return value;
+    } catch(e) {
+      err = e;
     }
 
-    action.displayName = name;
-    action.observers = observers;
-    assign(action, Rx.Observable.prototype, Rx.Subject.prototype);
-
-    action.hasObservers = function hasObservers() {
-      return observers.length > 0 ||
-        actionStart.hasObservers();
-    };
-
-    action.waitFor = function() {
-      return actionStart
-        .flatMap(payload => waitFor(...arguments).map(() => payload));
-    };
-
-    Rx.Observable.call(action, observer => {
-      observers.push(observer);
-      return new Rx.Disposable(() => {
-        observers.splice(observers.indexOf(observer), 1);
-      });
+    actionStart.onNext(value);
+    observers.forEach((observer) => {
+      if (err) {
+        return observer.onError(err);
+      }
+      observer.onNext(value);
     });
 
-    debug('action %s created', action.displayName);
-    return action;
-  },
+    return value;
+  }
 
-  createManyOn(ctx, actions) {
-    invariant(
-      Array.isArray(actions),
-      'createActions requires an array but got %s',
-      actions
-    );
+  action.displayName = name;
+  action.observers = observers;
+  stampit.mixin(action, Rx.Observable.prototype);
 
-    let actionsBag = actions.reduce(function(ctx, action) {
-      invariant(
-        action &&
-        typeof action === 'object',
-        'createActions requires items in array to be objects but ' +
-        'was supplied with %s',
-        action
-      );
+  action.hasObservers = function hasObservers() {
+    return observers.length > 0 ||
+      actionStart.hasObservers();
+  };
 
-      invariant(
-        typeof action.name === 'string',
-        'createActions requires objects to have a name key, but got %s',
-        action.name
-      );
+  action.waitFor = function() {
+    return actionStart
+      .flatMap(payload => waitFor(...arguments).map(() => payload));
+  };
 
-      /* istanbul ignore else */
-      if (action.map) {
-        invariant(
-          typeof action.map === 'function',
-          'createActions requires objects with map field to be a function ' +
-          'but was given %s',
-          action.map
-        );
-      }
+  Rx.Observable.call(action, observer => {
+    observers.push(observer);
+    return new Rx.Disposable(() => {
+      observers.splice(observers.indexOf(observer), 1);
+    });
+  });
 
-      ctx[action.name] = ActionCreator.create(action.name, action.map);
+  debug('action %s created', action.displayName);
+  return action;
+}
+
+export function createMany() {
+  return this
+    .map(create)
+    .reduce((ctx, action) => {
+      ctx[action.displayName] = action;
       return ctx;
     }, {});
+}
 
-    return assign(ctx, actionsBag);
-  }
-};
-
-export default class Actions {
-  constructor(actionNames) {
-    if (actionNames) {
-      invariant(
-        Array.isArray(actionNames) &&
-        actionNames.every(actionName => typeof actionName === 'string'),
-        '%s should get an array of strings but got %s',
-        actionNames
-      );
-    }
-
-    let actionDefinitions = getActionNames(this)
-      .map(name => ({ name: name, map: this[name] }));
-
-    if (actionNames) {
-      actionDefinitions = actionDefinitions.concat(
-        actionNames.map(name => ({ name, map: Rx.helpers.identity }))
-      );
-    }
-
-    // istanbul ignore else
-    if (actionDefinitions && actionDefinitions.length) {
-      ActionCreator.createManyOn(this, actionDefinitions);
-    }
-  }
+export default function Actions(obj = {}) {
+  return stampit()
+    .refs({ displayName: obj.displayName })
+    .init(({ instance }) => {
+      const actionMethods = getActionDef(obj)::createMany();
+      return stampit.mixin(instance, actionMethods);
+    });
 }

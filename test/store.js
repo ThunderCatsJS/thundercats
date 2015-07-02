@@ -15,10 +15,11 @@ chai.use(sinonChai);
 
 describe('Store', function() {
   describe('class', function() {
-    let store, CatStore, catActions;
+    let store, CatStore, CatActions, catActions;
 
     beforeEach(function() {
-      catActions = createActions();
+
+      catActions = new Rx.Subject();
       class CatStore extends Store {
         constructor() {
           super();
@@ -45,14 +46,14 @@ describe('Store', function() {
       let spy = sinon.spy();
       store.subscribe.should.be.a('function');
       store.subscribe(spy);
-      catActions.doAction({ replace: { name: 'purr' }});
+      catActions.onNext({ replace: { name: 'purr' }});
       spy.should.have.been.calledWith({ name: 'purr' });
     });
 
     it('should replacer built in operations onError handler', function() {
       expect(function() {
         store.subscribe(function() { });
-        catActions.doAction.onError(new Error('Do not cross streams'));
+        catActions.onError();
       }).to.not.throw();
     });
 
@@ -60,7 +61,7 @@ describe('Store', function() {
       expect(function() {
         let spy = sinon.spy();
         store.subscribe(spy);
-        catActions.doAction.onCompleted("I ain't got nothing left");
+        catActions.onCompleted();
       }).to.throw(/ops completed/);
     });
   });
@@ -68,32 +69,6 @@ describe('Store', function() {
   describe('operations', function() {
 
     describe('register', function() {
-
-      it('should register actions class instance', function() {
-        let fn = function() {
-          class CatActions extends Actions {
-            constructor() {
-              super();
-            }
-            doAction() {
-            }
-            doAnother() {
-            }
-          }
-          let catActions = new CatActions();
-          class CatStore extends Store {
-            constructor() {
-              super();
-              this.value = {};
-              this.register(catActions);
-            }
-          }
-          let store = new CatStore();
-          store.subscribe(function() { });
-        };
-        expect(fn).not.to.throw();
-      });
-
       it('should throw if no actions are registered', function() {
           expect(function() {
             class ExtendStore extends Store {
@@ -125,7 +100,7 @@ describe('Store', function() {
 
       it('should throw if an action errors', function() {
         let fn = function() {
-          let catActions = createActions();
+          let catActions = new Rx.Subject();
           class ExtendStore extends Store {
             constructor() {
               super();
@@ -135,13 +110,13 @@ describe('Store', function() {
           }
           let store = new ExtendStore();
           store.subscribe(function() { });
-          catActions.doAction.onError('catastrophy');
+          catActions.onError('catastrophy');
         };
         expect(fn).to.throw(/catastrophy/);
       });
 
       it('should complain when action completes', function() {
-        let catActions = createActions();
+        let catActions = new Rx.Subject();
         class ExtendStore extends Store {
           constructor() {
             super();
@@ -152,7 +127,7 @@ describe('Store', function() {
         let store = new ExtendStore();
         let onCompletedSpy = sinon.spy(store, 'opsOnCompleted');
         store.subscribe(function() {});
-        catActions.doAction.onCompleted();
+        catActions.onCompleted();
         onCompletedSpy.should.have.been.calledOnce;
       });
     });
@@ -358,7 +333,7 @@ describe('Store', function() {
       let store;
 
       before(function() {
-        catActions = createActions();
+        catActions = new Rx.Subject();
         class CatStore extends Store {
           constructor() {
             super();
@@ -378,20 +353,20 @@ describe('Store', function() {
       );
 
       it('should notify observers with the new value', function() {
-        catActions.doAction.onNext({ replace: newValue });
+        catActions.onNext({ replace: newValue });
         spy.should.have.been.calledWith(newValue);
         spy.should.have.been.calledTwice;
       });
 
       it('should not throw if value is null', function() {
         expect(() => {
-          catActions.doAction({ replace: null });
+          catActions.onNext({ replace: null });
         }).to.not.throw();
       });
 
       it('should throw if value is not an object', function() {
         expect(() => {
-          catActions.doAction({ replace: 'not the momma' });
+          catActions.onNext({ replace: 'not the momma' });
         }).to.throw(/invalid operation/);
       });
     });
@@ -405,7 +380,7 @@ describe('Store', function() {
       let store;
 
       before(function() {
-        catActions = createActions();
+        catActions = new Rx.Subject();
         class CatStore extends Store {
           constructor() {
             super();
@@ -421,7 +396,7 @@ describe('Store', function() {
         spy.should.have.not.been.calledWith(
           sinon.match({ hello: 'world', foo: 'bar' })
         );
-        catActions.doAction({ set: newValue });
+        catActions.onNext({ set: newValue });
         spy.lastCall.should.have.been.calledWith(
           sinon.match({ hello: 'world', foo: 'bar' })
         );
@@ -429,7 +404,7 @@ describe('Store', function() {
 
       it('should not throw if set is null', function() {
         expect(() => {
-          catActions.doAction({
+          catActions.onNext({
             set: null
           });
         }).to.not.throw();
@@ -437,7 +412,7 @@ describe('Store', function() {
 
       it('should throw if set is not an object or null', function() {
         expect(() => {
-          catActions.doAction({
+          catActions.onNext({
             set: 'yo yo yo'
           });
         }).to.throw(/invalid operation/);
@@ -454,7 +429,7 @@ describe('Store', function() {
       let store;
 
       before(function() {
-        catActions = createActions();
+        catActions = new Rx.Subject();
         class CatStore extends Store {
           constructor() {
             super();
@@ -478,7 +453,7 @@ describe('Store', function() {
         'transform',
         function() {
           spy.should.have.not.been.calledWith(newValue);
-          catActions.doAction({
+          catActions.onNext({
             transform: function(val) {
               val.should.equal(value);
               return newValue;
@@ -494,7 +469,7 @@ describe('Store', function() {
 
       it('should throw if not a function', function() {
         expect(() => {
-          catActions.doAction({ transform: 'not the momma' });
+          catActions.onNext({ transform: 'not the momma' });
         }).to.throw(/invalid operation/);
       });
     });
@@ -511,7 +486,7 @@ describe('Store', function() {
       before(function() {
         spy = sinon.spy();
         defer = Q.defer();
-        catActions = createActions();
+        catActions = new Rx.Subject();
         class CatStore extends Store {
           constructor() {
             super();
@@ -528,7 +503,7 @@ describe('Store', function() {
         'should register a new entry in store history with optimistic promise',
         function() {
           store.history.size.should.equal(0);
-          catActions.doAction({
+          catActions.onNext({
             replace: newValue,
             optimistic: defer.promise
           });
@@ -538,7 +513,7 @@ describe('Store', function() {
 
       it('should respect previous operations', function() {
         let defer2 = new Rx.Subject();
-        catActions.doAction({
+        catActions.onNext({
           replace: {},
           optimistic: defer2
         });
@@ -567,7 +542,7 @@ describe('Store', function() {
       before(function() {
         spy = sinon.spy();
         defer = Q.defer();
-        catActions = createActions();
+        catActions = new Rx.Subject();
         class CatStore extends Store {
           constructor() {
             super();
@@ -620,7 +595,7 @@ describe('Store', function() {
         let store;
 
         before(function() {
-          catActions = createActions();
+          catActions = new Rx.Subject();
           class CatStore extends Store {
             constructor() {
               super();
@@ -631,7 +606,7 @@ describe('Store', function() {
           store = new CatStore();
           store.subscribe(spy);
 
-          catActions.doAction({
+          catActions.onNext({
             transform: function (arr) {
               return arr.concat('foo');
             },
@@ -651,7 +626,7 @@ describe('Store', function() {
           'should notify observers with the transformed value ' +
           'after the second operation has been applied',
           function() {
-            catActions.doAction({
+            catActions.onNext({
               transform: function (arr) {
                 return arr.concat('bar');
               },
@@ -702,7 +677,7 @@ describe('Store', function() {
       class CatStore extends Store {
         constructor() {
           super();
-          this.register(catActions);
+          this.register(catActions.doAction);
         }
       }
       store = new CatStore();
@@ -746,7 +721,7 @@ describe('Store', function() {
       class CatStore extends Store {
         constructor() {
           super();
-          this.register(catActions);
+          this.register(catActions.doAction);
           this.value = { cats: 'meow' };
         }
       }
@@ -766,7 +741,7 @@ describe('Store', function() {
       class CatStore extends Store {
         constructor() {
           super();
-          this.register(catActions);
+          this.register(catActions.doAction);
           this.value = null;
         }
       }
@@ -817,15 +792,11 @@ describe('Store', function() {
 
 function createActions(spy) {
   spy = spy || function(val) { return val; };
-  class CatActions extends Actions {
-    constructor() {
-      super();
-    }
-
+  return Actions({
+    displayName: 'catActions',
     doAction(val) {
       spy(val);
       return val;
     }
-  }
-  return new CatActions();
+  })();
 }

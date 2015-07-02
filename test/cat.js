@@ -144,7 +144,7 @@ describe('Cat', function() {
     it('should return a Actions if it exists', function() {
       let catActions = cat.getActions('CatActions');
       expect(catActions).to.exist;
-      catActions.should.be.an.instanceOf(Actions);
+      catActions.doAction.should.exist;
     });
 
     it('should return undefined if Actions does not exits', function() {
