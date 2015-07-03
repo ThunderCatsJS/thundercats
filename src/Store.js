@@ -1,8 +1,14 @@
-import Rx from 'rx';
 import uuid from 'node-uuid';
+import stampit, { assign } from 'stampit';
+import { Observable, Disposable } from 'rx';
 import invariant from 'invariant';
 import debugFactory from 'debug';
-import assign from 'object.assign';
+
+import {
+  mergeChainNonFunctions,
+  mixinChainFunctions,
+} from 'supermixer';
+
 import {
   areObservable,
   createObjectValidator,
@@ -32,7 +38,7 @@ function addOperation(observable, validateItem, map) {
     .map(map);
 }
 
-export function registerObservable(obs, actionsArr, storeName) {
+function registerObservable(obs, actionsArr, storeName) {
   actionsArr = actionsArr.slice();
   invariant(
     isObservable(obs),
@@ -87,7 +93,7 @@ export const Optimism = {
   }
 };
 
-export function applyOperation(oldValue, operation) {
+function applyOperation(oldValue, operation) {
   const { replace, transform, set } = operation;
   if (replace) {
     return replace;
@@ -100,7 +106,7 @@ export function applyOperation(oldValue, operation) {
   }
 }
 
-export function notifyObservers(value, observers) {
+function notifyObservers(value, observers) {
   debug('starting notify cycle');
   observers.forEach((observer, uid) => {
     debug('notifying %s', uid);
@@ -108,14 +114,14 @@ export function notifyObservers(value, observers) {
   });
 }
 
-export function dispose(subscription, history) {
+function dispose(subscription) {
   if (subscription) {
     subscription.dispose();
   }
   return new Map();
 }
 
-export function checkId(id, history) {
+function checkId(id, history) {
   invariant(
     history.has(id),
     'an unknown operation id was used that is not within its history.' +
@@ -123,79 +129,19 @@ export function checkId(id, history) {
   );
 }
 
-
-export default class Store extends Rx.Observable {
-
-  constructor() {
-    super(Store.prototype._subscribe);
-
-    this.value = {};
-    this._operationsSubscription = null;
-    this.actions = [];
-    this.observers = new Map();
-    this.history = new Map();
-  }
-
-  static createRegistrar(store) {
-    function register(observable) {
-      store.actions = registerObservable(
-        observable,
-        store.actions,
-        getName(store)
-      );
-      return store;
-    }
-    return register;
-  }
-
-  static fromMany() {
-    return Rx.Observable.from(arguments)
-      .tap(validateObservable)
-      .toArray()
-      .flatMap(observables => Rx.Observable.merge(observables));
-  }
-
-  static replacer(observable) {
-    return addOperation(
-      observable,
-      createObjectValidator('setter should receive objects but was given %s'),
-      replace => ({ replace })
-    );
-  }
-
-  static setter(observable) {
-    return addOperation(
-      observable,
-      createObjectValidator('setter should receive objects but was given %s'),
-      set => ({ set })
-    );
-  }
-
-  static transformer(observable) {
-    return addOperation(
-      observable,
-      fun => {
-        /* istanbul ignore else */
-        if (__DEV__) {
-          invariant(
-            typeof fun === 'function',
-            'transform should receive functions but was given %s',
-            fun
-          );
-        }
-      },
-      transform => ({ transform })
-    );
-  }
-
+const methods = {
   register(observable) {
-    this.actions = registerObservable(observable, this.actions, getName(this));
+    this.actions = registerObservable(
+      observable,
+      this.actions,
+      getName(this)
+    );
     return this;
-  }
+  },
 
   hasObservers() {
     return !!this.observers.size;
-  }
+  },
 
   _init() {
     debug('initiating %s', getName(this));
@@ -219,7 +165,7 @@ export default class Store extends Rx.Observable {
       getName(this)
     );
 
-    this._operationsSubscription = Rx.Observable.merge(operations)
+    this._operationsSubscription = Observable.merge(operations)
       .filter(operation => typeof operation.replace === 'object' ?
         !!operation.replace :
         true
@@ -249,7 +195,8 @@ export default class Store extends Rx.Observable {
           invariant(
             isPromise(operation.optimistic) ||
             isObservable(operation.optimistic),
-            'invalid operation, optimistic should be a promise or observable,' +
+            'invalid operation, optimistic should be a ' +
+            'promise or observable,' +
             'given : %s',
             operation.optimistic
           );
@@ -260,7 +207,7 @@ export default class Store extends Rx.Observable {
         this.opsOnError.bind(this),
         this.opsOnCompleted.bind(this)
       );
-  }
+  },
 
   _opsOnNext(operation) {
     const ops = assign({}, operation);
@@ -279,7 +226,7 @@ export default class Store extends Rx.Observable {
 
     if ('optimistic' in ops) {
       const optimisticObs = isPromise(ops.optimistic) ?
-        Rx.Observable.fromPromise(ops.optimistic) :
+        Observable.fromPromise(ops.optimistic) :
         ops.optimistic;
 
       optimisticObs.firstOrDefault().subscribe(
@@ -300,15 +247,17 @@ export default class Store extends Rx.Observable {
     } else {
       Optimism.confirm(uid, this.history);
     }
-  }
+  },
 
   opsOnError(err) {
-    throw new Error('An error has occurred in the operations observer: ' + err);
-  }
+    throw new Error(
+      'An error has occurred in the operations observer: ' + err
+    );
+  },
 
   opsOnCompleted() {
     console.warn('operations observable has terminated without error');
-  }
+  },
 
   _subscribe(observer) {
 
@@ -324,7 +273,7 @@ export default class Store extends Rx.Observable {
 
     observer.onNext(this.value);
 
-    return Rx.Disposable.create(() => {
+    return Disposable.create(() => {
       debug('Disposing obserable %s', uid);
       this.observers.delete(uid);
       /* istanbul ignore else */
@@ -333,11 +282,11 @@ export default class Store extends Rx.Observable {
         this.history = dispose(this._operationsSubscription, this.history);
       }
     });
-  }
+  },
 
   serialize() {
     return this.value ? JSON.stringify(this.value) : '';
-  }
+  },
 
   deserialize(stringyData) {
     let data = JSON.parse(stringyData);
@@ -350,4 +299,86 @@ export default class Store extends Rx.Observable {
     this.value = data;
     return this.value;
   }
+};
+
+const staticMethods = {
+  createRegistrar(store) {
+    function register(observable) {
+      store.actions = registerObservable(
+        observable,
+        store.actions,
+        getName(store)
+      );
+      return store;
+    }
+    return register;
+  },
+
+  fromMany() {
+    return Observable.from(arguments)
+      .tap(validateObservable)
+      .toArray()
+      .flatMap(observables => Observable.merge(observables));
+  },
+
+  replacer(observable) {
+    return addOperation(
+      observable,
+      createObjectValidator(
+        'setter should receive objects but was given %s'
+      ),
+      replace => ({ replace })
+    );
+  },
+
+  setter(observable) {
+    return addOperation(
+      observable,
+      createObjectValidator(
+        'setter should receive objects but was given %s'
+      ),
+      set => ({ set })
+    );
+  },
+
+  transformer(observable) {
+    return addOperation(
+      observable,
+      fun => {
+        /* istanbul ignore else */
+        if (__DEV__) {
+          invariant(
+            typeof fun === 'function',
+            'transform should receive functions but was given %s',
+            fun
+          );
+        }
+      },
+      transform => ({ transform })
+    );
+  }
+};
+
+export default function Store(value = {}) {
+  const stamp = stampit();
+  stamp.fixed.refs = stamp.fixed.state = mergeChainNonFunctions(
+    stamp.fixed.refs,
+    Observable.prototype
+  );
+  assign(stamp, assign(stamp.fixed.static, Observable));
+
+  mixinChainFunctions(stamp.fixed.methods, Observable.prototype);
+  return stamp
+    .init(({ instance }) => Observable.call(instance, methods._subscribe))
+    .refs({
+      value,
+      _operationsSubscription: null,
+      actions: [],
+      observers: new Map(),
+      history: new Map()
+    })
+    .static(staticMethods)
+    .methods(methods);
 }
+
+assign(Store, staticMethods);

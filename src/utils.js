@@ -1,5 +1,7 @@
+import { helpers } from 'rx';
 import invariant from 'invariant';
 
+export const { isFunction } = helpers;
 export const __DEV__ = process.env.NODE_ENV !== 'production';
 
 export function areObservable(observables) {
@@ -49,12 +51,10 @@ export function isPromise(promise) {
 
 export function isStore(obj) {
   return !!(
-    obj.createRegistrar &&
-    obj.fromMany &&
-    obj.replacer &&
-    obj.setter &&
-    obj.transformer &&
-    obj.prototype &&
-    obj.prototype.register
+    isFunction(obj.createRegistrar) &&
+    isFunction(obj.fromMany) &&
+    isFunction(obj.replacer) &&
+    isFunction(obj.setter) &&
+    isFunction(obj.transformer)
   );
 }

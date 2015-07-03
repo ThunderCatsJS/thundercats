@@ -8,8 +8,8 @@ import { getName, getNameOrNull, isStore } from './utils';
 
 const debug = debugFactory('thundercats:cat');
 
-export function Register(map, Constructor, constructorArgs) {
-  const name = getName(Constructor);
+export function Register(map, Factory, constructorArgs) {
+  const name = getName(Factory);
   if (map.has(name.toLowerCase())) {
     return warning(
       false,
@@ -17,9 +17,12 @@ export function Register(map, Constructor, constructorArgs) {
       name
     );
   }
-  const instance =
-    new (Function.prototype.bind.apply(Constructor, constructorArgs));
-  debug('registering store %s', name);
+  const instance = Factory.apply(null, constructorArgs);
+  debug(
+    'registering %s %s',
+    isStore(Factory) ? 'store' : 'action',
+    name
+  );
   map.set(name.toLowerCase(), instance);
   return map;
 }
@@ -30,7 +33,7 @@ export default class Cat {
     this.actions = new Map();
   }
 
-  register(StoreOrActions) {
+  register(StoreOrActions, ...args) {
     let name = getNameOrNull(StoreOrActions);
 
     invariant(
@@ -41,7 +44,7 @@ export default class Cat {
     return Register(
       isStore(StoreOrActions) ? this.stores : this.actions,
       StoreOrActions,
-      [...arguments]
+      args
     );
   }
 

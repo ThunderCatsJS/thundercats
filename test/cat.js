@@ -49,7 +49,8 @@ describe('Cat', function() {
       CatStore = createStore();
       cat.stores.size.should.equal(0);
       cat.register(CatActions);
-      cat.register(CatStore, cat);
+      cat.register(CatStore, null, cat);
+      cat.actions.size.should.equal(1);
       cat.stores.size.should.equal(1);
     });
 
@@ -74,10 +75,10 @@ describe('Cat', function() {
       let cat = new CatApp();
       cat.stores.size.should.equal(0);
       cat.register(CatActions);
-      cat.register(CatStore, cat);
+      cat.register(CatStore, null, cat);
       let spy = sinon.spy(console, 'error');
       cat.stores.size.should.equal(1);
-      cat.register(CatStore);
+      cat.register(CatStore, null, cat);
       cat.stores.size.should.equal(1);
       spy.restore();
       spy.should.have.been.calledOnce;
@@ -108,7 +109,7 @@ describe('Cat', function() {
         constructor() {
           super();
           this.register(CatActions);
-          this.register(CatStore, this);
+          this.register(CatStore, null, this);
         }
       }
       cat = new CatApp();
@@ -117,7 +118,8 @@ describe('Cat', function() {
     it('should return a Store if it exists', function() {
       let catStore = cat.getStore('CatStore');
       expect(catStore).to.exist;
-      catStore.should.be.an.instanceOf(Store);
+      catStore.register.should.exist;
+      catStore.subscribe.should.exist;
     });
 
     it('should return undefined if a Store does not exits', function() {
@@ -169,14 +171,14 @@ describe('Cat', function() {
 
     it('should return an observable', () => {
       CatStore = createStore();
-      cat.register(CatStore, cat);
+      cat.register(CatStore, null, cat);
       cat.hydrate().subscribe.should.be.a('function');
     });
 
     describe('observable', () => {
       it('should call onError if given non object', (done) => {
         CatStore = createStore();
-        cat.register(CatStore, cat);
+        cat.register(CatStore, null, cat);
         cat.hydrate('').subscribeOnError(err => {
           err.should.match(/hydrate should get objects/);
           done();
@@ -186,7 +188,7 @@ describe('Cat', function() {
       it('should hydrate store with correct data', (done) => {
         let val = { foo: 'bar' };
         CatStore = createStore();
-        cat.register(CatStore, cat);
+        cat.register(CatStore, null, cat);
         let catStore = cat.getStore('CatStore');
         cat.hydrate({ CatStore: val })
           .subscribeOnCompleted(() => {
@@ -212,7 +214,7 @@ describe('Cat', function() {
 
     it('should return an observable', function(done) {
       CatStore = createStore();
-      cat.register(CatStore, cat);
+      cat.register(CatStore, null, cat);
       let stateObs = cat.dehydrate();
       expect(stateObs).to.exist;
       stateObs.should.be.an('object');
@@ -228,7 +230,7 @@ describe('Cat', function() {
       it('should return store data', function(done) {
         storeVal = { bah: 'humbug' };
         CatStore = createStore(storeVal);
-        cat.register(CatStore, cat);
+        cat.register(CatStore, null, cat);
         let stateObs = cat.dehydrate();
         stateObs.subscribe(state => {
           state.should.deep.equal({ CatStore: storeVal });
@@ -238,10 +240,10 @@ describe('Cat', function() {
 
       it('should return an empty object if no stores have data', done => {
         CatStore = createStore();
-        cat.register(CatStore, cat);
+        cat.register(CatStore, null, cat);
         let stateObs = cat.dehydrate();
         stateObs.subscribe(state => {
-          state.should.deep.equal({});
+          state.should.deep.equal({ CatStore: {} });
           done();
         });
       });
@@ -263,7 +265,7 @@ describe('Cat', function() {
 
     it('should return an observable', function(done) {
       CatStore = createStore();
-      cat.register(CatStore, cat);
+      cat.register(CatStore, null, cat);
       let stringyStateObs = cat.serialize();
       expect(stringyStateObs).to.exist;
       stringyStateObs.should.be.an('object');
@@ -279,7 +281,7 @@ describe('Cat', function() {
       it('should serialize store data', function(done) {
         storeVal = { bah: 'humbug' };
         CatStore = createStore(storeVal);
-        cat.register(CatStore, cat);
+        cat.register(CatStore, null, cat);
         let stringyStateObs = cat.serialize();
         stringyStateObs.subscribe(stringyState => {
           stringyState.should.equal(JSON.stringify({ CatStore: storeVal }));
@@ -289,10 +291,10 @@ describe('Cat', function() {
 
       it('should return an "{}" if no stores have data', function(done) {
         CatStore = createStore();
-        cat.register(CatStore, cat);
+        cat.register(CatStore, null, cat);
         let stringyStateObs = cat.serialize();
         stringyStateObs.subscribe((stringyState) => {
-          stringyState.should.equal('{}');
+          stringyState.should.equal(JSON.stringify({ CatStore: {} }));
           done();
         });
       });
@@ -314,14 +316,14 @@ describe('Cat', function() {
 
     it('should return an observable', () => {
       CatStore = createStore();
-      cat.register(CatStore, cat);
+      cat.register(CatStore, null, cat);
       cat.deserialize().subscribe.should.be.a('function');
     });
 
     describe('observable', () => {
       it('should error if given non strings', done => {
         CatStore = createStore();
-        cat.register(CatStore, cat);
+        cat.register(CatStore, null, cat);
         cat.deserialize({ notA: 'String' }).subscribeOnError((err) => {
           err.should.match(/deserialize expects a string/);
           done();
@@ -332,7 +334,7 @@ describe('Cat', function() {
         'should error if stringy data does not parse into an object or null',
         done => {
           CatStore = createStore();
-          cat.register(CatStore, cat);
+          cat.register(CatStore, null, cat);
           cat.deserialize('1').subscribeOnError((err) => {
             err.should.match(/should be an object or null/);
             done();
@@ -343,7 +345,7 @@ describe('Cat', function() {
       it('should hydrate store with correct data', (done) => {
         let val = { foo: 'bar' };
         CatStore = createStore();
-        cat.register(CatStore, cat);
+        cat.register(CatStore, null, cat);
         let catStore = cat.getStore('CatStore');
         cat.deserialize(JSON.stringify({ CatStore: val }))
           .subscribeOnCompleted(() => {
@@ -355,17 +357,14 @@ describe('Cat', function() {
   });
 });
 
-function createStore(initValue = null) {
-  class CatStore extends Store {
-    constructor(cat) {
-      super();
-      this.value = initValue;
-      let catActions = cat.getActions('CatActions');
-      this.register(
+function createStore(initValue = {}) {
+  return Store(initValue)
+    .refs({ displayName: 'CatStore' })
+    .init(({ instance, args }) => {
+      const cat = args[0];
+      const catActions = cat.getActions('CatActions');
+      instance.register(
         catActions.doAction.delay(500).map(() => ({ replace: {}}))
       );
-    }
-  }
-  CatStore.displayName = 'CatStore';
-  return CatStore;
+    });
 }

@@ -48,6 +48,7 @@
     "node-uuid": "^1.4.1",
     "object.assign": "^3.0.0",
     "stampit": "^2.1.0",
+    "supermixer": "^1.0.2",
     "warning": "^1.0.1"
   },
   "peerDependencies": {
