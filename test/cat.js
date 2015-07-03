@@ -12,27 +12,19 @@ chai.should();
 chai.use(sinonChai);
 
 describe('Cat', function() {
-  describe('class', function() {
+  describe('Factory', function() {
     it('should be extendable', function() {
-      class AppCat extends Cat {
-        constructor() {
-          super();
-        }
-      }
-      let appCat = new AppCat();
-      appCat.should.be.instanceOf(Cat);
+      const AppCat = Cat().refs({ displayName: 'FooActions' });
+      let appCat = AppCat();
+      appCat.register.should.be.a('function');
+      appCat.displayName.should.equal('FooActions');
     });
   });
 
   describe('register', function() {
     let CatStore, CatActions, CatApp;
     beforeEach(function() {
-      class _CatApp extends Cat {
-        constructor() {
-          super();
-        }
-      }
-      CatApp = _CatApp;
+      CatApp = Cat();
     });
 
     it('should register an instance of actions class', function() {
@@ -55,15 +47,11 @@ describe('Cat', function() {
     });
 
     it('should throw if actions/store does not have a displayName', function() {
-      class NoName extends Actions {
-        constructor() {
-          super();
-        }
-        doSomething() {
-        }
-      }
+      const NoName = Actions({
+        doSomething() { }
+      });
 
-      let cat = new CatApp();
+      let cat = CatApp();
       expect(() => {
         cat.register(NoName);
       }).to.throw(/does not have a displayName/);
@@ -105,14 +93,12 @@ describe('Cat', function() {
     beforeEach(function() {
       CatActions = createActions();
       CatStore = createStore();
-      class CatApp extends Cat {
-        constructor() {
-          super();
-          this.register(CatActions);
-          this.register(CatStore, null, this);
-        }
-      }
-      cat = new CatApp();
+      const CatApp = Cat()
+        .init(({ instance }) => {
+          instance.register(CatActions);
+          instance.register(CatStore, null, instance);
+        });
+      cat = CatApp();
     });
 
     it('should return a Store if it exists', function() {
@@ -134,13 +120,11 @@ describe('Cat', function() {
 
     beforeEach(function() {
       CatActions = createActions();
-      class CatApp extends Cat {
-        constructor() {
-          super();
-          this.register(CatActions);
-        }
-      }
-      cat = new CatApp();
+      const CatApp = Cat()
+        .init(({ instance }) => {
+          instance.register(CatActions);
+        });
+      cat = CatApp();
     });
 
     it('should return a Actions if it exists', function() {
@@ -160,13 +144,11 @@ describe('Cat', function() {
     let CatStore, CatActions, cat;
     beforeEach(() => {
       CatActions = createActions();
-      class CatApp extends Cat {
-        constructor() {
-          super();
-          this.register(CatActions);
-        }
-      }
-      cat = new CatApp();
+      const CatApp = Cat()
+        .init(({ instance })=> {
+          instance.register(CatActions);
+        });
+      cat = CatApp();
     });
 
     it('should return an observable', () => {
@@ -203,13 +185,11 @@ describe('Cat', function() {
     let CatStore, CatActions, cat, storeVal;
     beforeEach(function() {
       CatActions = createActions();
-      class CatApp extends Cat {
-        constructor() {
-          super();
-          this.register(CatActions);
-        }
-      }
-      cat = new CatApp();
+      const CatApp = Cat()
+        .init(({ instance }) => {
+          instance.register(CatActions);
+        });
+      cat = CatApp();
     });
 
     it('should return an observable', function(done) {
@@ -254,13 +234,11 @@ describe('Cat', function() {
     let CatStore, CatActions, cat, storeVal;
     beforeEach(function() {
       CatActions = createActions();
-      class CatApp extends Cat {
-        constructor() {
-          super();
-          this.register(CatActions);
-        }
-      }
-      cat = new CatApp();
+      const CatApp = Cat()
+        .init(({ instance }) => {
+          instance.register(CatActions);
+        });
+      cat = CatApp();
     });
 
     it('should return an observable', function(done) {
@@ -305,13 +283,11 @@ describe('Cat', function() {
     let CatStore, CatActions, cat;
     beforeEach(() => {
       CatActions = createActions();
-      class CatApp extends Cat {
-        constructor() {
-          super();
-          this.register(CatActions);
-        }
-      }
-      cat = new CatApp();
+      const CatApp = Cat()
+        .init(({ instance }) => {
+          instance.register(CatActions);
+        });
+      cat = CatApp();
     });
 
     it('should return an observable', () => {

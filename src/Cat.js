@@ -1,4 +1,5 @@
 import Rx from 'rx';
+import stampit from 'stampit';
 import invariant from 'invariant';
 import warning from 'warning';
 import debugFactory from 'debug';
@@ -27,12 +28,7 @@ export function Register(map, Factory, constructorArgs) {
   return map;
 }
 
-export default class Cat {
-  constructor() {
-    this.stores = new Map();
-    this.actions = new Map();
-  }
-
+const methods = {
   register(StoreOrActions, ...args) {
     let name = getNameOrNull(StoreOrActions);
 
@@ -46,30 +42,30 @@ export default class Cat {
       StoreOrActions,
       args
     );
-  }
+  },
 
   getStore(store) {
     return this.stores.get(('' + store).toLowerCase());
-  }
+  },
 
   getActions(action) {
     return this.actions.get(('' + action).toLowerCase());
-  }
+  },
 
   dehydrate() {
     return Translate.dehydrate(Rx.Observable.from(this.stores.values()));
-  }
+  },
 
   hydrate(catState) {
     return Translate.hydrate(
       Rx.Observable.from(this.stores.values()),
       Rx.Observable.just(catState)
     );
-  }
+  },
 
   serialize() {
     return Translate.serialize(Rx.Observable.from(this.stores.values()));
-  }
+  },
 
   deserialize(stringyCatState) {
     return Translate.deserialize(
@@ -77,4 +73,13 @@ export default class Cat {
       Rx.Observable.just(stringyCatState)
     );
   }
+};
+
+export default function Cat() {
+  return stampit()
+    .init(({ instance }) => {
+      instance.stores = new Map();
+      instance.actions = new Map();
+    })
+    .methods(methods);
 }
