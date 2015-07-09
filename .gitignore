@@ -1,5 +1,5 @@
 lib/*
-!lib/global
+!lib/umd
 node_modules
 .idea
 docs

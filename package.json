@@ -1,7 +1,8 @@
 {
   "name": "thundercats",
-  "description": "RxJS Meets isomorphic Flux with a little bit of Relay thrown in for good measure",
+  "description": "RxJS Meets isomorphic Flux",
   "version": "2.0.0-rc5",
+  "homepage": "http://thundercats.js.org",
   "keywords": [
     "alwaysUseTwoSpaces",
     "thundercats",
@@ -22,19 +23,17 @@
     "url": "https://github.com/r3dm/thundercats"
   },
   "scripts": {
-    "build": "npm run build-clean && npm run build-global && npm run build-npm",
-    "build-clean": "rm -rf lib/* && mkdir lib/global",
-    "build-global": "NODE_ENV='production' browserify src/index.js -s ThunderCats -i rx -t babelify  -t browserify-shim -g envify -o lib/global/ThunderCats.js",
-    "build-global-min": "NODE_ENV='production' browserify src/index.js -s ThunderCats -i rx -t babelify -t browserify-shim -g envify -p [ minifyify --no-map --uglify [--compress --mangle --dead_code]] -o lib/global/ThunderCats.min.js",
-    "build-npm": "babel ./src -d lib/",
+    "build": "npm run build-clean && npm run build-npm && npm run build-umd",
+    "build-npm": "babel src --out-dir lib",
+    "build-umd": "NODE_ENV=production webpack src/ lib/umd/ThunderCats.js && NODE_ENV=production webpack -p src/ lib/umd/ThunderCats.min.js && npm run build-size",
+    "build-size": "echo \"gzipped, the umd build is `gzip -c lib/umd/ThunderCats.min.js | wc -c | sed -e 's/^[[:space:]]*//'` bytes\"",
+    "build-clean": "rm -rf lib/* && mkdir lib/umd",
     "cover": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js",
     "coverAlls": "istanbul cover _mocha -- --compilers js:./registerWithOptions.js && istanbul-coveralls",
     "lint": "eslint .",
     "pretest": "npm run lint",
+    "prepublish": "npm run test && npm run build",
     "test": "mocha --compilers js:babel/register"
-  },
-  "browserify-shim": {
-    "rx": "global:Rx"
   },
   "author": {
     "name": "Berkeley Martinez",
@@ -56,11 +55,11 @@
   },
   "devDependencies": {
     "babel": "^5.4.7",
-    "babelify": "^6.1.2",
+    "babel-core": "^5.6.15",
     "babel-eslint": "^3.1.20",
+    "babel-loader": "^5.3.1",
     "babel-runtime": "^5.0.12",
-    "browserify": "^10.1.3",
-    "browserify-shim": "^3.8.6",
+    "babelify": "^6.1.2",
     "chai": "^2.1.1",
     "chai-as-promised": "^5.0.0",
     "envify": "^3.4.0",
@@ -72,9 +71,11 @@
     "minifyify": "^7.0.0",
     "mocha": "^2.2.1",
     "mocha-istanbul": "^0.2.0",
+    "node-libs-browser": "^0.5.2",
     "q": "^1.2.0",
     "rx": "^2.3.14",
     "sinon": "^1.11.1",
-    "sinon-chai": "^2.7.0"
+    "sinon-chai": "^2.7.0",
+    "webpack": "^1.10.1"
   }
 }
