@@ -36,6 +36,7 @@ describe('Store', function() {
 
       catActions = new Rx.Subject();
       const CatStore = Store({ name: 'Lion-O' })
+        .static({ displayName: 'CatStore' })
         .methods({
           opsOnError(err) {
             console.log('an error occurred in operations with ' + err);

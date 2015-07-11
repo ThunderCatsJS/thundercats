@@ -359,6 +359,8 @@ const staticMethods = {
   }
 };
 
+// Store is a stamp factory
+// It returns a factory that creates store instances
 export default function Store(value = {}) {
   const stamp = stampit();
   stamp.fixed.refs = stamp.fixed.state = mergeChainNonFunctions(
@@ -381,4 +383,5 @@ export default function Store(value = {}) {
     .methods(methods);
 }
 
+// Make static methods also available on stamp factory
 assign(Store, staticMethods);
