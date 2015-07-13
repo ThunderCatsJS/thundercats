@@ -48,7 +48,7 @@
     "object.assign": "^3.0.0",
     "stampit": "^2.1.0",
     "supermixer": "^1.0.2",
-    "warning": "^1.0.1"
+    "warning": "^2.0.0"
   },
   "peerDependencies": {
     "rx": "^2.3.14"
