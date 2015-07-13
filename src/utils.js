@@ -31,12 +31,13 @@ export function getName(comp) {
 
 export function getNameOrNull(comp) {
   return (
-    (comp && comp.displayName) ||
-    (comp.constructor &&
-    comp.constructor.displayName) ||
-    (comp.fixed &&
-    comp.fixed.refs &&
-    comp.fixed.refs.displayName) ||
+    !!comp &&
+      ((comp && comp.displayName) ||
+      (comp.constructor &&
+      comp.constructor.displayName) ||
+      (comp.fixed &&
+      comp.fixed.refs &&
+      comp.fixed.refs.displayName)) ||
     null
   );
 }
