@@ -371,16 +371,19 @@ export default function Store(value = {}) {
 
   mixinChainFunctions(stamp.fixed.methods, Observable.prototype);
   return stamp
-    .init(({ instance }) => Observable.call(instance, methods._subscribe))
     .refs({
       value,
-      _operationsSubscription: null,
-      actions: [],
-      observers: new Map(),
-      history: new Map()
+      _operationsSubscription: null
     })
     .static(staticMethods)
-    .methods(methods);
+    .methods(methods)
+    .init(({ instance }) => {
+      instance.observers = new Map();
+      instance.history = new Map();
+      instance.actions = [];
+      Observable.call(instance, methods._subscribe);
+      return instance;
+    });
 }
 
 // Make static methods also available on stamp factory
