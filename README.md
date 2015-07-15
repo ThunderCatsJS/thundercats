@@ -226,12 +226,6 @@ If your store depends on an actions class make sure you register it beforehand.
 And if the store needs the cat to get that actions instance, pass it in to
 the register method as additional arguments to pass to the factory.
 
----
-### waitFor
-[&#x24C8;]()
-
-waitFor is a function that takes observables returns an observable that waits for all of the observables to publish a new value. Under the hood it uses [combineLatest](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/combinelatest.md) but first converts the passed in observables into hot observables. This is great when you just want to wait for new values and not current values of observables.
-
 ### Contributing
 
 Commits messages should start with
@@ -272,8 +266,6 @@ A factory function ([a stampit stamp](https://github.com/stampit-org/stampit#sta
 
 Any method defined during factory creation will be an observable method availble
 on the instance object. This method has all the methods available to an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md#observable-instance-methods) instance as well as...
-
-### actions.someObservableMethod.waitFor(observable[, observeable[, observable...]]) : observable
 
 ### actions.someObservableMethod.displayName : string
 
@@ -390,11 +382,6 @@ returns `undefined` if not found
 #### cat.deserialize(stringyCatState : string) : observable
 
 #### cat.serialize() : observable\<stringyStoresState : string\>
-
-### waitFor
-
-#### waitFor(observable[, ... observables]) : observable
-[&#x24C8;]()
 
 Takes n observables, returns an observable.
 
