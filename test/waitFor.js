@@ -4,7 +4,7 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
-import { waitFor } from '../src';
+import waitFor from '../src/waitFor';
 
 const expect = chai.expect;
 

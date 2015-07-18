@@ -16,7 +16,7 @@ import { isObservable } from './utils';
 const debug = debugFactory('thundercats:waitFor');
 const slice = Array.prototype.slice;
 
-export default function waitFor(observables) {
+export default function waitFor() {
   return Rx.Observable.from(arguments)
     .tapOnNext(observable => {
       return isObservable(observable) ?
