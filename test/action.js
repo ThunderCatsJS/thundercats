@@ -208,7 +208,7 @@ describe('Actions', function() {
     });
 
     it('should return true if the action as observers', function() {
-      catActions.doThis.subscribe(function () {});
+      catActions.doThis.subscribe(function() {});
       catActions.doThis.hasObservers().should.be.true;
     });
 

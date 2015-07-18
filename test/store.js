@@ -498,7 +498,7 @@ describe('Store', function() {
       });
     });
 
-    describe('reject', function () {
+    describe('reject', function() {
 
       let value = {};
       let newValue = {};
@@ -521,7 +521,7 @@ describe('Store', function() {
 
       it(
         'should notify observers with the initial value',
-        function () {
+        function() {
           spy.should.have.been.calledOnce;
           spy.should.have.been.calledWith(value);
           catActions.doAction({ replace: value });
@@ -530,7 +530,7 @@ describe('Store', function() {
 
       it(
         'should have notified observers with the new value',
-        function () {
+        function() {
           catActions.doAction({
             replace: newValue,
             optimistic: defer.promise
@@ -587,7 +587,7 @@ describe('Store', function() {
           'after the second operation has been applied',
           function() {
             catActions.onNext({
-              transform: function (arr) {
+              transform: function(arr) {
                 return arr.concat('bar');
               },
               optimistic: deferred2.promise
@@ -642,8 +642,8 @@ describe('Store', function() {
 
     it(
       'should subscribe to actions on initial subscription',
-      function () {
-        store.subscribe(function () { });
+      function() {
+        store.subscribe(function() { });
         catActions.doAction.hasObservers().should.be.true;
       }
     );
