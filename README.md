@@ -373,17 +373,28 @@ returns `undefined` if not found
 [&#x24C8;]()
 
 Get the instance of the actions from the cat with displayName equal to `actionsDisplayName` (case insensitive);
-returns `undefined` if not found
+returns `undefined` if not found.
 
 #### cat.hydrate(storesState: object) : observable
 
+Will take an object that is used to hydrate the stores. The `storesState` object
+should have the signature `{ displayNameOfStore: storeSate }`. Each key that
+matches a store displayName will be used to hydrate that particular store. The
+value used to hydrate the store must be an object. When the hydrate completes,
+the onNext and onCompleted callbacks are called.
+
+#### cat.deserialize(stringyStoresState : string) : observable
+
+Same as above but excepts a serialized storesState
+
 #### cat.dehydrate() : observable\<storesState : object\>
 
-#### cat.deserialize(stringyCatState : string) : observable
+Returns an observable. This observables onNext is called with an object with the
+signature `{ storeDisplayName: storeState }`.
 
 #### cat.serialize() : observable\<stringyStoresState : string\>
 
-Takes n observables, returns an observable.
+Same as above but returns a serialized storesSate.
 
 <br>
 <br>
