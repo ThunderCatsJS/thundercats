@@ -1,9 +1,10 @@
 [![Circle CI](https://circleci.com/gh/ThunderCatsJS/thundercats.svg?style=svg)](https://circleci.com/gh/ThunderCatsJS/thundercats)
-[![Coverage Status](https://coveralls.io/repos/ThunderCatsJS/thundercats/badge.svg?branch=master&service=github)](https://coveralls.io/github/ThunderCatsJS/thundercats?branch=master)
-[![NPM version](http://img.shields.io/npm/v/thundercats.svg)](https://npmjs.org/package/thundercats)
+[![Coverage Status](https://coveralls.io/repos/ThunderCatsJS/thundercats/badge.svg?branch=master&service=github&style=flat-square)](https://coveralls.io/github/ThunderCatsJS/thundercats?branch=master)
 [![Join the chat at https://gitter.im/thundercatsjs/thundercats](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/thundercatsjs/thundercats?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Downloads](http://img.shields.io/npm/dm/thundercats.svg)](https://npmjs.org/package/thundercats)
 [![JS.ORG](https://img.shields.io/badge/js.org-thundercats-ffb400.svg?style=flat-square)](http://js.org)
+
+[![NPM](https://nodei.co/npm/thundercats.png?downloads=true)](https://nodei.co/npm/thundercats/)
+
 # ThunderCats.js
 
 > ThunderCats, Ho!
@@ -16,7 +17,9 @@ The [Flux](https://github.com/facebook/flux/) architecture allows you to think
 of your application as an unidirectional flow of data, this module aims to
 facilitate the use of [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md)
 as basis for defining the relations between the different entities composing
-your application.
+your application. This module also implements Universal JavaScript First design.
+What does that mean? It means the module is designed with the intent to be used
+both server-side and client-side from the beginning.
 
 ## How
 
@@ -46,20 +49,20 @@ Tl;DR `new` and `class` are broken, and borked.
 
 *Wait a second, what are Cats?*
 
-A Cat is just a bag where you can register your store and actions factories. It
-is also a stamp factories that create factories that create instances of a cat. By
+A Cat is a bag where you can register your store and actions factories. It
+is also a stamp factory that creates factories that create instances of a cat. By
 themselves they are only slightly useful and optional, but combine them with
 [ThunderCats-React](https://github.com/berkeleytrue/thundercats-react) and you
-can do cool things like server-side render with data pre-fetching and call render
+can do cool things like server-side rendering with data pre-fetching and call render
 methods using the observable pattern.
 
 ## Install
 
-This is a pre-release 2.0.0 version and is currently unstable.
 
 ```
-npm install thundercats@2.0.0-rc7
+npm install thundercats
 ```
+
 ThunderCats makes heavy use of es6 Map object. While available in the latest versions of Node.js, io.js and all modern browsers, a great many older browsers will need a polyfill in order to work with ThunderCats.
 
 I recommend using [es6-map](https://www.npmjs.com/package/es6-map) as a polyfill for just the Map object or [babel polyfill](https://babeljs.io/docs/usage/polyfill/) to give you all the es6 goodies!
@@ -230,10 +233,10 @@ the register method as additional arguments to pass to the factory.
 
 Commits messages should start with
 
-* adds
-* changes
-* fixes
-* removes
+* [adds]
+* [changes]
+* [fixes]
+* [removes]
 
 Use eslint to lint according to the provided .eslintrc file.
 Add unit tests for new features.
@@ -244,6 +247,7 @@ Add unit tests for new features.
 ### Actions
 
 #### Actions({ displayName : string, ...spec }) : ActionsFactory
+[&#x24C8;]()
 
 Takes an object argument. That object can have a displayName property that
 identifies this factory.
@@ -274,6 +278,7 @@ A displayName taken from the key in `spec`
 ### Store
 
 #### Store(initialValue : object) : StoreFactory
+[&#x24C8;]()
 
 Returns a factory function (a stampit stamp).
 
@@ -350,6 +355,7 @@ Optimistic updates can be done using the optimistic key. The store will update i
 ### Cat
 
 #### Cat(staticProperties : object) : CatFactory
+[&#x24C8;]()
 
 A stampit factory that produces factory functions. Takes in object that will set
 static properties of the factory function.
@@ -375,7 +381,14 @@ returns `undefined` if not found
 Get the instance of the actions from the cat with displayName equal to `actionsDisplayName` (case insensitive);
 returns `undefined` if not found.
 
-#### cat.hydrate(storesState: object) : observable
+#### cat.get(storeOractionsDisplayName : string) : storeInstance|actionsInstance|undefined
+[&#x24C8;]()
+
+Same as the above two but will first check for a store, if none found it will
+then check if in actions, else it returns undefined
+
+### hydrate(catInstance, storesState: object) : observable
+[&#x24C8;]()
 
 Will take an object that is used to hydrate the stores. The `storesState` object
 should have the signature `{ displayNameOfStore: storeSate }`. Each key that
@@ -383,18 +396,11 @@ matches a store displayName will be used to hydrate that particular store. The
 value used to hydrate the store must be an object. When the hydrate completes,
 the onNext and onCompleted callbacks are called.
 
-#### cat.deserialize(stringyStoresState : string) : observable
-
-Same as above but excepts a serialized storesState
-
-#### cat.dehydrate() : observable\<storesState : object\>
+### dehydrate(catInstanec) : observable\<storesState : object\>
+[&#x24C8;]()
 
 Returns an observable. This observables onNext is called with an object with the
 signature `{ storeDisplayName: storeState }`.
-
-#### cat.serialize() : observable\<stringyStoresState : string\>
-
-Same as above but returns a serialized storesSate.
 
 <br>
 <br>
