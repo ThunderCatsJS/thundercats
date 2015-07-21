@@ -68,8 +68,8 @@ I recommend using [es6-map](https://www.npmjs.com/package/es6-map) as a polyfill
 
 Check out:
 
-* [TodoMVC](https://github.com/r3dm/thundercats-todomvc) app.
-* [Chat App](https://github.com/r3dm/thundercats-chat)
+* [TodoMVC app](https://github.com/thundercatsjs/thundercats-todomvc).
+* [Chat App](https://github.com/thundercatsjs/thundercats-chat).
 * The source for [The R3DM Consulting](https://github.com/r3dm/r3dm.com) isomorphic app.
 
 ## Guide
