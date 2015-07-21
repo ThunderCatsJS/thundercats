@@ -1,6 +1,7 @@
 general:
-  ignore:
-    - gh-pages
+  branches:
+    ignore:
+      - gh-pages
 machine:
   node:
     version: iojs-v1.6.4
