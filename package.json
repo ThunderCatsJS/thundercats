@@ -33,7 +33,7 @@
     "lint": "eslint .",
     "pretest": "npm run lint",
     "prepublish": "npm run test && npm run build",
-    "test": "mocha --compilers js:babel/register"
+    "test": "NODE_ENV=development mocha --compilers js:babel/register"
   },
   "author": {
     "name": "Berkeley Martinez",

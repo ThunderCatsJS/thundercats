@@ -50,8 +50,18 @@ export function isPromise(promise) {
   return promise && typeof promise.then === 'function';
 }
 
+export function isKitten(obj) {
+  return !!(
+    obj &&
+    isFunction(obj.register) &&
+    isFunction(obj.getStore) &&
+    isFunction(obj.getActions)
+  );
+}
+
 export function isStore(obj) {
   return !!(
+    obj &&
     isFunction(obj.createRegistrar) &&
     isFunction(obj.fromMany) &&
     isFunction(obj.replacer) &&

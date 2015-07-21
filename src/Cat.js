@@ -1,10 +1,8 @@
-import Rx from 'rx';
 import stampit from 'stampit';
 import invariant from 'invariant';
 import warning from 'warning';
 import debugFactory from 'debug';
 
-import Translate from './Translate';
 import { getName, getNameOrNull, isStore } from './utils';
 
 const debug = debugFactory('thundercats:cat');
@@ -50,28 +48,6 @@ const methods = {
 
   getActions(action) {
     return this.actions.get(('' + action).toLowerCase());
-  },
-
-  dehydrate() {
-    return Translate.dehydrate(Rx.Observable.from(this.stores.values()));
-  },
-
-  hydrate(catState) {
-    return Translate.hydrate(
-      Rx.Observable.from(this.stores.values()),
-      Rx.Observable.just(catState)
-    );
-  },
-
-  serialize() {
-    return Translate.serialize(Rx.Observable.from(this.stores.values()));
-  },
-
-  deserialize(stringyCatState) {
-    return Translate.deserialize(
-      Rx.Observable.from(this.stores.values()),
-      Rx.Observable.just(stringyCatState)
-    );
   }
 };
 
