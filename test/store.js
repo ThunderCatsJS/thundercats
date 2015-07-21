@@ -440,6 +440,16 @@ describe('Store', function() {
         spy.should.have.been.calledTwice;
       });
 
+      it('should cause store noop if return is null', () => {
+        spy.should.have.been.calledTwice;
+        catActions.onNext({
+          transform(val) {
+            return null;
+          }
+        });
+        spy.should.have.been.calledTwice;
+      });
+
       it('should throw if not a function', function() {
         expect(() => {
           catActions.onNext({ transform: 'not the momma' });

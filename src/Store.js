@@ -213,8 +213,18 @@ const methods = {
     const ops = assign({}, operation);
 
     debug('on next called');
-    let oldValue = this.value;
-    this.value = applyOperation(this.value, ops);
+    const oldValue = this.value;
+    const newValue = applyOperation(this.value, ops);
+
+    if (!newValue) {
+      // operational noop,
+      // do not change value
+      // do not update history
+      // do not collect 200 dollars
+      return;
+    }
+
+    this.value = newValue;
     notifyObservers(this.value, this.observers);
 
     let uid = uuid.v1();
