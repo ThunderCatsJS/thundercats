@@ -1,5 +1,5 @@
 [![Circle CI](https://circleci.com/gh/ThunderCatsJS/thundercats.svg?style=svg)](https://circleci.com/gh/ThunderCatsJS/thundercats)
-[![Coverage Status](https://coveralls.io/repos/thundercatsjs/thundercats/badge.svg)](https://coveralls.io/r/thundercatsjs/thundercats)
+[![Coverage Status](https://coveralls.io/repos/ThunderCatsJS/thundercats/badge.svg?branch=master&service=github)](https://coveralls.io/github/ThunderCatsJS/thundercats?branch=master)
 [![NPM version](http://img.shields.io/npm/v/thundercats.svg)](https://npmjs.org/package/thundercats)
 [![Join the chat at https://gitter.im/thundercatsjs/thundercats](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/thundercatsjs/thundercats?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Downloads](http://img.shields.io/npm/dm/thundercats.svg)](https://npmjs.org/package/thundercats)
