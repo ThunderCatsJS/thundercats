@@ -1,3 +1,14 @@
+# July 21, 2015 v2.0.0
+
+This release has major breaking changes!
+
+    * ThunderCats is now Universal JavaScript First.
+    * Stores/Actions/Cat are now [stamps](https://github.com/stampit-org/stampit)
+    * Adds hydrate/dehydrate for use with the cat
+    * removes waitFor utils: see https://github.com/ThunderCatsJS/thundercats/issues/71
+    * removes all react specific components and utils. These are now located at https://github.com/thundercats/thundercats-react
+    * many more...
+
 # March 13, 2015 v1.2.0
 
     * Adds [setStateUtil](https://github.com/r3dm/thundercats/commit/277921014421ca306b890868dc87242fda7d63fe)
