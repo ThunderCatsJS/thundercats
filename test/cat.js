@@ -139,6 +139,40 @@ describe('Cat', function() {
       expect(lameActions).to.be.undefined;
     });
   });
+
+  describe('get', function() {
+    let cat, CatActions, CatStore;
+
+    beforeEach(function() {
+      CatActions = createActions();
+      CatStore = createStore();
+      const CatApp = Cat()
+        .init(({ instance }) => {
+          instance.register(CatActions);
+          instance.register(CatStore, null, instance);
+        });
+      cat = CatApp();
+    });
+
+    it('should return a Store if it exists', function() {
+      let catStore = cat.getStore('CatStore');
+      expect(catStore).to.exist;
+      catStore.register.should.exist;
+      catStore.subscribe.should.exist;
+    });
+
+    it('should return a Actions if it exists', function() {
+      let catActions = cat.getActions('CatActions');
+      expect(catActions).to.exist;
+      catActions.doAction.should.exist;
+    });
+
+    it('should return undefined if a StoreOrAtions does not exits', function() {
+      let lameStore = cat.getStore('LameStore');
+      expect(lameStore).to.not.exist;
+      expect(lameStore).to.be.undefined;
+    });
+  });
 });
 
 function createStore(initValue = {}) {

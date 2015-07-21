@@ -48,6 +48,11 @@ const methods = {
 
   getActions(action) {
     return this.actions.get(('' + action).toLowerCase());
+  },
+
+  get(storeOrActions) {
+    const possibleStore = this.getStore(storeOrActions);
+    return possibleStore ? possibleStore : this.getActions(storeOrActions);
   }
 };
 
