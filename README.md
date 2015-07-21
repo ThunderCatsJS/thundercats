@@ -1,7 +1,7 @@
-[![Circle CI](https://circleci.com/gh/r3dm/thundercats.svg?style=svg)](https://circleci.com/gh/r3dm/thundercats)
-[![Coverage Status](https://coveralls.io/repos/r3dm/thundercats/badge.svg)](https://coveralls.io/r/r3dm/thundercats)
+[![Circle CI](https://circleci.com/gh/ThunderCatsJS/thundercats.svg?style=svg)](https://circleci.com/gh/ThunderCatsJS/thundercats)
+[![Coverage Status](https://coveralls.io/repos/thundercatsjs/thundercats/badge.svg)](https://coveralls.io/r/thundercatsjs/thundercats)
 [![NPM version](http://img.shields.io/npm/v/thundercats.svg)](https://npmjs.org/package/thundercats)
-[![Join the chat at https://gitter.im/r3dm/thundercats](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/r3dm/thundercats?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/thundercatsjs/thundercats](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/thundercatsjs/thundercats?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Downloads](http://img.shields.io/npm/dm/thundercats.svg)](https://npmjs.org/package/thundercats)
 [![JS.ORG](https://img.shields.io/badge/js.org-thundercats-ffb400.svg?style=flat-square)](http://js.org)
 # ThunderCats.js
@@ -286,7 +286,7 @@ always functional.
 #### Store.fromMany(observable[, obsevable[, observable...]]) : observable
 [&#x24C8;]()
 
-Register many observables at once. Uses [RxJS merge ](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/merge.md) under the [hood](https://github.com/r3dm/thundercats/blob/master/src/Store.js#L168).
+Register many observables at once. Uses [RxJS merge ](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/merge.md) under the [hood](https://github.com/thundercatsjs/thundercats/blob/master/src/Store.js#L168).
 
 #### Store.setter(observable : Observable\<object\>) : observable
 [&#x24C8;]()
