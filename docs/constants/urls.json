@@ -1,7 +1,7 @@
 {
   "flux": "https://facebook.github.com/flux",
   "react": "http://facebook.github.io/react",
-  "source": "https://github.com/r3dm/thundercats",
+  "source": "https://github.com/thundercatsjs/thundercats",
   "reflux": "https://github.com/spoike/refluxjs",
   "reactiveX": "http://reactivex.io/",
   "observable": "https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md",

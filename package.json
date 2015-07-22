@@ -1,7 +1,7 @@
 {
-  "name": "thundercats",
-  "description": "How the Thundercats would build Flux architecture",
-  "version": "2.0.0-alpha.7",
+  "name": "thundercats.js.org",
+  "description": "thundercats.js.org site",
+  "version": "1.0.0",
   "keywords": [
     "alwaysUseTwoSpaces",
     "thundercats",
@@ -16,10 +16,10 @@
     "reactive"
   ],
   "main": "lib/",
-  "bugs": "https://github.com/r3dm/thundercats/issues",
+  "bugs": "https://github.com/thundercatsjs/thundercats/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/r3dm/thundercats"
+    "url": "https://github.com/thundercatsjs/thundercats"
   },
   "scripts": {
     "webpack": "webpack -w",
