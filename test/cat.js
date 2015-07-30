@@ -155,20 +155,20 @@ describe('Cat', function() {
     });
 
     it('should return a Store if it exists', function() {
-      let catStore = cat.getStore('CatStore');
+      let catStore = cat.get('CatStore');
       expect(catStore).to.exist;
       catStore.register.should.exist;
       catStore.subscribe.should.exist;
     });
 
     it('should return a Actions if it exists', function() {
-      let catActions = cat.getActions('CatActions');
+      let catActions = cat.get('CatActions');
       expect(catActions).to.exist;
       catActions.doAction.should.exist;
     });
 
     it('should return undefined if a StoreOrAtions does not exits', function() {
-      let lameStore = cat.getStore('LameStore');
+      let lameStore = cat.get('LameStore');
       expect(lameStore).to.not.exist;
       expect(lameStore).to.be.undefined;
     });
