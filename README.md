@@ -387,6 +387,10 @@ returns `undefined` if not found.
 Same as the above two but will first check for a store, if none found it will
 then check if in actions, else it returns undefined
 
+#### cat.dispose()
+
+Iterates through all the store instances and dispose of their observers.
+
 ### hydrate(catInstance, storesState: object) : observable
 [&#x24C8;]()
 

@@ -288,10 +288,16 @@ const methods = {
       this.observers.delete(uid);
       /* istanbul ignore else */
       if (!this.hasObservers()) {
-        debug('All observers disposed, disposing operations observer');
-        this.history = dispose(this._operationsSubscription, this.history);
+        debug('all observers cleared');
+        this.dispose();
       }
     });
+  },
+
+  dispose() {
+    debug('disposing %s', getName(this));
+    this.observers = new Map();
+    this.history = dispose(this._operationsSubscription, this.history);
   },
 
   serialize() {

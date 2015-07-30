@@ -173,6 +173,35 @@ describe('Cat', function() {
       expect(lameStore).to.be.undefined;
     });
   });
+
+  describe('dispose', function() {
+    let cat, CatActions, CatStore;
+
+    beforeEach(function() {
+      CatActions = createActions();
+      CatStore = createStore();
+      const CatApp = Cat()
+        .init(({ instance }) => {
+          instance.register(CatActions);
+          instance.register(CatStore, null, instance);
+        });
+      cat = CatApp();
+    });
+    it('should iterate and dispose of all observables', () => {
+      const catStore = cat.getStore('catStore');
+      const catActions = cat.getActions('catActions');
+      catStore.hasObservers().should.be.false;
+      catActions.doAction.hasObservers().should.be.false;
+      // add observer to store
+      // in turn store observers actions
+      catStore.subscribe(() => {});
+      catStore.hasObservers().should.equal.true;
+      catActions.doAction.hasObservers().should.equal.true;
+      cat.dispose();
+      catStore.hasObservers().should.equal.false;
+      catActions.doAction.hasObservers().should.equal.false;
+    });
+  });
 });
 
 function createStore(initValue = {}) {

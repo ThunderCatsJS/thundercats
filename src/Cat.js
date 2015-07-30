@@ -53,6 +53,13 @@ const methods = {
   get(storeOrActions) {
     const possibleStore = this.getStore(storeOrActions);
     return possibleStore ? possibleStore : this.getActions(storeOrActions);
+  },
+
+  dispose() {
+    debug('dispose all the things');
+    this.stores.forEach((store) => {
+      store.dispose();
+    });
   }
 };
 
