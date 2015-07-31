@@ -1,3 +1,8 @@
+# July 30, 2015 v2.1.0
+
+    * [30dbb70](../../commit/30dbb70) add store.shouldStoreNotify
+    * [e73938d](../../commit/e73938d) add cat.dispose
+
 # July 21, 2015 v2.0.0
 
 This release has major breaking changes!
