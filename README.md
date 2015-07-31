@@ -329,6 +329,11 @@ Returns an array of all the currently registered observables
 
 Registered observables must return objects. The object top level key determines the type of operation the store will perform (remember stores are reducers). The following are keys and corresponding operations.
 
+#### store.shouldStoreNotify(value, nextValue) : bool
+
+A user definable method that will be called during operations onNext lifecycle. It
+will pass in the current value and the next value. If the return is true, then
+the store operates as normal. If false, the store will not notify its observers.
 
 ##### _replace: object_
 [&#x24C8;]()

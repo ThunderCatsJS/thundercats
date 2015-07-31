@@ -217,10 +217,22 @@ const methods = {
     const newValue = applyOperation(this.value, ops);
 
     if (!newValue) {
-      // operational noop,
+      debug('%s operational noop', getName(this));
       // do not change value
       // do not update history
       // do not collect 200 dollars
+      return;
+    }
+
+    // if shouldStoreNotify returns false
+    // do not change value or update history
+    // else continue as normal
+    if (
+      this.shouldStoreNotify &&
+      typeof this.shouldStoreNotify === 'function' &&
+      !this.shouldStoreNotify(oldValue, newValue)
+    ) {
+      debug('%s will not notify', getName(this));
       return;
     }
 

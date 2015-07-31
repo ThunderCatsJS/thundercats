@@ -645,7 +645,7 @@ describe('Store', function() {
       operationsSpy = sinon.spy();
       catActions = createActions(operationsSpy);
       const CatStore = Store()
-        .static({ displayName: 'CatActions' })
+        .static({ displayName: 'CatStore' })
         .init(({ instance }) => instance.register(catActions.doAction));
       store = CatStore();
     });
@@ -680,6 +680,68 @@ describe('Store', function() {
         catActions.doAction.hasObservers().should.be.true;
       }
     );
+  });
+
+  describe('shouldStoreNotify', function() {
+    let operationsSpy;
+    let catActions;
+    let CatStore, disposable;
+
+    beforeEach(() => {
+      operationsSpy = sinon.spy();
+      catActions = createActions(operationsSpy);
+    });
+
+    it('should notify observer if true', () => {
+      CatStore = Store({ foo: 'bar' })
+        .refs({ displayName: 'CatStore' })
+        .init(({ instance }) => instance.register(catActions.doAction))
+        .methods({
+          shouldStoreNotify() {
+            return true;
+          }
+        });
+      const store = CatStore();
+      const observerSpy = sinon.spy();
+      store.subscribe(observerSpy);
+      observerSpy.should.have.been.calledWith(sinon.match({ foo: 'bar'}));
+      catActions.doAction({ set: { foo: 'baz' }});
+      observerSpy.should.have.been.calledWith(sinon.match({ foo: 'baz' }));
+    });
+
+    it('should notify observer of initValue and none after if false', () => {
+      CatStore = Store({ foo: 'bar' })
+        .refs({ displayName: 'CatStore' })
+        .init(({ instance }) => instance.register(catActions.doAction))
+        .methods({
+          shouldStoreNotify() {
+            console.log('foo');
+            return false;
+          }
+        });
+      const store = CatStore();
+      const observerSpy = sinon.spy();
+      store.subscribe(observerSpy);
+      observerSpy.should.have.been.calledWith(sinon.match({ foo: 'bar'}));
+      observerSpy.should.have.been.calledOnce;
+      catActions.doAction({ set: { foo: 'baz' }});
+      observerSpy.should.have.been.calledOnce;
+    });
+
+    it('should not affect if not a function', () => {
+      CatStore = Store({ foo: 'bar' })
+        .refs({ displayName: 'CatStore' })
+        .init(({ instance }) => instance.register(catActions.doAction))
+        .methods({
+          shouldStoreNotify: 'not the momma'
+        });
+      const store = CatStore();
+      const observerSpy = sinon.spy();
+      store.subscribe(observerSpy);
+      observerSpy.should.have.been.calledWith(sinon.match({ foo: 'bar'}));
+      catActions.doAction({ set: { foo: 'baz' }});
+      observerSpy.should.have.been.calledWith(sinon.match({ foo: 'baz' }));
+    });
   });
 
   describe('serialize', function() {
