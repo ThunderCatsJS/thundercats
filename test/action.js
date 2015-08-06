@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-expressions */
 import Rx from 'rx';
+import stampit from 'stampit';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -61,6 +62,34 @@ describe('Actions', function() {
         done();
       });
       catActions.getInBox('human');
+    });
+
+    it('should bind original map function to the stamp', function(done) {
+      const mixin = stampit().methods({
+        getResult() {
+          return true;
+        }
+      });
+
+      const ComposedActions = Actions({
+        displayName: 'composedActions',
+
+        perform() {
+          this.should.be.defined;
+          this.getResult.should.be.a( 'function' );
+
+          return {
+            result: this.getResult()
+          };
+        }
+      }).compose( mixin );
+      let composedActions = ComposedActions();
+
+      composedActions.perform.subscribe(function(value) {
+        value.result.should.be.true;
+        done();
+      });
+      composedActions.perform();
     });
 
     it(
