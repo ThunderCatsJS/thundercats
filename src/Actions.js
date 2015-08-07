@@ -31,11 +31,12 @@ export function getActionDef(ctx) {
 export function create({ name, map }) {
   let observers = [];
   let actionStart = new Rx.Subject();
+  let boundMap = map.bind(this);
 
   function action(value) {
     let err = null;
     try {
-      value = map(value);
+      value = boundMap(value);
     } catch(e) {
       err = e;
     }
@@ -76,9 +77,9 @@ export function create({ name, map }) {
   return action;
 }
 
-export function createMany() {
+export function createMany(instance) {
   return this
-    .map(create)
+    .map(create, instance)
     .reduce((ctx, action) => {
       ctx[action.displayName] = action;
       return ctx;
@@ -89,7 +90,7 @@ export default function Actions(obj = {}) {
   return stampit()
     .refs({ displayName: obj.displayName })
     .init(({ instance }) => {
-      const actionMethods = getActionDef(obj)::createMany();
+      const actionMethods = getActionDef(obj)::createMany(instance);
       return stampit.mixin(instance, actionMethods);
     });
 }
