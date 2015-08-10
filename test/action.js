@@ -145,6 +145,23 @@ describe('Actions', function() {
     });
   });
 
+  describe('spec', function() {
+    it('should take stamp descriptors', () => {
+      const initSpy = sinon.spy();
+      const CatActions = Actions({
+        init: initSpy,
+        props: { foo: { bar: 'baz' } },
+        refs: { meow: 'goesthecat' },
+        statics: { boo: { bar: () => {} } }
+      });
+      CatActions.boo.bar.should.be.a.function;
+      const catActions = CatActions();
+      catActions.foo.bar.should.equal('baz');
+      catActions.meow.should.equal('goesthecat');
+      initSpy.should.have.been.calledOnce;
+    });
+  });
+
   describe('waitFor', function() {
     let catActions, observable1, observable2;
 

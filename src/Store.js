@@ -389,7 +389,14 @@ const staticMethods = {
 
 // Store is a stamp factory
 // It returns a factory that creates store instances
-export default function Store(value = {}) {
+export default function Store(value = {}, stampSpec = {}) {
+  const {
+    init = [],
+    refs = {},
+    props = {},
+    statics = {}
+  } = stampSpec;
+
   const stamp = stampit();
   stamp.fixed.refs = stamp.fixed.state = mergeChainNonFunctions(
     stamp.fixed.refs,
@@ -411,7 +418,11 @@ export default function Store(value = {}) {
       instance.actions = [];
       Observable.call(instance, methods._subscribe);
       return instance;
-    });
+    })
+    .props(props)
+    .refs(refs)
+    .static(statics)
+    .init(init);
 }
 
 // Make static methods also available on stamp factory

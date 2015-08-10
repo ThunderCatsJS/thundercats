@@ -29,7 +29,7 @@ describe('isStore', function() {
 });
 
 describe('Store', function() {
-  describe('class', function() {
+  describe('Factory', function() {
     let store, CatStore, CatActions, catActions;
 
     beforeEach(function() {
@@ -76,6 +76,24 @@ describe('Store', function() {
         store.subscribe(spy);
         catActions.onCompleted();
       }).to.throw(/ops completed/);
+    });
+  });
+
+  describe('stamp descriptor', function() {
+    it('should honor stamp descriptor in created stamp', function() {
+      const initSpy = sinon.spy();
+      const CatStore = Store({ todos: ['foo'] }, {
+        init: initSpy,
+        props: { foo: { bar: 'baz' } },
+        refs: { meow: 'goesthecat' },
+        statics: { boo: { bar: () => {} } }
+      });
+      CatStore.boo.bar.should.be.a.function;
+      const catStore = CatStore();
+      catStore.value.todos[0].should.equal('foo');
+      catStore.foo.bar.should.equal('baz');
+      catStore.meow.should.equal('goesthecat');
+      initSpy.should.have.been.calledOnce;
     });
   });
 

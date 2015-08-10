@@ -6,11 +6,22 @@ import debugFactory from 'debug';
 import waitFor from './waitFor';
 
 const debug = debugFactory('thundercats:actions');
+const currentStampSpec = [
+  'methods',
+  'statics',
+  'props',
+  'refs',
+  'init',
+  'compose',
+  'create',
+  'isStamp'
+];
+
 const protectedProperties = [
   'shouldBindMethods',
   'displayName',
   'constructor'
-];
+].join(currentStampSpec);
 
 export function getActionDef(ctx) {
   return Object.getOwnPropertyNames(ctx)
@@ -89,7 +100,15 @@ export function createMany(shouldBind, instance) {
 }
 
 export default function Actions(obj = {}) {
-  const { shouldBindMethods: shouldBind, displayName } = obj;
+  const {
+    shouldBindMethods: shouldBind,
+    displayName,
+    init = [],
+    props = {},
+    refs = {},
+    statics = {}
+  } = obj;
+
   warning(
     !displayName,
     '%s used displayName in spec, this will be deprecated in future versions',
@@ -100,5 +119,9 @@ export default function Actions(obj = {}) {
     .init(({ instance }) => {
       const actionMethods = getActionDef(obj)::createMany(shouldBind, instance);
       return stampit.mixin(instance, actionMethods);
-    });
+    })
+    .refs(refs)
+    .props(props)
+    .static(statics)
+    .init(init);
 }
