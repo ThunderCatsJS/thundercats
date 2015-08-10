@@ -80,6 +80,9 @@ export default class extends React.Component {
             <ListItem onClick={ this.goToExternal(urls.source) }>
               Source
             </ListItem>
+            <ListItem onClick={ this.goToExternal(urls.logo) }>
+              Logo Credits: <br>Lenore Messler</br>
+            </ListItem>
           </List>
         </SideNavigation>
       </div>
