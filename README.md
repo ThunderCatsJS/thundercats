@@ -91,8 +91,6 @@ import uuid from 'node-uuid';
 import { TodoService } from '../services/todo-service';
 
 export default Actions({
-  // displayName is needed to use with cats and for debugging but not required otherwise
-  displayName: 'TodoActions',
   // this method will be an observable on new instances
   create(text) {
     const todo = {
@@ -106,7 +104,9 @@ export default Actions({
       promise: TodoService.create(todo)
     };
   }
-});
+})
+  // displayName is needed to use with cats and for debugging but not required otherwise
+  .refs({ displayName: 'TodoActions' });
 
 ```
 
@@ -132,10 +132,10 @@ Lets say you wanted to create a bunch of methods, but don't want or care for a m
 import { Actions } from 'thundercats';
 
 export default Actions({
-  displayName: 'ChatActions',
   clickThread: null,
   receiveRawMessages: null
-});
+})
+  .refs({ displayName: 'ChatActions' });
 
 // someScript.js
 
@@ -246,16 +246,21 @@ Add unit tests for new features.
 
 ### Actions
 
-#### Actions({ displayName : string, ...spec }) : ActionsFactory
+#### Actions(spec : object) : ActionsFactory
 [&#x24C8;]()
 
-Takes an object argument. That object can have a displayName property that
-identifies this factory.
+A factory that produces stampit factory functions. Takes in optional object
+`spec`.
+
+`spec` can take optional `init`, `props`, `refs`, and `statics` properties that are used
+normally to create stamps and are added to
+the stamp factory returned. To see more documentation of these features see the
+stampit [docs](https://github.com/stampit-org/stampit).
 
 Any other properties are used to create observables
-methods of this factories instances. These are taken as the specifications of the actions instance.
+methods of these factories instances. These are taken as the specifications of the actions instance.
 
-> spec signature : { methodName: mappingFunction|null }
+> spec signature : { methodName: mappingFunction | null }
 
 For every key on spec,
 there will be a corresponding method with that name. If the keys value on spec
@@ -277,10 +282,14 @@ A displayName taken from the key in `spec`
 
 ### Store
 
-#### Store(initialValue : object) : StoreFactory
+#### Store(initialValue : object, stampDescriptor : object) : StoreFactory
 [&#x24C8;]()
 
 Returns a factory function (a stampit stamp).
+`stampDescriptor` is an object with the `init`, `props`, `refs`, and `statics` properties all of which are optional.
+These properties are the same used to normally create stamps and are added to
+the stamp factory returned. To see more documentation of these features see the
+stampit [docs](https://github.com/stampit-org/stampit)
 
 #### Store.createRegistrar(store : StoreInstance) : function
 [&#x24C8;]()
@@ -359,11 +368,15 @@ Optimistic updates can be done using the optimistic key. The store will update i
 
 ### Cat
 
-#### Cat(staticProperties : object) : CatFactory
+#### Cat(stampDescriptor : object) : CatFactory
 [&#x24C8;]()
 
-A stampit factory that produces factory functions. Takes in object that will set
-static properties of the factory function.
+A factory that produces stampit factory functions. Takes in optional object
+`stampDescriptor` with the `init`, `props`, `refs`, and `statics` properties all of
+which are optional.
+These properties are the same used to normally create stamps and are added to
+the stamp factory returned. To see more documentation of these features see the
+stampit [docs](https://github.com/stampit-org/stampit).
 
 #### CatFactory(instanceProperties) : cat
 

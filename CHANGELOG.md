@@ -1,3 +1,9 @@
+# August 10, 2015 v2.2.0
+
+    * [3f82754](../../commit/3f82754) add Actions spec now takes stampit descriptors. add stamp description as second argument to Store
+    * [ffb6f55](../../commit/ffb6f55) add make method binding optional
+    * [f1498d9](../../commit/f1498d9) change action mapping fn context to the stamp
+
 # July 30, 2015 v2.1.0
 
     * [30dbb70](../../commit/30dbb70) add store.shouldStoreNotify
