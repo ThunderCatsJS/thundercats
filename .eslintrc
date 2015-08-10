@@ -12,8 +12,8 @@
     "react"
   ],
   "rules": {
-    "indent": [2, 2, { "indentSwitchCase": true }],
-    "no-comma-dangle": 2,
+    "indent": [2, 2, { "SwitchCase": 2 }],
+    "comma-dangle": 2,
     "no-cond-assign": 2,
     "no-console": 0,
     "no-constant-condition": 2,
@@ -21,7 +21,7 @@
     "no-debugger": 2,
     "no-dupe-keys": 2,
     "no-empty": 2,
-    "no-empty-class": 2,
+    "no-empty-character-class": 2,
     "no-ex-assign": 2,
     "no-extra-boolean-cast": 2,
     "no-extra-parens": 0,
@@ -157,12 +157,12 @@
     ],
     "no-nested-ternary": 2,
     "no-new-object": 2,
-    "no-space-before-semi": 2,
+    "semi-spacing": 2,
     "no-spaced-func": 2,
     "no-ternary": 0,
     "no-trailing-spaces": 1,
     "no-underscore-dangle": 0,
-    "no-wrap-func": 2,
+    "no-extra-parens": 2,
     "one-var": 0,
     "operator-assignment": 0,
     "padded-blocks": 0,
@@ -200,7 +200,7 @@
             "nonwords": false
         }
     ],
-    "spaced-line-comment": [
+    "spaced-comment": [
         2,
         "always",
         { "exceptions": ["-"] }
