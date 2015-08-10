@@ -733,7 +733,6 @@ describe('Store', function() {
         .init(({ instance }) => instance.register(catActions.doAction))
         .methods({
           shouldStoreNotify() {
-            console.log('foo');
             return false;
           }
         });
