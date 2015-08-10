@@ -1,11 +1,14 @@
 import Rx from 'rx';
+import warning from 'warning';
 import stampit from 'stampit';
 import debugFactory from 'debug';
 
+import { getName } from './utils';
 import waitFor from './waitFor';
 
 const debug = debugFactory('thundercats:actions');
 const protectedProperties = [
+  'shouldBindMethods',
   'displayName',
   'constructor'
 ];
@@ -26,15 +29,17 @@ export function getActionDef(ctx) {
 }
 
 
-export function create({ name, map }) {
+export function create(shouldBind, { name, map }) {
   let observers = [];
   let actionStart = new Rx.Subject();
-  let boundMap = map.bind(this);
+  let maybeBound = shouldBind ?
+    map.bind(this) :
+    map;
 
   function action(value) {
     let err = null;
     try {
-      value = boundMap(value);
+      value = maybeBound(value);
     } catch(e) {
       err = e;
     }
@@ -75,9 +80,9 @@ export function create({ name, map }) {
   return action;
 }
 
-export function createMany(instance) {
+export function createMany(shouldBind, instance) {
   return this
-    .map(create, instance)
+    .map(create.bind(instance, shouldBind))
     .reduce((ctx, action) => {
       ctx[action.displayName] = action;
       return ctx;
@@ -85,10 +90,16 @@ export function createMany(instance) {
 }
 
 export default function Actions(obj = {}) {
+  const { shouldBindMethods: shouldBind, displayName } = obj;
+  warning(
+    displayName,
+    '%s used displayName in spec, this will be depricated in future versions',
+    getName(this)
+  );
   return stampit()
-    .refs({ displayName: obj.displayName })
+    .refs({ displayName: displayName })
     .init(({ instance }) => {
-      const actionMethods = getActionDef(obj)::createMany(instance);
+      const actionMethods = getActionDef(obj)::createMany(shouldBind, instance);
       return stampit.mixin(instance, actionMethods);
     });
 }

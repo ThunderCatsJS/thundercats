@@ -64,7 +64,7 @@ describe('Actions', function() {
       catActions.getInBox('human');
     });
 
-    it('should bind original map function to the stamp', function(done) {
+    it('should not bind original map by default', function(done) {
       const mixin = stampit().methods({
         getResult() {
           return true;
@@ -72,21 +72,50 @@ describe('Actions', function() {
       });
 
       const ComposedActions = Actions({
-        displayName: 'composedActions',
 
         perform() {
-          this.should.be.defined;
-          this.getResult.should.be.a( 'function' );
-
-          return {
-            result: this.getResult()
-          };
+          return this && typeof this.getResult === 'function' ?
+            this.getResult() :
+            false;
         }
-      }).compose( mixin );
+      })
+        .refs({ displayName: 'composedActions' })
+        .compose(mixin);
+
       let composedActions = ComposedActions();
 
       composedActions.perform.subscribe(function(value) {
-        value.result.should.be.true;
+        value.should.be.false;
+        done();
+      });
+      composedActions.perform();
+    });
+
+    it('should bind map if shouldBindMethods is true', function(done) {
+      const mixin = stampit().methods({
+        getResult() {
+          return true;
+        }
+      });
+
+      const ComposedActions = Actions({
+        shouldBindMethods: true,
+        perform() {
+          this.should.be.defined;
+          this.getResult.should.be.a('function');
+
+          return typeof this.getResult === 'function' ?
+            this.getResult() :
+            false;
+        }
+      })
+        .refs({ displayName: 'composedActions' })
+        .compose(mixin);
+
+      let composedActions = ComposedActions();
+
+      composedActions.perform.subscribe(function(value) {
+        value.should.be.true;
         done();
       });
       composedActions.perform();
