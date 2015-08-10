@@ -6,10 +6,10 @@ module.exports = {
 
 function createActions(spy = function() {}, name = 'CatActions') {
   return Actions({
-    displayName: name,
     doAction(val) {
       spy(val);
       return val;
     }
-  });
+  })
+    .refs({ displayName: name });
 }

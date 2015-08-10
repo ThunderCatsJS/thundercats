@@ -810,10 +810,10 @@ describe('Store', function() {
 function createActions(spy) {
   spy = spy || function(val) { return val; };
   return Actions({
-    displayName: 'catActions',
     doAction(val) {
       spy(val);
       return val;
     }
-  })();
+  })
+    .refs({ displayName: 'catActions' })();
 }

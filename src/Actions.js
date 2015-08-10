@@ -3,7 +3,6 @@ import warning from 'warning';
 import stampit from 'stampit';
 import debugFactory from 'debug';
 
-import { getName } from './utils';
 import waitFor from './waitFor';
 
 const debug = debugFactory('thundercats:actions');
@@ -92,9 +91,9 @@ export function createMany(shouldBind, instance) {
 export default function Actions(obj = {}) {
   const { shouldBindMethods: shouldBind, displayName } = obj;
   warning(
-    displayName,
-    '%s used displayName in spec, this will be depricated in future versions',
-    getName(this)
+    !displayName,
+    '%s used displayName in spec, this will be deprecated in future versions',
+    displayName
   );
   return stampit()
     .refs({ displayName: displayName })

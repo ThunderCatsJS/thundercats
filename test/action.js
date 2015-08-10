@@ -18,7 +18,6 @@ describe('Actions', function() {
 
     beforeEach(function() {
       const CatActions = Actions({
-        displayName: 'catActions',
         shortcut: null,
         getInBox(value) {
           return {
@@ -32,7 +31,8 @@ describe('Actions', function() {
         errorMap() {
           throw new Error('test');
         }
-      });
+      })
+        .refs({ displayName: 'catActions' });
       catActions = CatActions();
     });
     it('should add displayName as property, not observable', () => {
