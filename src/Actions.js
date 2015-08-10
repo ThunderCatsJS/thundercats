@@ -13,10 +13,8 @@ const protectedProperties = [
 export function getActionDef(ctx) {
   return Object.getOwnPropertyNames(ctx)
     .filter(name => {
-      return (
-        protectedProperties.indexOf(name) === -1 &&
-        name.indexOf('_') === -1
-      );
+      return protectedProperties.indexOf(name) === -1 &&
+        name.indexOf('_') === -1;
     })
     .map(name => ({ name: name, map: ctx[name] }))
     .map(def => {

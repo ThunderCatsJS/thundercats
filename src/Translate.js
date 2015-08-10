@@ -46,17 +46,17 @@ export function hydrate(cat, storesState) {
   }
 
   return Observable.combineLatest([
-      Observable.from(cat.stores.values()),
-      Observable.just(storesState).tap(
-        createObjectValidator('hydrate should get objects but got %s')
-      )
-    ],
-    (store, stateMap) => {
-      return {
-        store,
-        data: stateMap[getNameOrNull(store)]
-      };
-    })
+    Observable.from(cat.stores.values()),
+    Observable.just(storesState).tap(
+      createObjectValidator('hydrate should get objects but got %s')
+    )
+  ],
+  (store, stateMap) => {
+    return {
+      store,
+      data: stateMap[getNameOrNull(store)]
+    };
+  })
     // filter out falsey data and non objects
     .filter(({ data }) => data && typeof data === 'object')
     // assign value to store
