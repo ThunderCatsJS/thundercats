@@ -1,12 +1,13 @@
 import uuid from 'node-uuid';
-import stampit, { assign } from 'stampit';
+import assign from 'object.assign';
+import stampit from 'stampit';
 import { Observable, Disposable } from 'rx';
 import invariant from 'invariant';
 import debugFactory from 'debug';
 
 import {
   mergeChainNonFunctions,
-  mixinChainFunctions,
+  mixinChainFunctions
 } from 'supermixer';
 
 import {

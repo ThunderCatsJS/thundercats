@@ -1,5 +1,6 @@
 import Rx from 'rx';
 import warning from 'warning';
+import assign from 'object.assign';
 import stampit from 'stampit';
 import debugFactory from 'debug';
 
@@ -50,7 +51,7 @@ export function create(shouldBind, { name, map }) {
     let err = null;
     try {
       value = maybeBound(value);
-    } catch(e) {
+    } catch (e) {
       err = e;
     }
 
@@ -67,7 +68,7 @@ export function create(shouldBind, { name, map }) {
 
   action.displayName = name;
   action.observers = observers;
-  stampit.mixin(action, Rx.Observable.prototype);
+  assign(action, Rx.Observable.prototype);
 
   action.hasObservers = function hasObservers() {
     return observers.length > 0 ||
@@ -118,7 +119,7 @@ export default function Actions(obj = {}) {
     .refs({ displayName: displayName })
     .init(({ instance }) => {
       const actionMethods = getActionDef(obj)::createMany(shouldBind, instance);
-      return stampit.mixin(instance, actionMethods);
+      return assign(instance, actionMethods);
     })
     .refs(refs)
     .props(props)
