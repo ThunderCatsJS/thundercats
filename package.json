@@ -14,7 +14,9 @@
     "rx",
     "rxjs",
     "frp",
-    "reactive"
+    "reactive",
+    "stamp",
+    "stampit"
   ],
   "main": "lib/",
   "bugs": "https://github.com/thundercatsjs/thundercats/issues",
