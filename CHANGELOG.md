@@ -1,3 +1,7 @@
+# September 21, 2015 v2.2.1
+
+    * [175090c](../../commit/175090c) use object.assign instead of stampit assign methods
+
 # August 10, 2015 v2.2.0
 
     * [3f82754](../../commit/3f82754) add Actions spec now takes stampit descriptors. add stamp description as second argument to Store
