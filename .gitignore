@@ -2,7 +2,6 @@ lib/*
 !lib/umd
 node_modules
 .idea
-docs
 index.html
 dist
 coverage
