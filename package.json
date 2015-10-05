@@ -25,7 +25,7 @@
     "url": "https://github.com/thundercatsjs/thundercats"
   },
   "scripts": {
-    "build": "npm run build-clean && npm run build-npm && npm run build-umd",
+    "build": "npm run build-clean && npm run build-npm",
     "build-npm": "babel src --out-dir lib",
     "build-umd": "NODE_ENV=production webpack src/ lib/umd/ThunderCats.js && NODE_ENV=production webpack -p src/ lib/umd/ThunderCats.min.js && npm run build-size",
     "build-size": "echo \"gzipped, the umd build is `gzip -c lib/umd/ThunderCats.min.js | wc -c | sed -e 's/^[[:space:]]*//'` bytes\"",
