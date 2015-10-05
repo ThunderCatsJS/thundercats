@@ -332,6 +332,30 @@ describe('Store', function() {
       });
     });
 
+    it('should throw if stream item is null or undefined', () => {
+      const catActions = new Rx.Subject();
+      const CatStore = Store({ })
+        .init(({ instance }) => instance.register(catActions));
+      expect(() => {
+        const store = CatStore();
+        store.subscribe(
+          () => {},
+          () => {},
+          () => {}
+        );
+        catActions.onNext();
+      }).to.throw(/operation should be an object/);
+      expect(() => {
+        const store = CatStore();
+        store.subscribe(
+          () => {},
+          () => {},
+          () => {}
+        );
+        catActions.onNext(null);
+      }).to.throw(/operation should be an object/);
+    });
+
     describe('replace', function() {
 
       let value = { hello: 'world' };
