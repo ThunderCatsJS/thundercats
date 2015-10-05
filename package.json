@@ -52,7 +52,7 @@
     "warning": "^2.0.0"
   },
   "peerDependencies": {
-    "rx": "^2.3.14"
+    "rx": "^4.0.0"
   },
   "devDependencies": {
     "babel": "^5.4.7",
@@ -74,7 +74,7 @@
     "mocha-istanbul": "^0.2.0",
     "node-libs-browser": "^0.5.2",
     "q": "^1.2.0",
-    "rx": "^2.3.14",
+    "rx": "^4.0.0",
     "sinon": "^1.11.1",
     "sinon-chai": "^2.7.0",
     "webpack": "^1.10.1"

@@ -8,6 +8,7 @@ import waitFor from '../src/waitFor';
 
 const expect = chai.expect;
 
+Rx.config.longStackSupport = true;
 chai.should();
 chai.use(sinonChai);
 
@@ -50,7 +51,7 @@ describe('waitFor', function() {
       function(done) {
         let spy = sinon.spy(function() { done(); });
         let waitForObservable = waitFor(observable1);
-        waitForObservable.firstOrDefault().subscribe(spy);
+        waitForObservable.first().subscribe(spy);
         spy.should.have.not.been.called;
         observable1.onNext();
         spy.should.have.been.calledOnce;
@@ -66,7 +67,7 @@ describe('waitFor', function() {
           done();
         });
         waitFor(observable1, observable2)
-          .firstOrDefault()
+          .first()
           .subscribe(spyOnNext);
         spyOnNext.should.not.have.been.called;
         observable1.onNext('ThunderCats');

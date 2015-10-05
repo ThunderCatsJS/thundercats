@@ -79,12 +79,14 @@ export function create(shouldBind, { name, map }) {
       .flatMap(payload => waitFor(...arguments).map(() => payload));
   };
 
-  Rx.Observable.call(action, observer => {
+  action._subscribe = function subscribeToAction(observer) {
     observers.push(observer);
     return new Rx.Disposable(() => {
       observers.splice(observers.indexOf(observer), 1);
     });
-  });
+  };
+
+  Rx.Observable.call(action);
 
   debug('action %s created', action.displayName);
   return action;

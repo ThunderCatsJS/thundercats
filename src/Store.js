@@ -260,7 +260,7 @@ const methods = {
         Observable.fromPromise(ops.optimistic) :
         ops.optimistic;
 
-      optimisticObs.firstOrDefault().subscribe(
+      optimisticObs.first().subscribe(
         () => {},
         err => {
           debug('optimistic error. reverting changes', err);
@@ -426,7 +426,7 @@ export default function Store(stampSpec = {}) {
       instance.observers = new Map();
       instance.history = new Map();
       instance.actions = [];
-      Observable.call(instance, methods._subscribe);
+      Observable.call(instance);
       return instance;
     })
     .props(props)

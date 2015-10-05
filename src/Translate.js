@@ -74,6 +74,6 @@ export function hydrate(cat, storesState) {
       (err) => debug('deserialize encountered a err', err),
       () => debug('deserialize completed')
     )
-    .lastOrDefault()
+    .last()
     .map(() => cat);
 }
