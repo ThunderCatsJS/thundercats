@@ -1,3 +1,3 @@
 require('babel/register')({
-  auxiliaryComment: 'istanbul ignore next'
+  auxiliaryCommentBefore: 'istanbul ignore next'
 });

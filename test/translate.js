@@ -119,8 +119,8 @@ describe('Translate', function() {
   });
 });
 
-function createStore(initValue = {}) {
-  return Store(initValue)
+function createStore(value = {}) {
+  return Store({ refs: { value } })
     .refs({ displayName: 'CatStore' })
     .init(({ instance, args }) => {
       const cat = args[0];

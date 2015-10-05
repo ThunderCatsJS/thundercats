@@ -35,7 +35,7 @@ describe('Store', function() {
     beforeEach(function() {
 
       catActions = new Rx.Subject();
-      const CatStore = Store({ name: 'Lion-O' })
+      const CatStore = Store({ refs: { value: { name: 'Lion-O' } } })
         .static({ displayName: 'CatStore' })
         .methods({
           opsOnError(err) {
@@ -82,10 +82,13 @@ describe('Store', function() {
   describe('stamp descriptor', function() {
     it('should honor stamp descriptor in created stamp', function() {
       const initSpy = sinon.spy();
-      const CatStore = Store({ todos: ['foo'] }, {
+      const CatStore = Store({
         init: initSpy,
         props: { foo: { bar: 'baz' } },
-        refs: { meow: 'goesthecat' },
+        refs: {
+          value: { todos: ['foo'] },
+          meow: 'goesthecat'
+        },
         statics: { boo: { bar: () => {} } }
       });
       CatStore.boo.bar.should.be.a.function;
@@ -103,7 +106,7 @@ describe('Store', function() {
 
       it('should throw when registering non observables', function() {
         let fn = function() {
-          const ExtendStore = Store({name: 'Lion-O'})
+          const ExtendStore = Store({ refs: { value: {name: 'Lion-O'} } })
             .init(({ instance }) => {
               instance.register('not the momma');
             });
@@ -116,7 +119,7 @@ describe('Store', function() {
       it('should throw if an action errors', function() {
         let fn = function() {
           let catActions = new Rx.Subject();
-          const ExtendStore = Store({ name: 'Lion-O' })
+          const ExtendStore = Store({ refs: { value: { name: 'Lion-O' } } })
             .init(({ instance }) => {
               instance.register(catActions);
             });
@@ -129,7 +132,7 @@ describe('Store', function() {
 
       it('should complain when action completes', function() {
         let catActions = new Rx.Subject();
-        const ExtendStore = Store({ name: 'Lion-O' })
+        const ExtendStore = Store({ refs: { value: { name: 'Lion-O' } } })
           .init(({ instance }) => {
             instance.register(catActions);
           });
@@ -339,7 +342,7 @@ describe('Store', function() {
 
       before(function() {
         catActions = new Rx.Subject();
-        const CatStore = Store(value)
+        const CatStore = Store({ refs: { value } })
           .init(({ instance }) => instance.register(catActions));
         store = CatStore();
         store.subscribe(spy);
@@ -381,7 +384,7 @@ describe('Store', function() {
 
       before(function() {
         catActions = new Rx.Subject();
-        const CatStore = Store(value)
+        const CatStore = Store({ refs: { value } })
           .init(({ instance }) => instance.register(catActions));
         store = CatStore();
         store.subscribe(spy);
@@ -425,7 +428,7 @@ describe('Store', function() {
 
       before(function() {
         catActions = new Rx.Subject();
-        const CatStore = Store(value)
+        const CatStore = Store({ refs: { value } })
           .static({ displayName: 'CatStore' })
           .init(({ instance }) => instance.register(catActions));
         store = CatStore();
@@ -488,7 +491,7 @@ describe('Store', function() {
         spy = sinon.spy();
         defer = Q.defer();
         catActions = new Rx.Subject();
-        const CatStore = Store(value)
+        const CatStore = Store({ refs: { value } })
           .static({ displayName: 'CatStore' })
           .init(({ instance }) => instance.register(catActions));
         CatStore.displayName = 'CatStore';
@@ -540,7 +543,7 @@ describe('Store', function() {
         spy = sinon.spy();
         defer = Q.defer();
         catActions = new Rx.Subject();
-        const CatStore = Store(value)
+        const CatStore = Store({ refs: { value } })
           .static({ displayName: 'CatStore' })
           .init(({ instance }) => instance.register(catActions));
         store = CatStore();
@@ -588,7 +591,7 @@ describe('Store', function() {
 
         before(function() {
           catActions = new Rx.Subject();
-          const CatStore = Store([])
+          const CatStore = Store({ refs: { value: [] } })
             .static({ displayName: 'CatStore' })
             .init(({ instance }) => instance.register(catActions));
           store = CatStore();
@@ -711,7 +714,7 @@ describe('Store', function() {
     });
 
     it('should notify observer if true', () => {
-      CatStore = Store({ foo: 'bar' })
+      CatStore = Store({ refs: { value: { foo: 'bar' } } })
         .refs({ displayName: 'CatStore' })
         .init(({ instance }) => instance.register(catActions.doAction))
         .methods({
@@ -728,7 +731,7 @@ describe('Store', function() {
     });
 
     it('should notify observer of initValue and none after if false', () => {
-      CatStore = Store({ foo: 'bar' })
+      CatStore = Store({ refs: { value: { foo: 'bar' } } })
         .refs({ displayName: 'CatStore' })
         .init(({ instance }) => instance.register(catActions.doAction))
         .methods({
@@ -746,7 +749,7 @@ describe('Store', function() {
     });
 
     it('should not affect if not a function', () => {
-      CatStore = Store({ foo: 'bar' })
+      CatStore = Store({ refs: { value: { foo: 'bar' } } })
         .refs({ displayName: 'CatStore' })
         .init(({ instance }) => instance.register(catActions.doAction))
         .methods({
@@ -764,7 +767,7 @@ describe('Store', function() {
   describe('serialize', function() {
     it('should produce a string with the correct data', function() {
       let catActions = createActions();
-      const CatStore = Store({ cats: 'meow' })
+      const CatStore = Store({ refs: { value: { cats: 'meow' } } })
         .static({ displayName: 'displayName' })
         .init(({ instance }) => instance.register(catActions.doAction));
       let store = CatStore();

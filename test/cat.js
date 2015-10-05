@@ -205,7 +205,7 @@ describe('Cat', function() {
 });
 
 function createStore(initValue = {}) {
-  return Store(initValue)
+  return Store({ refs: { value: initValue } })
     .refs({ displayName: 'CatStore' })
     .init(({ instance, args }) => {
       const cat = args[0];
