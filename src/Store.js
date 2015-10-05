@@ -1,5 +1,4 @@
 import uuid from 'node-uuid';
-import assign from 'object.assign';
 import stampit from 'stampit';
 import { Observable, Disposable } from 'rx';
 import invariant from 'invariant';
@@ -18,6 +17,7 @@ import {
   isPromise
 } from './utils';
 
+const assign = Object.assign;
 const debug = debugFactory('thundercats:store');
 const __DEV__ = process.env.NODE_ENV !== 'production';
 
