@@ -167,6 +167,14 @@ const methods = {
     );
 
     this._operationsSubscription = Observable.merge(operations)
+      .doOnNext(operation => {
+        invariant(
+          typeof operation !== 'undefined' &&
+          !!operation,
+          'operation should be an object but was given %s',
+          operation
+        );
+      })
       .filter(operation => typeof operation.replace === 'object' ?
         !!operation.replace :
         true
