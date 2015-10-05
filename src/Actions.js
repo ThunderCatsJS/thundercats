@@ -1,5 +1,4 @@
 import Rx from 'rx';
-import warning from 'warning';
 import stampit from 'stampit';
 import debugFactory from 'debug';
 
@@ -103,20 +102,13 @@ export function createMany(shouldBind, instance) {
 export default function Actions(obj = {}) {
   const {
     shouldBindMethods: shouldBind,
-    displayName,
     init = [],
     props = {},
     refs = {},
     statics = {}
   } = obj;
 
-  warning(
-    !displayName,
-    '%s used displayName in spec, this will be deprecated in future versions',
-    displayName
-  );
   return stampit()
-    .refs({ displayName: displayName })
     .init(({ instance }) => {
       const actionMethods = getActionDef(obj)::createMany(shouldBind, instance);
       return assign(instance, actionMethods);
