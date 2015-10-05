@@ -9,6 +9,7 @@ import Q from 'q';
 import { Store, Actions } from '../src';
 import { isObservable, isStore } from '../src/utils';
 
+Rx.config.longStackSupport = true;
 chai.should();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);

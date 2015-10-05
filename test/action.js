@@ -8,6 +8,8 @@ import chaiAsPromised from 'chai-as-promised';
 
 import { Actions } from '../src';
 
+Rx.config.longStackSupport = true;
+
 chai.should();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
@@ -213,7 +215,7 @@ describe('Actions', function() {
             done();
           });
           let waitForObservable = catActions.tryWaitFor.waitFor(observable1);
-          waitForObservable.firstOrDefault().subscribe(spy);
+          waitForObservable.first().subscribe(spy);
           spy.should.have.not.been.called;
           catActions.tryWaitFor('meow');
           spy.should.have.not.been.called;
