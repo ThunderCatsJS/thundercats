@@ -390,13 +390,14 @@ const staticMethods = {
 
 // Store is a stamp factory
 // It returns a factory that creates store instances
-export default function Store(value = {}, stampSpec = {}) {
+export default function Store(stampSpec = {}) {
   const {
     init = [],
     refs = {},
     props = {},
     statics = {}
   } = stampSpec;
+  const { value = {} } = refs;
 
   const stamp = stampit();
   stamp.fixed.refs = stamp.fixed.state = mergeChainNonFunctions(

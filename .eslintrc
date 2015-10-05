@@ -220,7 +220,7 @@
 
     "react/display-name": 1,
     "react/jsx-boolean-value": 1,
-    "react/jsx-quotes": [1, "single", "avoid-escape"],
+    "jsx-quotes": [ 1, "prefer-single" ],
     "react/jsx-no-undef": 1,
     "react/jsx-sort-props": 1,
     "react/jsx-uses-react": 1,
