@@ -1,6 +1,5 @@
 import { Observable } from 'rx';
 import invariant from 'invariant';
-import assign from 'object.assign';
 import debugFactory from 'debug';
 import {
   createObjectValidator,
@@ -9,6 +8,7 @@ import {
   isKitten
 } from './utils';
 
+const assign = Object.assign;
 const __DEV__ = process.env.NODE_ENV === 'development';
 const debug = debugFactory('thundercats:translate');
 

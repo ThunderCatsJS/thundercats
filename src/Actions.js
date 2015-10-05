@@ -1,11 +1,11 @@
 import Rx from 'rx';
 import warning from 'warning';
-import assign from 'object.assign';
 import stampit from 'stampit';
 import debugFactory from 'debug';
 
 import waitFor from './waitFor';
 
+const assign = Object.assign;
 const debug = debugFactory('thundercats:actions');
 const currentStampSpec = [
   'methods',
