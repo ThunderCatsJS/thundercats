@@ -1,7 +1,7 @@
 {
   "name": "thundercats",
   "description": "RxJS Meets isomorphic Flux",
-  "version": "2.2.1",
+  "version": "3.0.0",
   "homepage": "http://thundercats.js.org",
   "keywords": [
     "alwaysUseTwoSpaces",
@@ -29,7 +29,7 @@
     "build-npm": "babel src --out-dir lib",
     "build-umd": "NODE_ENV=production webpack src/ lib/umd/ThunderCats.js && NODE_ENV=production webpack -p src/ lib/umd/ThunderCats.min.js && npm run build-size",
     "build-size": "echo \"gzipped, the umd build is `gzip -c lib/umd/ThunderCats.min.js | wc -c | sed -e 's/^[[:space:]]*//'` bytes\"",
-    "build-clean": "rm -rf lib/* && mkdir lib/umd",
+    "build-clean": "rm -rf lib/*",
     "cover": "NODE_ENV=development istanbul cover _mocha -- --compilers js:./registerWithOptions.js",
     "coverAlls": "NODE_ENV=development istanbul cover _mocha -- --compilers js:./registerWithOptions.js && istanbul-coveralls",
     "lint": "eslint .",

@@ -1,3 +1,13 @@
+# October 8, 2015 v3.0.0
+    There are several breaking changes in this release.
+
+    * [4c2690f](../../commit/4c2690f) Update to RxJS 4.0
+    * [0d61877](../../commit/0d61877) Add a to Stores that receive operations that are null or undefined
+    * [4c25827](../../commit/4c25827) Remove value from Store arguments. Store now takes a stamp or stamp spec object as its first argument
+    * [9a5bd51](../../commit/9a5bd51) Remove deprecated property `displayName` from the action spec
+    * [aa56717](../../commit/aa56717) ThunderCats now requires the use of Object.assign. You must manually include the polyfill if you intend to support older browsers
+
+
 # September 21, 2015 v2.2.1
 
     * [175090c](../../commit/175090c) use object.assign instead of stampit assign methods
