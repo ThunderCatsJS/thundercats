@@ -21,7 +21,14 @@ methods of these factories instances. These are taken as the specifications of t
 For every key on spec,
 there will be a corresponding method with that name. If the keys value on spec
 is a function, it is used as an initial mapping function. If value is null, the
-indentity function, `((x) => x)` is used.
+indentity function, `((x) => x)`, is used.
+
+A mapping function has the following signature
+
+`(value : any) : any|Observable<any>`
+
+If a mapping function returns an observable, that observable is subscribed to
+and those values it returns are passed to that actions observables.
 
 ### ActionsFactory(instanceProperties) : actions
 

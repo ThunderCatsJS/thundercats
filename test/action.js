@@ -32,13 +32,15 @@ describe('Actions', function() {
         },
         errorMap() {
           throw new Error('test');
-        }
-      })
-        .refs({ displayName: 'catActions' });
+        },
+        returnObservable(obs) {
+          return obs;
+        },
+
+        refs: { displayName: 'catActions' }
+      });
+
       catActions = CatActions();
-    });
-    it('should add displayName as property, not observable', () => {
-      catActions.displayName.should.equal('catActions');
     });
 
     it('should be extend-able', function() {
@@ -134,9 +136,19 @@ describe('Actions', function() {
       }
     );
 
+    it('should accept observables from map function', done => {
+      catActions.returnObservable.subscribe(val => {
+        val.should.equal(3);
+        done();
+      });
+      catActions.returnObservable(Rx.Observable.just(3));
+    });
+
     it('should call onError when map throws', function(done) {
       catActions.errorMap.subscribe(
-        () => {},
+        () => {
+          throw new Error('should not call on next');
+        },
         err => {
           expect(err).to.be.an.instanceOf(Error);
           done();
@@ -145,6 +157,25 @@ describe('Actions', function() {
       );
       catActions.errorMap();
     });
+
+    it(
+      'should accept observables from map function and call onError',
+      done => {
+        const err = new Error('Happy Cat Day!');
+        catActions.returnObservable.subscribe(
+          () => {
+            throw new Error('should not call onNext!');
+          },
+          _err => {
+            _err.should.equal(err);
+            done();
+          },
+          done
+        );
+
+        catActions.returnObservable(Rx.Observable.throw(err));
+      }
+    );
   });
 
   describe('spec', function() {
