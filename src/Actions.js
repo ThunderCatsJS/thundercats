@@ -1,4 +1,4 @@
-import Rx from 'rx';
+import { Observable, Subject, Disposable, helpers } from 'rx';
 import stampit from 'stampit';
 import debugFactory from 'debug';
 
@@ -32,7 +32,7 @@ export function getActionDef(ctx) {
     .map(name => ({ name: name, map: ctx[name] }))
     .map(def => {
       if (typeof def.map !== 'function') {
-        def.map = Rx.helpers.identity;
+        def.map = helpers.identity;
       }
       return def;
     });
@@ -41,33 +41,42 @@ export function getActionDef(ctx) {
 
 export function create(shouldBind, { name, map }) {
   let observers = [];
-  let actionStart = new Rx.Subject();
+  let actionStart = new Subject();
   let maybeBound = shouldBind ?
     map.bind(this) :
     map;
 
   function action(value) {
-    let err = null;
-    try {
-      value = maybeBound(value);
-    } catch (e) {
-      err = e;
-    }
-
-    actionStart.onNext(value);
-    observers.forEach((observer) => {
-      if (err) {
-        return observer.onError(err);
-      }
-      observer.onNext(value);
-    });
+    Observable.just(value)
+      .map(maybeBound)
+      .flatMap(value => {
+        if (Observable.isObservable(value)) {
+          return value;
+        }
+        return Observable.just(value);
+      })
+      // notify of action start
+      .do(value => actionStart.onNext(value))
+      // notify action observers
+      .doOnNext(
+        value => observers.forEach(observer => observer.onNext(value))
+      )
+      // notify action observers of error
+      .doOnError(
+        value => observers.forEach(observer => observer.onError(value))
+      )
+      // prevent error from calling on error
+      .catch(e => Observable.just(e))
+      .subscribe(
+        () => debug('action % onNext', name)
+      );
 
     return value;
   }
 
   action.displayName = name;
   action.observers = observers;
-  assign(action, Rx.Observable.prototype);
+  assign(action, Observable.prototype);
 
   action.hasObservers = function hasObservers() {
     return observers.length > 0 ||
@@ -81,12 +90,12 @@ export function create(shouldBind, { name, map }) {
 
   action._subscribe = function subscribeToAction(observer) {
     observers.push(observer);
-    return new Rx.Disposable(() => {
+    return new Disposable(() => {
       observers.splice(observers.indexOf(observer), 1);
     });
   };
 
-  Rx.Observable.call(action);
+  Observable.call(action);
 
   debug('action %s created', action.displayName);
   return action;
