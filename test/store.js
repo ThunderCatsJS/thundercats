@@ -546,11 +546,11 @@ describe('Store', function() {
       });
 
       it('should remove that entry on promise resolve', function(done) {
-        defer.resolve();
         defer.promise.then(function() {
           store.history.size.should.equal(0);
           done();
         });
+        defer.resolve();
       });
     });
 
@@ -657,11 +657,11 @@ describe('Store', function() {
           'second operation on the old value after the first ' +
           'operation has failed',
           function(done) {
-            deferred1.reject();
             deferred1.promise.catch(function() {
               spy.should.have.been.calledWith(['bar']);
               done();
             });
+            deferred1.reject();
           }
         );
 
