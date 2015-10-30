@@ -542,15 +542,22 @@ describe('Store', function() {
           replace: {},
           optimistic: defer2
         });
+        store.history.size.should.equal(2);
         defer2.onError('boo');
+        store.history.size.should.equal(1);
       });
 
-      it('should remove that entry on promise resolve', function(done) {
-        defer.promise.then(function() {
-          store.history.size.should.equal(0);
-          done();
-        });
+      it('should remove that entry on promise resolve', function() {
+        const delay = Q.defer();
+        setTimeout(delay.resolve, 100);
+        store.history.size.should.equal(1);
         defer.resolve();
+        return delay
+          .promise
+          .then(() => defer.promise)
+          .then(() => {
+            store.history.size.should.equal(0);
+          });
       });
     });
 
@@ -621,20 +628,20 @@ describe('Store', function() {
             .init(({ instance }) => instance.register(catActions));
           store = CatStore();
           store.subscribe(spy);
-
-          catActions.onNext({
-            transform: function(arr) {
-              return arr.concat('foo');
-            },
-            optimistic: deferred1.promise
-          });
         });
 
         it(
           'should notify observers with the transformed value ' +
           'after the first operation has been applied',
           function() {
+            catActions.onNext({
+              transform: function(arr) {
+                return arr.concat('foo');
+              },
+              optimistic: deferred1.promise
+            });
             spy.should.have.been.calledWith(['foo']);
+            spy.should.have.been.callCount(2);
           }
         );
 
@@ -649,6 +656,7 @@ describe('Store', function() {
               optimistic: deferred2.promise
             });
             spy.should.have.been.calledWith(['foo', 'bar']);
+            spy.should.have.been.callCount(3);
           }
         );
 
@@ -656,24 +664,34 @@ describe('Store', function() {
           'should notify observers with result of applying the ' +
           'second operation on the old value after the first ' +
           'operation has failed',
-          function(done) {
-            deferred1.promise.catch(function() {
-              spy.should.have.been.calledWith(['bar']);
-              done();
-            });
+          function() {
+            const delay = Q.defer();
+            setTimeout(delay.resolve, 100);
             deferred1.reject();
+            return delay
+              .promise
+              .then(() => deferred1.promise)
+              .catch(() => {
+                spy.should.have.been.callCount(4);
+                spy.should.have.been.calledWith(['bar']);
+              });
           }
         );
 
         it(
           'should notify observers with the initial value after ' +
           'the second operation has failed',
-          function(done) {
+          function() {
+            const delay = Q.defer();
+            setTimeout(delay.resolve, 100);
             deferred2.reject();
-            deferred2.promise.catch(function() {
-              spy.should.have.been.calledWith([]);
-              done();
-            });
+            return delay
+              .promise
+              .then(() => deferred2.promise)
+              .catch(function() {
+                spy.should.have.been.callCount(5);
+                spy.should.have.been.calledWith([]);
+              });
           }
         );
       });
