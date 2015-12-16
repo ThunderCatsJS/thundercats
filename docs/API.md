@@ -2,7 +2,7 @@
 
 ## Actions
 
-### Actions(spec : object) : ActionsFactory
+### Actions(spec : Object) => ActionsFactory
 [&#x24C8;]()
 
 A factory that produces stampit factory functions. Takes in optional object
@@ -16,32 +16,37 @@ stampit [docs](https://github.com/stampit-org/stampit).
 Any other properties are used to create observables
 methods of these factories instances. These are taken as the specifications of the actions instance.
 
-> spec signature : { methodName: mappingFunction | null }
+`spec: { methodName: (map(val: any) => val: Observable|Any)|Null }`
 
 For every key on spec,
 there will be a corresponding method with that name. If the keys value on spec
-is a function, it is used as an initial mapping function. If value is null, the
-indentity function, `((x) => x)`, is used.
+is a function, it is used as an initial map function. If value is null, the
+identity function, `((x) => x)`, is used. Keys with `_` are ignored.
 
 A mapping function has the following signature
 
-`(value : any) : any|Observable<any>`
+`map(value : Any) => Observable<any>|Any`
 
 If a mapping function returns an observable, that observable is subscribed to
 and those values it returns are passed to that actions observables.
 
-### ActionsFactory(instanceProperties) : actions
+### ActionsFactory(instanceProperties: Object) => actions: Object
 
 A factory function ([a stampit stamp](https://github.com/stampit-org/stampit#stampit-api)) that returns an actions instance with methods defined during factory creation above.
 
-### actions.someObservableMethod : observable
+### actions.dispose: function
 
-Any method defined during factory creation will be an observable method availble
+Will dispose all the observable actions attached to the actions object and remove their observers.
+
+### actions.someObservableMethod: Observable
+
+Any method defined during factory creation will be an observable method available
 on the instance object. This method has all the methods available to an [RxJS Observable](https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md#observable-instance-methods) instance as well as...
 
 ### actions.someObservableMethod.displayName : string
 
-A displayName taken from the key in `spec`
+A displayName for the action used during debugging and registering. To add a
+displayName property use the `refs` of the stampit spec
 
 ## Store
 
