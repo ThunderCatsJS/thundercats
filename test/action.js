@@ -275,6 +275,41 @@ describe('Actions', function() {
     });
   });
 
+  describe('internal lifecycle hooks', function() {
+    it('should have a duration observable', () => {
+      const catActions = Actions({ purr: null })();
+      assert(
+        !!catActions.purr.__duration,
+        'actions should have a __durations property'
+      );
+    });
+
+    it('should on call __duration once per action', () => {
+      const spy = sinon.spy();
+      const spy2 = sinon.spy();
+      const catActions = Actions({ purr: null })();
+      catActions.purr.__duration().subscribe(spy);
+      catActions.purr(Observable.of(1, 2, 3));
+      assert(
+        spy.calledOnce,
+        'duration Observer was called more than once'
+      );
+
+      catActions.purr.__duration().subscribe(spy2);
+      catActions.purr(Observable.of(1, 2, 3));
+
+      assert(
+        spy.calledOnce,
+        'duration Observable spy was called more than once'
+      );
+
+      assert(
+        spy2.calledOnce,
+        'duration Observable spy was called more than once'
+      );
+    });
+  });
+
   describe('disposal', function() {
     let catActions;
 
