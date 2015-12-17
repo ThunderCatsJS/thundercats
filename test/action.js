@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
-import Rx from 'rx';
+import Rx, { Observable } from 'rx';
 import stampit from 'stampit';
-import chai, { expect } from 'chai';
+import chai, { assert, expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -193,6 +193,15 @@ describe('Actions', function() {
       catActions.meow.should.equal('goesthecat');
       initSpy.should.have.been.calledOnce;
     });
+
+    it('should work without it', () => {
+      const catActions = Actions()();
+
+      assert(
+        typeof catActions === 'object',
+        'using undefined spec does not work'
+      );
+    });
   });
 
   describe('waitFor', function() {
@@ -267,6 +276,107 @@ describe('Actions', function() {
   });
 
   describe('disposal', function() {
+    let catActions;
+
+    beforeEach(function() {
+      const CatActions = Actions({
+        doThis(val) {
+          return val;
+        },
+        mapObs(obs) {
+          return obs;
+        }
+      });
+      catActions = CatActions();
+    });
+
+    it('should have a dispose method', () => {
+      expect(catActions.dispose).to.be.a('function');
+    });
+
+    it('should dispose action observables', () => {
+      catActions.mapObs.isDisposed.should.be.false;
+      catActions.doThis.isDisposed.should.be.false;
+
+      catActions.mapObs.subscribe(() => {});
+      catActions.doThis.subscribe(() => {});
+
+      catActions.mapObs.hasObservers().should.be.equal(true);
+      catActions.doThis.hasObservers().should.be.equal(true);
+
+      // should dispose all observers
+      catActions.dispose();
+
+      catActions.doThis.isDisposed.should.be.true;
+      catActions.mapObs.isDisposed.should.be.true;
+
+      // these should be removed in next major version
+      // as hasObservers should throw when action is disposed
+      catActions.doThis.hasObservers().should.be.equal(false);
+      catActions.mapObs.hasObservers().should.be.equal(false);
+
+      expect(() => {
+        catActions.doThis({});
+      }).to.throw(/object has been disposed/i);
+
+      expect(() => {
+        catActions.mapObs(Observable.from([1, 2, 3]));
+      }).to.throw(/object has been disposed/i);
+    });
+
+    it('individual action should dispose', () => {
+      assert(
+        typeof catActions.doThis.dispose === 'function',
+        'individual action does not have a dispose method'
+      );
+
+      catActions.doThis.subscribe(() => {});
+      assert(
+        catActions.doThis.hasObservers(),
+        'action does not any have observers after a subscribe'
+      );
+
+      catActions.doThis.dispose();
+      assert(
+        catActions.doThis.isDisposed,
+        'action is not disposed'
+      );
+
+      assert(
+        !catActions.mapObs.isDisposed,
+        'unrelated action is disposed!'
+      );
+
+      catActions.dispose();
+      assert(
+        catActions.mapObs.isDisposed,
+        'actions is not disposed'
+      );
+    });
+  });
+
+  describe('error', function() {
+    it('should stop action', () => {
+      const err = new Error('Catastrophy');
+      const CatActions = Actions({
+        doThis(val) {
+          return val;
+        }
+      });
+      const catActions = CatActions();
+      catActions.doThis.subscribe(
+        () => { throw new Error('should never be called'); },
+        (_err) => expect(_err).to.equal(err)
+      );
+      catActions.doThis.hasObservers().should.be.true;
+      catActions.doThis(Observable.throw(err));
+
+      catActions.doThis(Observable.just('foo'));
+      catActions.doThis.hasObservers().should.be.false;
+    });
+  });
+
+  describe('subscription', function() {
 
     let spy;
     let catActions;

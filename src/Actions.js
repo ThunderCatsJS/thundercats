@@ -1,9 +1,16 @@
-import { Observable, Subject, Disposable, helpers } from 'rx';
 import stampit from 'stampit';
 import debugFactory from 'debug';
+import {
+  Observable,
+  Subject,
+  Disposable,
+  CompositeDisposable,
+  helpers
+} from 'rx';
 
 import waitFor from './waitFor';
 
+const { checkDisposed } = Disposable;
 const assign = Object.assign;
 const debug = debugFactory('thundercats:actions');
 const currentStampSpec = [
@@ -40,14 +47,27 @@ export function getActionDef(ctx) {
 
 
 export function create(shouldBind, { name, map }) {
-  let observers = [];
-  let actionStart = new Subject();
-  let maybeBound = shouldBind ?
+  const observers = [];
+  const actionDisposable = new CompositeDisposable();
+  const actionStart = new Subject();
+  const maybeBound = shouldBind ?
     map.bind(this) :
     map;
 
   function action(value) {
-    Observable.just(value)
+    // throw if disposed observable is retried
+    checkDisposed(action);
+    if (action.isStopped) {
+      debug('%s called after being stopped', name);
+      return value;
+    }
+
+    // NOTE: if an error is thrown in the mapping function
+    // this will cause the stream to collapse
+    // and the action will no longer be observable
+    // nor will the observers listen as they have been stopped by
+    // the error
+    const mapDisposable = Observable.just(value)
       .map(maybeBound)
       .flatMap(value => {
         if (Observable.isObservable(value)) {
@@ -61,26 +81,45 @@ export function create(shouldBind, { name, map }) {
       .doOnNext(
         value => observers.forEach(observer => observer.onNext(value))
       )
-      // notify action observers of error
-      .doOnError(
-        value => observers.forEach(observer => observer.onError(value))
-      )
-      // prevent error from calling on error
-      .catch(e => Observable.just(e))
       .subscribe(
-        () => debug('action % onNext', name)
+        () => debug('%s onNext', name),
+        err => {
+          // observables returned by the mapping function must use
+          // a catch to prevent the action from collapsing the stream
+          action.error = err;
+          action.isStopped = true;
+          action.hasError = true;
+
+          // notify action observers of error
+          observers.forEach(observer => observer.onError(err));
+          // observers will no longer listen after pushing error
+          // as the stream has collapsed
+          // so we remove them
+          observers.length = 0;
+        }
       );
 
+    actionDisposable.add(mapDisposable);
     return value;
   }
 
+  action.isDisposed = false;
+  action.isStopped = false;
   action.displayName = name;
   action.observers = observers;
   assign(action, Observable.prototype);
 
   action.hasObservers = function hasObservers() {
-    return observers.length > 0 ||
-      actionStart.hasObservers();
+    // in next major version this should throw if already disposed
+    // in order to better follow RxJS conventions
+    //
+    // checkDisposed(action);
+
+    return !!(
+      observers.length > 0 ||
+      actionStart.observers &&
+      actionStart.observers.length > 0
+    );
   };
 
   action.waitFor = function() {
@@ -89,22 +128,37 @@ export function create(shouldBind, { name, map }) {
   };
 
   action._subscribe = function subscribeToAction(observer) {
+    // in next major version this should check if action
+    // has been stopped or disposed and act accordingly
     observers.push(observer);
     return new Disposable(() => {
       observers.splice(observers.indexOf(observer), 1);
     });
   };
 
+  const subscription = new Disposable(() => {
+    observers.length = 0;
+    action.isDisposed = true;
+    actionStart.dispose();
+    actionDisposable.dispose();
+  });
+
+  action.dispose = () => subscription.dispose();
+
   Observable.call(action);
 
-  debug('action %s created', action.displayName);
-  return action;
+  debug('%s created', action.displayName);
+  return {
+    action,
+    subscription
+  };
 }
 
-export function createMany(shouldBind, instance) {
+export function createMany(shouldBind, instance, compositeDisposable) {
   return this
     .map(create.bind(instance, shouldBind))
-    .reduce((ctx, action) => {
+    .reduce((ctx, { action, subscription }) => {
+      compositeDisposable.add(subscription);
       ctx[action.displayName] = action;
       return ctx;
     }, {});
@@ -121,8 +175,15 @@ export default function Actions(obj = {}) {
 
   return stampit()
     .init(({ instance }) => {
-      const actionMethods = getActionDef(obj)::createMany(shouldBind, instance);
-      return assign(instance, actionMethods);
+      const actionsDisposable = new CompositeDisposable();
+      const actionMethods = getActionDef(obj)
+        ::createMany(shouldBind, instance, actionsDisposable);
+
+      return assign(
+        instance,
+        actionMethods,
+        { dispose() { actionsDisposable.dispose(); } }
+      );
     })
     .refs(refs)
     .props(props)
