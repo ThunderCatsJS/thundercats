@@ -1,4 +1,5 @@
 import stampit from 'stampit';
+import warning from 'warning';
 import debugFactory from 'debug';
 import {
   Observable,
@@ -10,6 +11,7 @@ import {
 
 import waitFor from './waitFor';
 
+const __DEV__ = process.env.NODE_ENV !== 'production';
 const { checkDisposed } = Disposable;
 const assign = Object.assign;
 const debug = debugFactory('thundercats:actions');
@@ -50,6 +52,7 @@ export function create(shouldBind, { name, map }) {
   const observers = [];
   const actionDisposable = new CompositeDisposable();
   const actionStart = new Subject();
+  const actionEnd = new Subject();
   const maybeBound = shouldBind ?
     map.bind(this) :
     map;
@@ -80,6 +83,9 @@ export function create(shouldBind, { name, map }) {
       // notify action observers
       .doOnNext(
         value => observers.forEach(observer => observer.onNext(value))
+      )
+      .doOnCompleted(
+        () => actionEnd.onNext()
       )
       .subscribe(
         () => debug('%s onNext', name),
@@ -123,8 +129,23 @@ export function create(shouldBind, { name, map }) {
   };
 
   action.waitFor = function() {
+    /* istanbul ignore else */
+    if (__DEV__) {
+      warning(
+        false,
+        'action.waitFor is deprecated and will be removed in ' +
+        'the next version of thundercats'
+      );
+    }
     return actionStart
       .flatMap(payload => waitFor(...arguments).map(() => payload));
+  };
+
+  // NOTE: not public API. May change or be removed at any time
+  action.__duration = function __duration() {
+    return actionStart
+      .flatMap(actionEnd)
+      .first();
   };
 
   action._subscribe = function subscribeToAction(observer) {
