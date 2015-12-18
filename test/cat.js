@@ -195,11 +195,14 @@ describe('Cat', function() {
       // add observer to store
       // in turn store observers actions
       catStore.subscribe(() => {});
-      catStore.hasObservers().should.equal.true;
-      catActions.doAction.hasObservers().should.equal.true;
+      catStore.hasObservers().should.be.true;
+      catActions.doAction.subscribe(() => {});
+
+      catActions.doAction.hasObservers().should.be.true;
       cat.dispose();
-      catStore.hasObservers().should.equal.false;
-      catActions.doAction.hasObservers().should.equal.false;
+
+      catStore.hasObservers().should.be.false;
+      catActions.doAction.hasObservers().should.equal(false);
     });
   });
 });
