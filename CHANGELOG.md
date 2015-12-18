@@ -1,3 +1,17 @@
+# December 17, 2015 v3.1.0
+
+    This release sees the addition of an import feature. The ability to return
+    an observable sequence from an action's map function. While you could do
+    this before, it would have been passed as an item and not mapped over.
+    Now the observable sequence will be subscribed to and its items are passed
+    to the actions observers.
+
+    This release also adds dispose methods on the entire actions object and the
+    individual actions.
+
+    * [8495558](../../commit/8495558) Add disposability to actions
+    * [d6a3339](../../commit/d6a3339) Action map now accepts observables
+
 # October 8, 2015 v3.0.0
     There are several breaking changes in this release.
 
