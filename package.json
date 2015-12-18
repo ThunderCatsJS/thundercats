@@ -1,7 +1,7 @@
 {
   "name": "thundercats",
   "description": "RxJS Meets isomorphic Flux",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "homepage": "http://thundercats.js.org",
   "keywords": [
     "alwaysUseTwoSpaces",
