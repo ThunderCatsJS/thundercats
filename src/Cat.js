@@ -57,8 +57,12 @@ const methods = {
 
   dispose() {
     debug('dispose all the things');
-    this.stores.forEach((store) => {
+    this.stores.forEach(store => {
       store.dispose();
+    });
+
+    this.actions.forEach(action => {
+      action.dispose();
     });
   }
 };
